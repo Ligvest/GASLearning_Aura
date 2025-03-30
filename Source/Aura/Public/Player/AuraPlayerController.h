@@ -7,6 +7,7 @@
 #include "AuraPlayerController.generated.h"
 
 // Forward declaration
+class IHighlightActorInterface;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
@@ -26,6 +27,8 @@ protected:
 	virtual void SetupInputComponent() override;
 
 	void Move( const FInputActionValue& InputActionValue );
+	void CursorTrace();
+	virtual void PlayerTick( float DeltaSeconds ) override;
 
 private:
 	UPROPERTY( EditAnywhere, Category = "Input" )
@@ -33,4 +36,7 @@ private:
 
 	UPROPERTY( EditAnywhere, Category = "Input" )
 	TObjectPtr<UInputAction> MoveAction;
+
+	TScriptInterface<IHighlightActorInterface> ThisActorUnderCursorToHighlight;
+	TScriptInterface<IHighlightActorInterface> LastActorUnderCursorToHighlight;
 };

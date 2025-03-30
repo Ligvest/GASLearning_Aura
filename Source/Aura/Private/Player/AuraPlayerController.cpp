@@ -3,6 +3,7 @@
 #include "Player/AuraPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Interaction/HighlightActorInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -62,4 +63,84 @@ void AAuraPlayerController::Move( const FInputActionValue& InputActionValue )
 		ControlledPawn->AddMovementInput( ForwardDirection, InputAxisVector.Y );
 		ControlledPawn->AddMovementInput( RightDirection, InputAxisVector.X );
 	}
+}
+void AAuraPlayerController::CursorTrace()
+{
+	FHitResult Hit;
+	GetHitResultUnderCursor( ECC_Visibility, false, Hit );
+	if ( !Hit.bBlockingHit )
+	{
+		return;
+	}
+
+	LastActorUnderCursorToHighlight = ThisActorUnderCursorToHighlight;
+	ThisActorUnderCursorToHighlight = Hit.GetActor();
+
+	/*
+	 * All cases:
+	 * A. ThisActor == nullptr, LastActor == nullptr - do nothing
+	 * B. ThisActor == nullptr, LastActor is Valid - UnHighlight Last
+	 * C. ThisActor is Valid, LastActor == nullptr - Highlight This
+	 * D. ThisActor is Valid, LastActor is Valid, ThisActor == LastActor - Do nothing ( already highlighted )
+	 * E. ThisActor is Valid, LastActor is Valid, ThisActor != LastActor - Hightlight This, UnHightlight Last
+	 *
+	 */
+	/*
+	if ( !ThisActorUnderCursorToHighlight )
+	{
+	    if ( LastActorUnderCursorToHighlight )
+	    {
+	        // Case B. UnHighlight Last
+	        LastActorUnderCursorToHighlight->UnHighlightActor();
+	    }
+	    else
+	    {
+	        // Case A. Do Nothing
+	    }
+	}
+	else  // This is valid
+	{
+	    if ( LastActorUnderCursorToHighlight )
+	    {
+	        if ( LastActorUnderCursorToHighlight != ThisActorUnderCursorToHighlight )
+	        {
+	            // Case D. Unhightlight Last. Hightlight This
+	            LastActorUnderCursorToHighlight->UnHighlightActor();
+	            ThisActorUnderCursorToHighlight->HighlightActor();
+	        }
+	        else
+	        {
+	            // Case E. Do nothing ( Already highlighted )
+	        }
+	    }
+	    else  // Last == nullptr
+	    {
+	        // Case C. Hightlight This
+	        ThisActorUnderCursorToHighlight->HighlightActor();
+	    }
+	}
+	*/
+
+	// If the new actor is the same as the last one, do nothing
+	if ( ThisActorUnderCursorToHighlight == LastActorUnderCursorToHighlight )
+	{
+		return;
+	}
+
+	// If there was a previously highlighted actor, unhighlight it
+	if ( LastActorUnderCursorToHighlight )
+	{
+		LastActorUnderCursorToHighlight->UnHighlightActor();
+	}
+
+	// If there is a new actor to highlight, highlight it
+	if ( ThisActorUnderCursorToHighlight )
+	{
+		ThisActorUnderCursorToHighlight->HighlightActor();
+	}
+}
+void AAuraPlayerController::PlayerTick( float DeltaSeconds )
+{
+	Super::PlayerTick( DeltaSeconds );
+	CursorTrace();
 }
