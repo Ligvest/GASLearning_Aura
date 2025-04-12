@@ -12,5 +12,7 @@
 UCLASS()
 class AURA_API AAuraEnemyCharacter : public AAuraAICharacter
 {
+	AAuraEnemyCharacter();
+	virtual void BeginPlay() override;
 	GENERATED_BODY()
 };

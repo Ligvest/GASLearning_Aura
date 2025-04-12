@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Characters/AuraCharacterBase.h"
+
+#include "GAS/AuraAbilitySystemComponent.h"
+#include "GAS/AuraAttributeSet.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {

@@ -1,21 +1,19 @@
 // Dovzhik Tolya
 
-#include "Characters/AuraEnemyCharacter.h"
+#include "Player/AuraPlayerState.h"
 
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
 
-AAuraEnemyCharacter::AAuraEnemyCharacter()
+AAuraPlayerState::AAuraPlayerState()
 {
+	// #lig Replication
+	SetNetUpdateFrequency( 100.f );
+
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>( "AuraAbilitySystemComponent" );
 	// #lig Replication
 	AbilitySystemComponent->SetIsReplicated( true );
-	AbilitySystemComponent->SetReplicationMode( EGameplayEffectReplicationMode::Minimal );
+	AbilitySystemComponent->SetReplicationMode( EGameplayEffectReplicationMode::Mixed );
 
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>( "AuraAttributeSet" );
-}
-void AAuraEnemyCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	AbilitySystemComponent->InitAbilityActorInfo( this, this );
 }
