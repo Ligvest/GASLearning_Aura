@@ -7,11 +7,14 @@
 
 AAuraPlayerState::AAuraPlayerState()
 {
-	// #lig Replication
+	// To replicate the PlayerState itself
+	bReplicates = true;
+	// Replicate 100 times a second I suppose
 	SetNetUpdateFrequency( 100.f );
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>( "AuraAbilitySystemComponent" );
-	// #lig Replication
+
+	// Enable replication of AbilitySystemComponent
 	AbilitySystemComponent->SetIsReplicated( true );
 	AbilitySystemComponent->SetReplicationMode( EGameplayEffectReplicationMode::Mixed );
 

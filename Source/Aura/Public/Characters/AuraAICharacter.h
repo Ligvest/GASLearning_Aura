@@ -16,8 +16,11 @@ class AURA_API AAuraAICharacter : public AAuraCharacterBase, public IHighlightAc
 {
 	GENERATED_BODY()
 public:
+	//~ Begin of IHightlightActorInterface
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
+	//~ End of IHightlightActorInterface
+
 	virtual void BeginPlay() override;
 
 	UPROPERTY( EditAnywhere, Category = Interaction )

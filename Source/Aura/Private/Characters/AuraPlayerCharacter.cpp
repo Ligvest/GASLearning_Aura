@@ -31,15 +31,21 @@ void AAuraPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
 void AAuraPlayerCharacter::PossessedBy( AController* NewController )
 {
 	Super::PossessedBy( NewController );
+
+	// For initializing AbilityComponent we use PossessedBy because without controlling the character the abilities don't make sense
 	// Init ability actor info for Server
 	InitAbilityActorInfo();
 }
 void AAuraPlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
+
+	// For initializing AbilityComponent we use OnRep_PlayerState instead of AknowledgePossession on a client
+	// because we need to be sure that PlayerState is replicated and has all valid data so we can use it
 	// Init ability actor info for Client
 	InitAbilityActorInfo();
 }

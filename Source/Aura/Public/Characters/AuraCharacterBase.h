@@ -18,7 +18,11 @@ class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInte
 
 public:
 	AAuraCharacterBase();
+
+	//~ Begin of IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; };
+	//~ End of IAbilitySystemInterface
+
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 	UPROPERTY( EditDefaultsOnly, Category = SocketNames )
