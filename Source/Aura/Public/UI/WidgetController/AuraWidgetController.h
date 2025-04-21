@@ -8,17 +8,43 @@
 
 class UAttributeSet;
 class UAbilitySystemComponent;
+
+USTRUCT( BlueprintType )
+struct FWidgetControllerParams
+{
+	GENERATED_BODY()
+
+	// TODO: Why expose to blueprints? Why EditAnywhere?
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	TObjectPtr<APlayerState> PlayerState;
+
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	TObjectPtr<APlayerController> PlayerController;
+
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	TObjectPtr<UAttributeSet> AttributeSet;
+};
 /**
  *
  */
-UCLASS()
+UCLASS( BlueprintType, Blueprintable )
 class AURA_API UAuraWidgetController : public UObject
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION( BlueprintCallable )
+	void SetWidgetControllerParams( const FWidgetControllerParams& WidgetControllerParams );
+
+	virtual void BroadcastInitialValues() const;
+
 protected:
-	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
-	TObjectPtr<APlayerState> PlayerState;
+	virtual void BindCallbacksToAttributeChanges() const;
+
+	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" ) TObjectPtr<APlayerState> PlayerState;
 
 	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
 	TObjectPtr<APlayerController> PlayerController;

@@ -7,9 +7,9 @@
 UAuraAttributeSet::UAuraAttributeSet()
 {
 	// You can Init props in ctor but can't use Setter here
-	InitHealth( 100.f );
+	InitHealth( 30.f );
 	InitMaxHealth( 100.f );
-	InitMana( 100.f );
+	InitMana( 70.f );
 	InitMaxMana( 100.f );
 }
 
@@ -27,22 +27,22 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps( TArray<class FLifetimeProper
 	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, Mana, COND_None, REPNOTIFY_Always );
 	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, MaxMana, COND_None, REPNOTIFY_Always );
 }
-void UAuraAttributeSet::OnRep_Health( const FGameplayAttributeData& OldHealth )
+void UAuraAttributeSet::OnRep_Health( const FGameplayAttributeData& OldHealth ) const
 {
 	// We can't just use Replicate as attributes replication in GAS should be forwarded to the GAS itself in the rep function
 	// So we forward the replication notification further to GAS so it could proccess it correctly
 	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, Health, OldHealth );
 }
 
-void UAuraAttributeSet::OnRep_MaxHealth( const FGameplayAttributeData& OldMaxHealth )
+void UAuraAttributeSet::OnRep_MaxHealth( const FGameplayAttributeData& OldMaxHealth ) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, MaxHealth, OldMaxHealth );
 }
-void UAuraAttributeSet::OnRep_Mana( const FGameplayAttributeData& OldMana )
+void UAuraAttributeSet::OnRep_Mana( const FGameplayAttributeData& OldMana ) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, Mana, OldMana );
 }
-void UAuraAttributeSet::OnRep_MaxMana( const FGameplayAttributeData& OldMaxMana )
+void UAuraAttributeSet::OnRep_MaxMana( const FGameplayAttributeData& OldMaxMana ) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, MaxMana, OldMaxMana );
 }

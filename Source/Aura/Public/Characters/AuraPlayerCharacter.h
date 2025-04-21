@@ -22,4 +22,6 @@ public:
 
 private:
 	void InitAbilityActorInfo();
+	void InitHUD() const;
+	void InitGASInfoAndHUD();
 };

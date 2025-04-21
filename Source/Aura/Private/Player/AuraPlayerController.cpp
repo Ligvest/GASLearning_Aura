@@ -12,11 +12,20 @@ AAuraPlayerController::AAuraPlayerController()
 }
 void AAuraPlayerController::BeginPlay()
 {
+	// Server and Client part
 	Super::BeginPlay();
 	check( IMC );
 
+	// Client only part
+	if ( IsLocalPlayerController() )
+	{
+		BeginPlayClientOnly();
+	}
+}
+
+inline void AAuraPlayerController::BeginPlayClientOnly()
+{
 	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>( GetLocalPlayer() );
-	check( InputSubsystem );
 
 	// Add Input Mapping Context to the player input subsystem so this PlayerController could use this IMC
 	InputSubsystem->AddMappingContext( IMC, 0 );
@@ -85,41 +94,6 @@ void AAuraPlayerController::CursorTrace()
 	 * E. ThisActor is Valid, LastActor is Valid, ThisActor != LastActor - Hightlight This, UnHightlight Last
 	 *
 	 */
-	/*
-	if ( !ThisActorUnderCursorToHighlight )
-	{
-	    if ( LastActorUnderCursorToHighlight )
-	    {
-	        // Case B. UnHighlight Last
-	        LastActorUnderCursorToHighlight->UnHighlightActor();
-	    }
-	    else
-	    {
-	        // Case A. Do Nothing
-	    }
-	}
-	else  // This is valid
-	{
-	    if ( LastActorUnderCursorToHighlight )
-	    {
-	        if ( LastActorUnderCursorToHighlight != ThisActorUnderCursorToHighlight )
-	        {
-	            // Case D. Unhightlight Last. Hightlight This
-	            LastActorUnderCursorToHighlight->UnHighlightActor();
-	            ThisActorUnderCursorToHighlight->HighlightActor();
-	        }
-	        else
-	        {
-	            // Case E. Do nothing ( Already highlighted )
-	        }
-	    }
-	    else  // Last == nullptr
-	    {
-	        // Case C. Hightlight This
-	        ThisActorUnderCursorToHighlight->HighlightActor();
-	    }
-	}
-	*/
 
 	// If the new actor is the same as the last one, do nothing
 	if ( ThisActorUnderCursorToHighlight == LastActorUnderCursorToHighlight )

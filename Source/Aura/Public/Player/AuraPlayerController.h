@@ -23,14 +23,14 @@ public:
 	AAuraPlayerController();
 
 protected:
-	virtual void BeginPlay() override;
-	virtual void SetupInputComponent() override;
-
 	void Move( const FInputActionValue& InputActionValue );
 	void CursorTrace();
 	virtual void PlayerTick( float DeltaSeconds ) override;
+	virtual void SetupInputComponent() override;
+	virtual void BeginPlay() override;
 
 private:
+	void BeginPlayClientOnly();
 	UPROPERTY( EditAnywhere, Category = "Input" )
 	TObjectPtr<UInputMappingContext> IMC;
 

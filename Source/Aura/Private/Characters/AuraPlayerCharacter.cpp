@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/AuraPlayerState.h"
+#include "UI/HUD/AuraHUD.h"
 
 AAuraPlayerCharacter::AAuraPlayerCharacter()
 {
@@ -32,14 +33,17 @@ void AAuraPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
+// Server
 void AAuraPlayerCharacter::PossessedBy( AController* NewController )
 {
 	Super::PossessedBy( NewController );
 
 	// For initializing AbilityComponent we use PossessedBy because without controlling the character the abilities don't make sense
 	// Init ability actor info for Server
-	InitAbilityActorInfo();
+	InitGASInfoAndHUD();
 }
+
+// Client
 void AAuraPlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
@@ -47,7 +51,7 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 	// For initializing AbilityComponent we use OnRep_PlayerState instead of AknowledgePossession on a client
 	// because we need to be sure that PlayerState is replicated and has all valid data so we can use it
 	// Init ability actor info for Client
-	InitAbilityActorInfo();
+	InitGASInfoAndHUD();
 }
 void AAuraPlayerCharacter::InitAbilityActorInfo()
 {
@@ -56,4 +60,21 @@ void AAuraPlayerCharacter::InitAbilityActorInfo()
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AbilitySystemComponent->InitAbilityActorInfo( AuraPlayerState, this );
 	AttributeSet = AuraPlayerState->GetAttributeSet();
+}
+void AAuraPlayerCharacter::InitHUD() const
+{
+	const APlayerController* PC = Cast<APlayerController>( GetController() );
+	AAuraHUD* HUD = PC->GetHUD<AAuraHUD>();
+	check( HUD );
+	HUD->InitHUDWidget();
+}
+void AAuraPlayerCharacter::InitGASInfoAndHUD()
+{
+	InitAbilityActorInfo();
+
+	// Init HUD only if this is a client. And this client controls this character ( so that it has valid PlayerController )
+	if ( IsLocallyControlled() )
+	{
+		InitHUD();
+	}
 }
