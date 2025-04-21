@@ -1,11 +1,8 @@
 // Dovzhik Tolya
 
 #include "Actor/AuraEffectActor.h"
-
+#include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
-#include "Components/SphereComponent.h"
-#include "GAS/AuraAbilitySystemComponent.h"
-#include "GAS/AuraAttributeSet.h"
 
 AAuraEffectActor::AAuraEffectActor()
 {

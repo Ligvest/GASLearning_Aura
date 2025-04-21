@@ -18,7 +18,7 @@ void UAuraHUDWidgetController::HealthChanged( const FOnAttributeChangeData& Chan
 }
 void UAuraHUDWidgetController::MaxHealthChanged( const FOnAttributeChangeData& ChangeData ) const
 {
-	OnHealthChanged.Broadcast( ChangeData.NewValue );
+	OnMaxHealthChanged.Broadcast( ChangeData.NewValue );
 }
 void UAuraHUDWidgetController::ManaChanged( const FOnAttributeChangeData& ChangeData ) const
 {
