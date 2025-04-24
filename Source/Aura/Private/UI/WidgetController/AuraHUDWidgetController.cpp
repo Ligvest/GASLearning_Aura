@@ -12,22 +12,7 @@ void UAuraHUDWidgetController::BroadcastInitialValues() const
 	OnManaChanged.Broadcast( AuraAttributeSet->GetMana() );
 	OnMaxManaChanged.Broadcast( AuraAttributeSet->GetMaxMana() );
 }
-void UAuraHUDWidgetController::HealthChanged( const FOnAttributeChangeData& ChangeData ) const
-{
-	OnHealthChanged.Broadcast( ChangeData.NewValue );
-}
-void UAuraHUDWidgetController::MaxHealthChanged( const FOnAttributeChangeData& ChangeData ) const
-{
-	OnMaxHealthChanged.Broadcast( ChangeData.NewValue );
-}
-void UAuraHUDWidgetController::ManaChanged( const FOnAttributeChangeData& ChangeData ) const
-{
-	OnManaChanged.Broadcast( ChangeData.NewValue );
-}
-void UAuraHUDWidgetController::MaxManaChanged( const FOnAttributeChangeData& ChangeData ) const
-{
-	OnMaxManaChanged.Broadcast( ChangeData.NewValue );
-}
+
 void UAuraHUDWidgetController::BindCallbacksToAttributeChanges() const
 {
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>( AttributeSet );
@@ -51,4 +36,24 @@ void UAuraHUDWidgetController::BindCallbacksToAttributeChanges() const
 	const FGameplayAttribute& MaxManaAttribute = AuraAttributeSet->GetMaxManaAttribute();
 	auto& OnMaxManaChangeDelegate = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate( MaxManaAttribute );
 	OnMaxManaChangeDelegate.AddUObject( this, &UAuraHUDWidgetController::MaxManaChanged );
+}
+
+void UAuraHUDWidgetController::HealthChanged( const FOnAttributeChangeData& ChangeData ) const
+{
+	OnHealthChanged.Broadcast( ChangeData.NewValue );
+}
+
+void UAuraHUDWidgetController::MaxHealthChanged( const FOnAttributeChangeData& ChangeData ) const
+{
+	OnMaxHealthChanged.Broadcast( ChangeData.NewValue );
+}
+
+void UAuraHUDWidgetController::ManaChanged( const FOnAttributeChangeData& ChangeData ) const
+{
+	OnManaChanged.Broadcast( ChangeData.NewValue );
+}
+
+void UAuraHUDWidgetController::MaxManaChanged( const FOnAttributeChangeData& ChangeData ) const
+{
+	OnMaxManaChanged.Broadcast( ChangeData.NewValue );
 }
