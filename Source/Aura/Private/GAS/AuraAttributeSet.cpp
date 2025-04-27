@@ -2,6 +2,8 @@
 
 #include "GAS/AuraAttributeSet.h"
 #include "AbilitySystemComponent.h"
+#include "GameplayEffectExtension.h"
+#include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
@@ -45,4 +47,77 @@ void UAuraAttributeSet::OnRep_Mana( const FGameplayAttributeData& OldMana ) cons
 void UAuraAttributeSet::OnRep_MaxMana( const FGameplayAttributeData& OldMaxMana ) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, MaxMana, OldMaxMana );
+}
+// This function is good for clamping CurrentValue of an attribute. To clamp BaseValue use PostGameplayEffectExecute
+void UAuraAttributeSet::PreAttributeChange( const FGameplayAttribute& Attribute, float& NewValue )
+{
+	Super::PreAttributeChange( Attribute, NewValue );
+
+	// Clamping CurrentValue of Health
+	if ( Attribute == GetHealthAttribute() )
+	{
+		NewValue = FMath::Clamp( NewValue, 0.0f, GetMaxHealth() );
+	}
+
+	// Clamping CurrentValue of Mana
+	if ( Attribute == GetManaAttribute() )
+	{
+		NewValue = FMath::Clamp( NewValue, 0.0f, GetMaxMana() );
+	}
+}
+void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallbackData& Data )
+{
+	Super::PostGameplayEffectExecute( Data );
+
+	// Clamping sketch
+	// Clamping BaseValue of Health
+	if ( Data.EvaluatedData.Attribute == GetHealthAttribute() )
+	{
+		SetHealth( FMath::Clamp( GetHealth(), 0.0f, GetMaxHealth() ) );
+	}
+
+	// Clamping BaseValue of Mana
+	if ( Data.EvaluatedData.Attribute == GetManaAttribute() )
+	{
+		SetMana( FMath::Clamp( GetMana(), 0.0f, GetMaxMana() ) );
+	}
+
+	const FGameplayEffectContextHandle ContextHandle = Data.EffectSpec.GetContext();
+	UAbilitySystemComponent* SourceASCPtr = ContextHandle.GetOriginalInstigatorAbilitySystemComponent();
+	UAbilitySystemComponent& TargetASCRef = Data.Target;
+	// Fill EffectTargetProps
+	FillEffectPropertiesWithASC( EffectSourceProperties, SourceASCPtr, ContextHandle );
+	// Fill EffectTargetProps
+	FillEffectPropertiesWithASC( EffectTargetProperties, &TargetASCRef, ContextHandle );
+}
+
+void UAuraAttributeSet::FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC, const FGameplayEffectContextHandle ContextHandle )
+{
+	// Set ASC. Ability System Component
+	Properties.ASC = ASC;
+
+	// Set Avatar. Representation in the World
+	Properties.AvatarActor = ASC->GetAvatarActor();
+	if ( !Properties.AvatarActor )
+	{
+		// If avatar is invalid then there are no Controller and Character
+		return;
+	}
+
+	// Set Controller
+	Properties.Controller = ASC->AbilityActorInfo->PlayerController.Get();  // Controller valid if controlled by player
+	if ( !Properties.Controller )                                           // If not PlayerController then it could be AIController
+	{
+		if ( APawn* Pawn = Cast<APawn>( Properties.AvatarActor ) )
+		{
+			Properties.Controller = Pawn->GetController();
+		}
+	}
+
+	// Set Character
+	if ( Properties.Controller )
+	{
+		// If the actor is a character
+		Properties.Character = Properties.Controller->GetCharacter();
+	}
 }

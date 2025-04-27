@@ -47,23 +47,26 @@ protected:
 	void OnEndOverlap( AActor* TargetActor );
 
 	// Instant gameplay effect
-	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Effects Preferences | Instant Effect" )
 	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass;
-	UPROPERTY( EditDefaultsOnly )
+	UPROPERTY( EditDefaultsOnly, Category = "Effects Preferences | Instant Effect" )
 	EEffectApplicationPolicy InstantEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
 
 	// Duration gameplay effect
-	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Effects Preferences | Duration Effect" )
 	TSubclassOf<UGameplayEffect> DurationGameplayEffectClass;
-	UPROPERTY( EditDefaultsOnly )
+	UPROPERTY( EditDefaultsOnly, Category = "Effects Preferences | Duration Effect" )
 	EEffectApplicationPolicy DurationEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
 
 	// Infinite gameplay effect
-	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Effects Preferences | Infinite Effect" )
 	TSubclassOf<UGameplayEffect> InfiniteGameplayEffectClass;
-	UPROPERTY( EditDefaultsOnly )
+	UPROPERTY( EditDefaultsOnly, Category = "Effects Preferences | Infinite Effect" )
 	EEffectApplicationPolicy InfiniteEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
-	UPROPERTY( EditDefaultsOnly )
+	UPROPERTY( EditDefaultsOnly, Category = "Effects Preferences | Infinite Effect" )
 	EEffectRemovalPolicy InfiniteEffectRemovalPolicy = EEffectRemovalPolicy::DoNotRemove;
 	TMap<UAbilitySystemComponent*, FActiveGameplayEffectHandle> AscToInfiniteGEHandle;
+
+	UPROPERTY( EditAnywhere, Category = "Effects Preferences" )
+	float EffectLevel = 1.f;
 };

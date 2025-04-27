@@ -28,8 +28,7 @@ void AAuraEffectActor::ApplyEffectToTarget( AActor* TargetActor, TSubclassOf<UGa
 
 	FGameplayEffectContextHandle ContextHandle = ASC->MakeEffectContext();
 	ContextHandle.AddSourceObject( this );
-	constexpr float TestLevel = 1.f;
-	const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec( GameplayEffectClass, TestLevel, ContextHandle );
+	const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec( GameplayEffectClass, EffectLevel, ContextHandle );
 	const FActiveGameplayEffectHandle GEHandle = ASC->ApplyGameplayEffectSpecToSelf( *EffectSpecHandle.Data );
 
 	const bool bIsInfinite = EffectSpecHandle.Data->Def->DurationPolicy == EGameplayEffectDurationType::Infinite;
@@ -81,9 +80,9 @@ void AAuraEffectActor::OnBeginOverlap( AActor* TargetActor )
 void AAuraEffectActor::OnEndOverlap( AActor* TargetActor )
 {
 	// Instant gameplay effect
-	if ( InfiniteEffectRemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap )
+	if ( InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap )
 	{
-		ApplyEffectToTarget( TargetActor, InfiniteGameplayEffectClass );
+		ApplyEffectToTarget( TargetActor, InstantGameplayEffectClass );
 	}
 
 	// Duration gameplay effect

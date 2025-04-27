@@ -14,6 +14,23 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER( PropertyName )               \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER( PropertyName )
 
+USTRUCT()
+struct FEffectProperties
+{
+	GENERATED_BODY()
+
+	// Here are only functions and TObjectPtr in the Handle. So we can just copy it
+	FGameplayEffectContextHandle EffectContextHandle;
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> ASC;
+	UPROPERTY()
+	TObjectPtr<AActor> AvatarActor;
+	UPROPERTY()
+	TObjectPtr<AController> Controller;
+	UPROPERTY()
+	TObjectPtr<ACharacter> Character;
+};
+
 /**
  *
  */
@@ -25,6 +42,9 @@ public:
 	UAuraAttributeSet();
 	// If in UPROPERTY we specify HOW the field is replicated in the function we specify WHEN the prop is replicated
 	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
+
+	virtual void PreAttributeChange( const FGameplayAttribute& Attribute, float& NewValue ) override;
+	virtual void PostGameplayEffectExecute( const struct FGameplayEffectModCallbackData& Data ) override;
 
 	// We can't just use Replicate becuase attributes replication in GAS should be forwarded to the GAS itself in the rep function
 	UPROPERTY( BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes" )
@@ -51,4 +71,10 @@ public:
 	void OnRep_Mana( const FGameplayAttributeData& OldMana ) const;
 	UFUNCTION()
 	void OnRep_MaxMana( const FGameplayAttributeData& OldMaxMana ) const;
+
+protected:
+	FEffectProperties EffectTargetProperties;
+	FEffectProperties EffectSourceProperties;
+
+	void FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC, const FGameplayEffectContextHandle ContextHandle );
 };
