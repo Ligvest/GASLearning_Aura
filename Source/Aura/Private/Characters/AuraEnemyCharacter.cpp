@@ -18,4 +18,7 @@ void AAuraEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	AbilitySystemComponent->InitAbilityActorInfo( this, this );
+	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
+	check( AuraASC );
+	AuraASC->Init();
 }

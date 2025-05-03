@@ -5,13 +5,30 @@
 #include "CoreMinimal.h"
 #include "GameplayEffectTypes.h"
 #include "UI/WidgetController/AuraWidgetController.h"
+#include "UI/Widget/AuraUserWidget.h"
 #include "AuraHUDWidgetController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnHealthChangedSignature, float, NewHealth );
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnMaxHealthChangedSignature, float, NewMaxHealth );
+USTRUCT( BlueprintType )
+struct FEffectMessageRow : public FTableRowBase
+{
+	GENERATED_BODY()
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnManaChangedSignature, float, NewMana );
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnMaxManaChangedSignature, float, NewMaxMana );
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	FGameplayTag EffectTag;
+
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	FText EffectMessage;
+
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	TSubclassOf<UAuraUserWidget> EffectWidgetClass;
+
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	UTexture2D* EffectImage;
+};
+
+// Delegates
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnAttributeChangedSignature, float, NewValue );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FEffectMessageRowDelegate, const FEffectMessageRow&, TagMessageRow );
 
 /**
  *
@@ -24,22 +41,34 @@ public:
 	virtual void BroadcastInitialValues() const override;
 
 	UPROPERTY( BlueprintAssignable )
-	FOnHealthChangedSignature OnHealthChanged;
+	FOnAttributeChangedSignature OnHealthChanged;
 
 	UPROPERTY( BlueprintAssignable )
-	FOnMaxHealthChangedSignature OnMaxHealthChanged;
+	FOnAttributeChangedSignature OnMaxHealthChanged;
 
 	UPROPERTY( BlueprintAssignable )
-	FOnManaChangedSignature OnManaChanged;
+	FOnAttributeChangedSignature OnManaChanged;
 
 	UPROPERTY( BlueprintAssignable )
-	FOnMaxManaChangedSignature OnMaxManaChanged;
+	FOnAttributeChangedSignature OnMaxManaChanged;
+
+	UPROPERTY( BlueprintAssignable )
+	FEffectMessageRowDelegate EffectMessageRowDelegate;
 
 protected:
-	void HealthChanged( const FOnAttributeChangeData& ChangeData ) const;
-	void MaxHealthChanged( const FOnAttributeChangeData& ChangeData ) const;
-	void ManaChanged( const FOnAttributeChangeData& ChangeData ) const;
-	void MaxManaChanged( const FOnAttributeChangeData& ChangeData ) const;
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "Tag message" )
+	TObjectPtr<UDataTable> EffectMessageTable;
+
+	void OnEffectWithTagsApplied( const FGameplayTagContainer& TagContainer ) const;
 	// Here we bind callbacks to be called whenever our attributes changes ( damage to Health etc. )
 	virtual void BindCallbacksToAttributeChanges() const override;
+
+private:
+	template <typename T>
+	T* GetDataTableRowByTag( UDataTable* DataTable, const FGameplayTag& Tag ) const;
 };
+template <typename T>
+T* UAuraHUDWidgetController::GetDataTableRowByTag( UDataTable* DataTable, const FGameplayTag& Tag ) const
+{
+	return DataTable->FindRow<T>( Tag.GetTagName(), FString() );
+}

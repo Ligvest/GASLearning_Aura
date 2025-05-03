@@ -3,6 +3,7 @@
 #include "Characters/AuraPlayerCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "GAS/AuraAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/AuraPlayerState.h"
 #include "UI/HUD/AuraHUD.h"
@@ -53,12 +54,15 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 	// Init ability actor info for Client
 	InitGASInfoAndHUD();
 }
-void AAuraPlayerCharacter::InitAbilityActorInfo()
+void AAuraPlayerCharacter::InitGASInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check( AuraPlayerState );
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AbilitySystemComponent->InitAbilityActorInfo( AuraPlayerState, this );
+	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
+	check( AuraASC );
+	AuraASC->Init();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 }
 void AAuraPlayerCharacter::InitHUD() const
@@ -70,7 +74,7 @@ void AAuraPlayerCharacter::InitHUD() const
 }
 void AAuraPlayerCharacter::InitGASInfoAndHUD()
 {
-	InitAbilityActorInfo();
+	InitGASInfo();
 
 	// Init HUD only if this is a client. And this client controls this character ( so that it has valid PlayerController )
 	if ( IsLocallyControlled() )

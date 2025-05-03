@@ -2,6 +2,7 @@
 
 #include "UI/WidgetController/AuraHUDWidgetController.h"
 
+#include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
 
 void UAuraHUDWidgetController::BroadcastInitialValues() const
@@ -16,44 +17,43 @@ void UAuraHUDWidgetController::BroadcastInitialValues() const
 void UAuraHUDWidgetController::BindCallbacksToAttributeChanges() const
 {
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>( AttributeSet );
+	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
+	// AuraASC should always be a base class for ASC for this project
+	check( AuraASC );
 
-	// Bind HealthChanged callback to call it when health attribute changes
+	// Bind callback to call it when Health attribute changes
 	const FGameplayAttribute& HealthAttribute = AuraAttributeSet->GetHealthAttribute();
 	auto& OnHealthChangeDelegate = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate( HealthAttribute );
-	OnHealthChangeDelegate.AddUObject( this, &UAuraHUDWidgetController::HealthChanged );
+	OnHealthChangeDelegate.AddLambda( [this]( const FOnAttributeChangeData& ChangeData ) { OnHealthChanged.Broadcast( ChangeData.NewValue ); } );
 
-	// Bind MaxHealthChanged callback to call it when health attribute changes
+	// Bind callback to call it when MaxHealth attribute changes
 	const FGameplayAttribute& MaxHealthAttribute = AuraAttributeSet->GetMaxHealthAttribute();
 	auto& OnMaxHealthChangeDelegate = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate( MaxHealthAttribute );
-	OnMaxHealthChangeDelegate.AddUObject( this, &UAuraHUDWidgetController::MaxHealthChanged );
+	OnMaxHealthChangeDelegate.AddLambda( [this]( const FOnAttributeChangeData& ChangeData ) { OnMaxHealthChanged.Broadcast( ChangeData.NewValue ); } );
 
-	// Bind ManaChanged callback to call it when health attribute changes
+	// Bind callback to call it when Mana attribute changes
 	const FGameplayAttribute& ManaAttribute = AuraAttributeSet->GetManaAttribute();
 	auto& OnManaChangeDelegate = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate( ManaAttribute );
-	OnManaChangeDelegate.AddUObject( this, &UAuraHUDWidgetController::ManaChanged );
+	OnManaChangeDelegate.AddLambda( [this]( const FOnAttributeChangeData& ChangeData ) { OnManaChanged.Broadcast( ChangeData.NewValue ); } );
 
-	// Bind MaxManaChanged callback to call it when health attribute changes
+	// Bind callback to call it when MaxMana attribute changes
 	const FGameplayAttribute& MaxManaAttribute = AuraAttributeSet->GetMaxManaAttribute();
 	auto& OnMaxManaChangeDelegate = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate( MaxManaAttribute );
-	OnMaxManaChangeDelegate.AddUObject( this, &UAuraHUDWidgetController::MaxManaChanged );
+	OnMaxManaChangeDelegate.AddLambda( [this]( const FOnAttributeChangeData& ChangeData ) { OnMaxManaChanged.Broadcast( ChangeData.NewValue ); } );
+
+	// Bind OnEffectWithTagsApplied to call when an effect with tags is applied
+	AuraASC->OnEffectWithTagsAppliedDelegate.AddUObject( this, &UAuraHUDWidgetController::OnEffectWithTagsApplied );
 }
 
-void UAuraHUDWidgetController::HealthChanged( const FOnAttributeChangeData& ChangeData ) const
+void UAuraHUDWidgetController::OnEffectWithTagsApplied( const FGameplayTagContainer& TagContainer ) const
 {
-	OnHealthChanged.Broadcast( ChangeData.NewValue );
-}
-
-void UAuraHUDWidgetController::MaxHealthChanged( const FOnAttributeChangeData& ChangeData ) const
-{
-	OnMaxHealthChanged.Broadcast( ChangeData.NewValue );
-}
-
-void UAuraHUDWidgetController::ManaChanged( const FOnAttributeChangeData& ChangeData ) const
-{
-	OnManaChanged.Broadcast( ChangeData.NewValue );
-}
-
-void UAuraHUDWidgetController::MaxManaChanged( const FOnAttributeChangeData& ChangeData ) const
-{
-	OnMaxManaChanged.Broadcast( ChangeData.NewValue );
+	FGameplayTag MessageTag = FGameplayTag::RequestGameplayTag( FName( "Message" ) );
+	for ( auto Tag : TagContainer )
+	{
+		if ( Tag.MatchesTag( MessageTag ) )
+		{
+			FEffectMessageRow* EffectMessageRow = GetDataTableRowByTag<FEffectMessageRow>( EffectMessageTable, Tag );
+			EffectMessageRowDelegate.Broadcast( *EffectMessageRow );
+		}
+	}
 }
