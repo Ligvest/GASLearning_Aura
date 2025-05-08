@@ -76,6 +76,12 @@ void AAuraEffectActor::OnBeginOverlap( AActor* TargetActor )
 	{
 		ApplyEffectToTarget( TargetActor, InfiniteGameplayEffectClass );
 	}
+
+	if ( bPickupable )
+	{
+		// Todo: maybe not a good way to do this
+		Destroy();
+	}
 }
 void AAuraEffectActor::OnEndOverlap( AActor* TargetActor )
 {

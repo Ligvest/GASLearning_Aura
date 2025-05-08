@@ -69,4 +69,7 @@ protected:
 
 	UPROPERTY( EditAnywhere, Category = "Effects Preferences" )
 	float EffectLevel = 1.f;
+
+	UPROPERTY( EditAnywhere )
+	bool bPickupable = false;
 };

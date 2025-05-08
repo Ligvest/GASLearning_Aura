@@ -64,6 +64,8 @@ void AAuraPlayerCharacter::InitGASInfo()
 	check( AuraASC );
 	AuraASC->Init();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
+	// It can be called only on the server as attributes will be replicated regardless
+	InitDefaultAttributes();
 }
 void AAuraPlayerCharacter::InitHUD() const
 {

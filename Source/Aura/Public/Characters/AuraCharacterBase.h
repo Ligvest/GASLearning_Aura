@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "AuraCharacterBase.generated.h"
 
+class UGameplayEffect;
 // Forward declarations
 class UAttributeSet;
 class UAbilitySystemComponent;
@@ -31,12 +32,22 @@ public:
 	UPROPERTY( EditAnywhere, Category = Combat )
 	TObjectPtr<class USkeletalMeshComponent> WeaponMeshComponent;
 
+	void InitDefaultAttributes() const;
+
+	void ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectClass, float EffectLevel = 1.f ) const;
+
 protected:
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+	UPROPERTY( EditAnywhere )
+	TSubclassOf<UGameplayEffect> InitPrimaryAttributesEffectClass;
+
+	UPROPERTY( EditAnywhere )
+	TSubclassOf<UGameplayEffect> InitSecondaryAttributesEffectClass;
 
 	virtual void BeginPlay() override;
 };
