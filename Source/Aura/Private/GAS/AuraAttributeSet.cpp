@@ -8,6 +8,7 @@
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
+	/*
 	// This is a bad way of initializing attributes.
 	// Use datatables or GameplayEffects with "Override" option
 	// Using GameplayEffects for initializing is preferable
@@ -15,6 +16,7 @@ UAuraAttributeSet::UAuraAttributeSet()
 	InitMaxHealth( 100.f );
 	InitMana( 70.f );
 	InitMaxMana( 100.f );
+	*/
 }
 
 // If in UPROPERTY we specify HOW the field is replicated in the function we specify WHEN the prop is replicated

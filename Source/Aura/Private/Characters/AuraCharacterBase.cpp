@@ -4,6 +4,7 @@
 
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
+#include "Net/UnrealNetwork.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -12,11 +13,17 @@ AAuraCharacterBase::AAuraCharacterBase()
 	WeaponMeshComponent->SetupAttachment( GetMesh(), SocketNameHandWeapon );
 	WeaponMeshComponent->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 }
+void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
+	DOREPLIFETIME( AAuraCharacterBase, CharacterLevel );
+}
 
 void AAuraCharacterBase::InitDefaultAttributes() const
 {
 	ApplyEffectToSelf( InitPrimaryAttributesEffectClass );
 	ApplyEffectToSelf( InitSecondaryAttributesEffectClass );
+	ApplyEffectToSelf( InitVitalAttributesEffectClass );
 }
 void AAuraCharacterBase::ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectClass, float EffectLevel /*= 1.f*/ ) const
 {
@@ -25,11 +32,15 @@ void AAuraCharacterBase::ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectC
 	// Must be called after ASC is correctly initialized
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	check( ASC );
-	const FGameplayEffectContextHandle EffectContextHandle = ASC->MakeEffectContext();
+	FGameplayEffectContextHandle EffectContextHandle = ASC->MakeEffectContext();
+	EffectContextHandle.AddSourceObject( this );
 	const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec( EffectClass, EffectLevel, EffectContextHandle );
 	ASC->ApplyGameplayEffectSpecToTarget( *EffectSpecHandle.Data, ASC );
 }
 void AAuraCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+}
+void AAuraCharacterBase::Rep_CharacterLevel( int OldCharacterLevel )
+{
 }

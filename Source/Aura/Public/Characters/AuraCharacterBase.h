@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
+#include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
 class UGameplayEffect;
@@ -13,7 +14,7 @@ class UAttributeSet;
 class UAbilitySystemComponent;
 
 UCLASS()
-class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface
+class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -23,6 +24,12 @@ public:
 	//~ Begin of IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; };
 	//~ End of IAbilitySystemInterface
+
+	//~ Begin of ICombatInterface
+	virtual int GetActorLevel() const override { return GetCharacterLevel(); };
+	//~ End of ICombatInterface
+
+	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
@@ -49,5 +56,17 @@ protected:
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<UGameplayEffect> InitSecondaryAttributesEffectClass;
 
+	UPROPERTY( EditAnywhere )
+	TSubclassOf<UGameplayEffect> InitVitalAttributesEffectClass;
+
 	virtual void BeginPlay() override;
+
+	FORCEINLINE int GetCharacterLevel() const { return CharacterLevel; }
+	FORCEINLINE void SetCharacterLevel( int NewValue ) { CharacterLevel = NewValue; }
+
+	UPROPERTY( BlueprintReadOnly, ReplicatedUsing = Rep_CharacterLevel )
+	int CharacterLevel = 1;
+
+	UFUNCTION()
+	void Rep_CharacterLevel( int OldCharacterLevel );
 };
