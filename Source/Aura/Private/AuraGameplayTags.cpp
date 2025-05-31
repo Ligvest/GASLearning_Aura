@@ -20,7 +20,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Attributes_Secondary_CriticalHitChance = AddGameplayTag( SecondaryAttributesPrefix, "CriticalHitChance", "+Chance to crit" );
 	Attributes_Secondary_CriticalHitDamage = AddGameplayTag( SecondaryAttributesPrefix, "CriticalHitDamage", "+Crit damage" );
 	Attributes_Secondary_CriticalHitResistance = AddGameplayTag( SecondaryAttributesPrefix, "CriticalHitResistance", "-Crit chance on taken damage" );
-	Attributes_Secondary_HealthRegeneration = AddGameplayTag( SecondaryAttributesPrefix, "HealthRegeneration", "+Health restoration per second" );
+	Attributes_Secondary_HealthRegeneration = AddGameplayTag( SecondaryAttributesPrefix, "HealthRegeneration", "+Health regen per second" );
 	Attributes_Secondary_ManaRegeneration = AddGameplayTag( SecondaryAttributesPrefix, "ManaRegeneration", "+Mana regen per 1 sec" );
 	Attributes_Secondary_MaxHealth = AddGameplayTag( SecondaryAttributesPrefix, "MaxHealth", "+Max Health" );
 	Attributes_Secondary_MaxMana = AddGameplayTag( SecondaryAttributesPrefix, "MaxMana", "+Max Mana" );

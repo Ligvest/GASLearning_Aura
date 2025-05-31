@@ -14,6 +14,10 @@ FGameplayAttribute UMMC_LevelBonus::GetBaseAttribute() const
 	// Should be implemented in childrens
 	return FGameplayAttribute();
 }
+
+// This function will be called in children.
+// I need to use it as If i call GetBaseAttribute in a base class constructor
+// the base class GetBaseAttribute will be called. So here is a workaround
 void UMMC_LevelBonus::InitBaseAttributeDef()
 {
 	// The same parameters as in GE blueprints in Modifiers

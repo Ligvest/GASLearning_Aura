@@ -16,6 +16,7 @@ FGameplayAttribute UMMC_MaxHealth::GetBaseAttribute() const
 {
 	return UAuraAttributeSet::GetVigorAttribute();
 }
+
 float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation( const FGameplayEffectSpec& Spec ) const
 {
 	return Super::CalculateBaseMagnitude_Implementation( Spec );

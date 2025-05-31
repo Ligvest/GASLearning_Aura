@@ -3,8 +3,10 @@
 #include "UI/HUD/AuraHUD.h"
 
 #include "Blueprint/UserWidget.h"
+#include "GAS/AuraGasBpLibrary.h"
 #include "Player/AuraPlayerState.h"
 #include "UI/Widget/AuraUserWidget.h"
+#include "UI/WidgetController/AuraAttributeWindowWC.h"
 #include "UI/WidgetController/AuraHUDWidgetController.h"
 
 void AAuraHUD::InitHUDWidget()
@@ -14,7 +16,8 @@ void AAuraHUD::InitHUDWidget()
 	// AbilitySystemComponent and AttributeSet are set in PlayerSet so they should be good too
 
 	// Create and init HUDWidgetController
-	InitWidgetController();
+	// TODO: I think this shouldnt be here. This is very stupid but for now i'll leave it here
+	UAuraGasBpLibrary::GetHudWC( this );
 
 	// Create and init HUDWidget
 	checkf( HUDWidgetClass, TEXT( "The variable is not set in blueprints" ) );
@@ -23,23 +26,21 @@ void AAuraHUD::InitHUDWidget()
 	HUDWidgetController->BroadcastInitialValues();
 	HUDWidget->AddToViewport();
 }
-void AAuraHUD::InitWidgetController()
+UAuraHUDWidgetController* AAuraHUD::TryGetHudWC( const FWidgetControllerParams& Params )
 {
-	// Init Params
-	FWidgetControllerParams WidgetControllerParams;
-	// PlayerController
-	WidgetControllerParams.PlayerController = GetOwningPlayerController();
-	check( WidgetControllerParams.PlayerController );
-	// PlayerState
-	WidgetControllerParams.PlayerState = WidgetControllerParams.PlayerController->PlayerState;
-	check( WidgetControllerParams.PlayerState );
-	// AbilitySystemComponent
-	const AAuraPlayerState* AuraPlayerState = Cast<AAuraPlayerState>( WidgetControllerParams.PlayerState );
-	WidgetControllerParams.AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
-	check( WidgetControllerParams.AbilitySystemComponent );
-	// AttributeSet
-	WidgetControllerParams.AttributeSet = AuraPlayerState->GetAttributeSet();
-	check( HUDWidgetControllerClass );
-	HUDWidgetController = NewObject<UAuraHUDWidgetController>( this, HUDWidgetControllerClass );
-	HUDWidgetController->SetWidgetControllerParams( WidgetControllerParams );
+	if ( !HUDWidgetController )
+	{
+		HUDWidgetController = NewObject<UAuraHUDWidgetController>( this, HUDWidgetControllerClass );
+		HUDWidgetController->SetWidgetControllerParams( Params );
+	}
+	return HUDWidgetController;
+}
+UAuraAttributeWindowWC* AAuraHUD::TryGetAttributeWindowWC( const FWidgetControllerParams& Params )
+{
+	if ( !AttributeWindowWC )
+	{
+		AttributeWindowWC = NewObject<UAuraAttributeWindowWC>( this, AttributeWindowWcClass );
+		AttributeWindowWC->SetWidgetControllerParams( Params );
+	}
+	return AttributeWindowWC;
 }

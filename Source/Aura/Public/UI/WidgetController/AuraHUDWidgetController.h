@@ -33,7 +33,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FEffectMessageRowDelegate, const FE
 /**
  *
  */
-UCLASS()
+UCLASS( Blueprintable )
 class AURA_API UAuraHUDWidgetController : public UAuraWidgetController
 {
 	GENERATED_BODY()

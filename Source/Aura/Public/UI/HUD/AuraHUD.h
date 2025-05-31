@@ -4,9 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraHUD.generated.h"
 
+// Forward declarations
 class UAuraHUDWidgetController;
+class UAuraAttributeWindowWC;
+
 /**
  *
  */
@@ -18,16 +22,25 @@ public:
 	void InitHUDWidget();
 
 protected:
+	// HUD Widget
+	UPROPERTY( EditAnywhere )
+	TSubclassOf<UUserWidget> HUDWidgetClass;
+
+	// HUD WC
 	UPROPERTY()
 	TObjectPtr<UAuraHUDWidgetController> HUDWidgetController;
 
 	UPROPERTY( EditAnywhere )
-	TSubclassOf<UUserWidget> HUDWidgetClass;
-
-	// In case we would want a BP widget controller
-	UPROPERTY( EditAnywhere )
 	TSubclassOf<UAuraHUDWidgetController> HUDWidgetControllerClass;
 
-private:
-	void InitWidgetController();
+	// Attribute Window WC
+	UPROPERTY()
+	TObjectPtr<UAuraAttributeWindowWC> AttributeWindowWC;
+
+	UPROPERTY( EditAnywhere )
+	TSubclassOf<UAuraAttributeWindowWC> AttributeWindowWcClass;
+
+public:
+	UAuraHUDWidgetController* TryGetHudWC( const FWidgetControllerParams& Params );
+	UAuraAttributeWindowWC* TryGetAttributeWindowWC( const FWidgetControllerParams& Params );
 };

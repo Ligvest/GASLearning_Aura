@@ -27,6 +27,7 @@ public:
 
 protected:
 	virtual FGameplayAttribute GetBaseAttribute() const;
+	// A function to call from ctor
 	void InitBaseAttributeDef();
 
 protected:
