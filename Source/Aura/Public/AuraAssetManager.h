@@ -7,6 +7,7 @@
 #include "AuraAssetManager.generated.h"
 
 /**
+ * A perfect place to initialize native tags
  *
  */
 UCLASS()

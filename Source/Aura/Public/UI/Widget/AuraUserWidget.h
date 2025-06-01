@@ -6,7 +6,10 @@
 #include "Blueprint/UserWidget.h"
 #include "AuraUserWidget.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE( FOnWidgetClosed );
+
 class UAuraWidgetController;
+class UButton;
 /**
  *
  */
@@ -22,8 +25,22 @@ public:
 	UFUNCTION( BlueprintCallable )
 	void SetWidgetController( UObject* InWidgetController );
 
+	UFUNCTION( BlueprintCallable )
+	void Open( UAuraUserWidget* InParentWidget, UButton* OpenButton );
+	UFUNCTION( BlueprintCallable )
+	void Close();
+
 protected:
 	// Called when WidgetController is set
 	UFUNCTION( BlueprintImplementableEvent )
 	void WidgetControllerSet();
+
+	UPROPERTY()
+	TObjectPtr<UButton> ParentButton;
+
+	UPROPERTY()
+	TObjectPtr<UAuraUserWidget> ParentWidget;
+
+	UPROPERTY( BlueprintAssignable )
+	FOnWidgetClosed OnWidgetClosed;
 };

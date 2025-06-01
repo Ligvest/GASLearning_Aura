@@ -32,6 +32,7 @@ class AURA_API UAuraAttributeInfoDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:
+	// Get attribute info from the AttributeInfos initialized in BP
 	FAuraAttributeInfo GetAttributeInfoByTag( const FGameplayTag& Tag );
 
 protected:

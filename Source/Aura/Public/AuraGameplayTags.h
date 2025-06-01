@@ -6,6 +6,8 @@
 #include "GameplayTagContainer.h"
 
 /**
+ * Container for our gameplay tags.
+ * Here we create them and save them so we have convenient access to each tag by variable and not by string literal
  *
  */
 struct FAuraGameplayTags

@@ -17,10 +17,10 @@ class AURA_API UAuraGasBpLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION( BlueprintCallable )
+	UFUNCTION( BlueprintPure )
 	static UAuraHUDWidgetController* GetHudWC( const UObject* WorldContext );
 
-	UFUNCTION( BlueprintCallable )
+	UFUNCTION( BlueprintPure )
 	static UAuraAttributeWindowWC* GetAttributeWindowWC( const UObject* WorldContext );
 
 private:

@@ -31,6 +31,13 @@ struct FEffectProperties
 	TObjectPtr<ACharacter> Character;
 };
 
+// typedef is specific to the FGameplayAttribute() signature, but TStaticFunPtr is generic to any signature chosen
+// typedef TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr FAttributeFuncPtr;
+template <class T>
+using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
+
+// TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
+
 /**
  *
  */
@@ -45,6 +52,8 @@ public:
 
 	virtual void PreAttributeChange( const FGameplayAttribute& Attribute, float& NewValue ) override;
 	virtual void PostGameplayEffectExecute( const struct FGameplayEffectModCallbackData& Data ) override;
+
+	TMap<FGameplayTag, FGameplayAttribute> TagsToAttributes;
 
 	// Health
 	// We can't just use Replicate becuase attributes replication in GAS should be forwarded to the GAS itself in the rep function
