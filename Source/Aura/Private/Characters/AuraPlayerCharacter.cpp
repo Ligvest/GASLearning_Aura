@@ -42,6 +42,7 @@ void AAuraPlayerCharacter::PossessedBy( AController* NewController )
 	// For initializing AbilityComponent we use PossessedBy because without controlling the character the abilities don't make sense
 	// Init ability actor info for Server
 	InitGASInfoAndHUD();
+	GrantDefaultAbilities();
 }
 
 // Client

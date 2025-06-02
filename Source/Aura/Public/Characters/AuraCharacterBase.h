@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UGameplayAbility;
 class UGameplayEffect;
 // Forward declarations
 class UAttributeSet;
@@ -43,6 +44,8 @@ public:
 
 	void ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectClass, float EffectLevel = 1.f ) const;
 
+	void GrantDefaultAbilities() const;
+
 protected:
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -69,4 +72,7 @@ protected:
 
 	UFUNCTION()
 	void Rep_CharacterLevel( int OldCharacterLevel );
+
+	UPROPERTY( EditDefaultsOnly )
+	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilityClasses;
 };

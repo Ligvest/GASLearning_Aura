@@ -16,3 +16,13 @@ void UAuraAbilitySystemComponent::OnEffectAppliedToSelf( UAbilitySystemComponent
 	EffectSpec.GetAllAssetTags( TagContainer );
 	OnEffectWithTagsAppliedDelegate.Broadcast( TagContainer );
 }
+void UAuraAbilitySystemComponent::GrantAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses )
+{
+	for ( auto AbilityClass : AbilityClasses )
+	{
+		constexpr int DefaultAbilityLevel = 1;
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec( AbilityClass, DefaultAbilityLevel );
+		// GiveAbility(AbilitySpec);
+		GiveAbilityAndActivateOnce( AbilitySpec );
+	}
+}

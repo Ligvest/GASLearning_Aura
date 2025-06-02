@@ -37,6 +37,17 @@ void AAuraCharacterBase::ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectC
 	const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec( EffectClass, EffectLevel, EffectContextHandle );
 	ASC->ApplyGameplayEffectSpecToTarget( *EffectSpecHandle.Data, ASC );
 }
+void AAuraCharacterBase::GrantDefaultAbilities() const
+{
+	// Run this only on a server
+	if ( !HasAuthority() )
+	{
+		return;
+	}
+
+	UAuraAbilitySystemComponent* ASC = CastChecked<UAuraAbilitySystemComponent>( AbilitySystemComponent );
+	ASC->GrantAbilities( DefaultAbilityClasses );
+}
 void AAuraCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();

@@ -19,6 +19,8 @@ public:
 
 	FOnEffectWithTagsApplied OnEffectWithTagsAppliedDelegate;
 
+	void GrantAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses );
+
 private:
 	void InitSubscriptions();
 
