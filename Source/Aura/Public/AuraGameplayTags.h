@@ -35,8 +35,17 @@ public:
 	FGameplayTag Attributes_Secondary_MaxHealth;
 	FGameplayTag Attributes_Secondary_MaxMana;
 
+	// Input
+	FGameplayTag AuraInput_LBM;
+	FGameplayTag AuraInput_RBM;
+	FGameplayTag AuraInput_1;
+	FGameplayTag AuraInput_2;
+	FGameplayTag AuraInput_3;
+	FGameplayTag AuraInput_4;
+
 private:
 	static FAuraGameplayTags GameplayTags;
 	const FString SecondaryAttributesPrefix{ "Attributes.Secondary." };
 	const FString PrimaryAttributesPrefix{ "Attributes.Primary." };
+	const FString InputPrefix{ "AuraInput." };
 };

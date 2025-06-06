@@ -3,6 +3,9 @@
 #include "Player/AuraPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Characters/AuraPlayerCharacter.h"
+#include "GAS/AuraAbilitySystemComponent.h"
+#include "Input/AuraInputComponent.h"
 #include "Interaction/HighlightActorInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
@@ -42,13 +45,47 @@ inline void AAuraPlayerController::BeginPlayClientOnly()
 	InputModeData.SetHideCursorDuringCapture( false );
 	SetInputMode( InputModeData );
 }
+UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
+{
+	if ( !IsValid( ASC ) )
+	{
+		AAuraPlayerCharacter* AuraCharacter = CastChecked<AAuraPlayerCharacter>( GetPawn() );
+		ASC = Cast<UAuraAbilitySystemComponent>( AuraCharacter->GetAbilitySystemComponent() );
+	}
+
+	return ASC;
+}
 void AAuraPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>( InputComponent );
+	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>( InputComponent );
 	check( MoveAction );
-	EnhancedInputComponent->BindAction( MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move );
+	AuraInputComponent->BindAction( MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move );
+	AuraInputComponent->BindAbilityActions( InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld );
+}
+void AAuraPlayerController::AbilityInputTagPressed( FGameplayTag InputTag )
+{
+	return;
+	// if ( IsValid( GetASC() ) )
+	// {
+	// 	GetASC()->AbilityInputTagPressed( InputTag );
+	// }
+}
+void AAuraPlayerController::AbilityInputTagReleased( FGameplayTag InputTag )
+{
+	if ( IsValid( GetASC() ) )
+	{
+		GetASC()->AbilityInputTagReleased( InputTag );
+	}
+}
+void AAuraPlayerController::AbilityInputTagHeld( FGameplayTag InputTag )
+{
+	// GEngine->AddOnScreenDebugMessage( -1, 2.f, FColor::Yellow, "Holding ability with tag: " + InputTag.ToString() );
+	if ( IsValid( GetASC() ) )
+	{
+		GetASC()->AbilityInputTagHeld( InputTag );
+	}
 }
 void AAuraPlayerController::Move( const FInputActionValue& InputActionValue )
 {

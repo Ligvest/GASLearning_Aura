@@ -20,6 +20,9 @@ public:
 	FOnEffectWithTagsApplied OnEffectWithTagsAppliedDelegate;
 
 	void GrantAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses );
+	void AbilityInputTagPressed( const FGameplayTag& InputTag );
+	void AbilityInputTagReleased( const FGameplayTag& InputTag );
+	void AbilityInputTagHeld( const FGameplayTag& InputTag );
 
 private:
 	void InitSubscriptions();

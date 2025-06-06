@@ -24,6 +24,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Attributes_Secondary_ManaRegeneration = AddGameplayTag( SecondaryAttributesPrefix, "ManaRegeneration", "+Mana regen per 1 sec" );
 	Attributes_Secondary_MaxHealth = AddGameplayTag( SecondaryAttributesPrefix, "MaxHealth", "+Max Health" );
 	Attributes_Secondary_MaxMana = AddGameplayTag( SecondaryAttributesPrefix, "MaxMana", "+Max Mana" );
+
+	// Input
+	AuraInput_LBM = AddGameplayTag( InputPrefix, "LBM", "Left Mouse Button" );
+	AuraInput_RBM = AddGameplayTag( InputPrefix, "RBM", "Right Mouse Button" );
+	AuraInput_1 = AddGameplayTag( InputPrefix, "1", "Key \"1\"" );
+	AuraInput_2 = AddGameplayTag( InputPrefix, "2", "Key \"2\"" );
+	AuraInput_3 = AddGameplayTag( InputPrefix, "3", "Key \"3\"" );
+	AuraInput_4 = AddGameplayTag( InputPrefix, "4", "Key \"4\"" );
 }
 FGameplayTag FAuraGameplayTags::AddGameplayTag( const FString& AttributeNamePrefix, const FString& AttributeName, const FString& AttributeHint )
 {
