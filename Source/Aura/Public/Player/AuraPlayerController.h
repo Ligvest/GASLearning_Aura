@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AuraPlayerController.generated.h"
 
+class USplineComponent;
 // Forward declaration
 class IHighlightActorInterface;
 class UInputMappingContext;
@@ -30,8 +31,12 @@ protected:
 	virtual void BeginPlay() override;
 
 	// Input
-	void Move( const FInputActionValue& InputActionValue );
+	void MoveWithButtons( const FInputActionValue& InputActionValue );
+	void MoveWithCursor();
+	void GeneratePathToPoint( FVector TargetPoint );
+	void AutoMoveAlongMovementSpline();
 	void CursorTrace();
+	void UpdateHightlightActor();
 	virtual void SetupInputComponent() override;
 	void AbilityInputTagPressed( FGameplayTag InputTag );
 	void AbilityInputTagReleased( FGameplayTag InputTag );
@@ -50,8 +55,29 @@ private:
 	UPROPERTY( EditDefaultsOnly, Category = "Input" )
 	TObjectPtr<UAuraInputConfig> InputConfig;
 
-	TScriptInterface<IHighlightActorInterface> ThisActorUnderCursorToHighlight;
+	TScriptInterface<IHighlightActorInterface> CurrentActorUnderCursorToHighlight;
 	TScriptInterface<IHighlightActorInterface> LastActorUnderCursorToHighlight;
 
 	UAuraAbilitySystemComponent* ASC;
+
+	// Input
+	UPROPERTY( VisibleAnywhere, Category = "Input" )
+	TObjectPtr<USplineComponent> AutoMoveSpline;
+	AActor* ActorUnderCursor;
+	FVector LastCursorTraceImpactPoint;
+
+	FVector AutoMoveDestinationPoint;
+	FVector AutoMoveDirection = FVector::ZeroVector;
+	bool bAutoMove = false;
+	float AutoMoveDisableDistanceThreshold = 50.f;
+	bool bTargeting = false;
+	float FollowTime = 0.f;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Input" )
+	float HoldButtonThreshold = 0.3;
+
+	// Debug
+public:
+	// Debug:
+	void DrawSplineDebug( USplineComponent* Spline, FColor Color = FColor::Red, float Step = 10.0f );
 };
