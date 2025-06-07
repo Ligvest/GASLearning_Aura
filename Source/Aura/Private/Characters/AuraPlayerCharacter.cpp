@@ -5,6 +5,8 @@
 #include "AbilitySystemComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/GameSession.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
 #include "UI/HUD/AuraHUD.h"
 
@@ -58,6 +60,13 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 void AAuraPlayerCharacter::InitGASInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	// TODO: Debug begin
+	APlayerController* D1PlayerController = GetLocalViewingPlayerController();
+	APlayerController* D2PlayerController = GetWorld()->GetFirstPlayerController();
+	APlayerController* D3PlayerController = UGameplayStatics::GetPlayerController( GetWorld(), 0 );
+	APlayerController* D4PlayerController = UGameplayStatics::GetPlayerController( this, 0 );
+	APlayerController* D5PlayerController = UGameplayStatics::GetPlayerController( AuraPlayerState, 0 );
+	// TODO: Debug end
 	check( AuraPlayerState );
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AbilitySystemComponent->InitAbilityActorInfo( AuraPlayerState, this );
@@ -71,6 +80,14 @@ void AAuraPlayerCharacter::InitGASInfo()
 void AAuraPlayerCharacter::InitHUD() const
 {
 	const APlayerController* PC = Cast<APlayerController>( GetController() );
+	// TODO: Debug
+	APlayerState* D1PC = GetPlayerState();
+	APlayerController* D1PlayerController = GetLocalViewingPlayerController();
+	APlayerController* D2PlayerController = GetWorld()->GetFirstPlayerController();
+	APlayerController* D3PlayerController = UGameplayStatics::GetPlayerController( GetWorld(), 0 );
+	APlayerController* D4PlayerController = UGameplayStatics::GetPlayerController( this, 0 );
+	APlayerController* D5PlayerController = UGameplayStatics::GetPlayerController( D1PC, 0 );
+	// TODO: Debug end
 	AAuraHUD* HUD = PC->GetHUD<AAuraHUD>();
 	check( HUD );
 	HUD->InitHUDWidget();

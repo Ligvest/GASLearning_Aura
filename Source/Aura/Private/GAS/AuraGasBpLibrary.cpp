@@ -45,6 +45,19 @@ FWidgetControllerParams UAuraGasBpLibrary::GetWidgetControllerParams( const UObj
 
 	// PlayerState
 	WidgetControllerParams.PlayerState = WidgetControllerParams.PlayerController->PlayerState;
+	// This function eventually is called from OnRep_PlayerState. When OnRep_PlayerState is called PlayerState and PlayerController should
+	// be up to date. But they can not have links between each other yet. So if they are not linked yet we go back to a Pawn which should
+	// be the Pawn which called OnRep_PlayerState and get the controller from this Pawn
+	if ( !WidgetControllerParams.PlayerState )
+	{
+		// Pawn could be still not linked with the PlayerState but this case is when there are network problems
+		// This game is intent to be Singleplayer but just to be aware
+		APawn* ControlledPawn = WidgetControllerParams.PlayerController->GetPawn();
+		if ( IsValid( ControlledPawn ) )
+		{
+			WidgetControllerParams.PlayerState = ControlledPawn->GetPlayerState();
+		}
+	}
 	check( WidgetControllerParams.PlayerState );
 
 	// AbilitySystemComponent

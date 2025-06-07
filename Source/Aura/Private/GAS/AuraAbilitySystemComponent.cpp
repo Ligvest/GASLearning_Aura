@@ -10,9 +10,12 @@ void UAuraAbilitySystemComponent::Init()
 }
 void UAuraAbilitySystemComponent::InitSubscriptions()
 {
-	OnGameplayEffectAppliedDelegateToSelf.AddUObject( this, &UAuraAbilitySystemComponent::OnEffectAppliedToSelf );
+	// This delegate is called only on a server.
+	// So it don't replicate the call. Thats because we use a RPC instead of local function so that a server
+	// replicated the call to the client for this ASC
+	OnGameplayEffectAppliedDelegateToSelf.AddUObject( this, &UAuraAbilitySystemComponent::Client_OnEffectAppliedToSelf );
 }
-void UAuraAbilitySystemComponent::OnEffectAppliedToSelf( UAbilitySystemComponent* ASC, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle EffectHandle )
+void UAuraAbilitySystemComponent::Client_OnEffectAppliedToSelf_Implementation( UAbilitySystemComponent* ASC, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle EffectHandle )
 {
 	FGameplayTagContainer TagContainer;
 	EffectSpec.GetAllAssetTags( TagContainer );
