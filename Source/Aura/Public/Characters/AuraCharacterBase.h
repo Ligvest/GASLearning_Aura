@@ -28,6 +28,7 @@ public:
 
 	//~ Begin of ICombatInterface
 	virtual int GetActorLevel() const override { return GetCharacterLevel(); };
+	virtual FVector GetProjectileSpawnSocketLocation() const override;
 	//~ End of ICombatInterface
 
 	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
@@ -36,6 +37,9 @@ public:
 
 	UPROPERTY( EditDefaultsOnly, Category = SocketNames )
 	FName SocketNameHandWeapon = FName( "HandWeapon" );
+
+	UPROPERTY( EditDefaultsOnly, Category = SocketNames )
+	FName SocketNameProjectileSpawn;
 
 	UPROPERTY( EditAnywhere, Category = Combat )
 	TObjectPtr<class USkeletalMeshComponent> WeaponMeshComponent;

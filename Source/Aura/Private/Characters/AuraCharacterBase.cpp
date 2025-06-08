@@ -13,6 +13,12 @@ AAuraCharacterBase::AAuraCharacterBase()
 	WeaponMeshComponent->SetupAttachment( GetMesh(), SocketNameHandWeapon );
 	WeaponMeshComponent->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 }
+FVector AAuraCharacterBase::GetProjectileSpawnSocketLocation() const
+{
+	check( WeaponMeshComponent );
+	check( !SocketNameProjectileSpawn.IsNone() );
+	return WeaponMeshComponent->GetSocketLocation( SocketNameProjectileSpawn );
+}
 void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const
 {
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
