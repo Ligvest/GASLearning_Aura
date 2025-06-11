@@ -42,7 +42,7 @@ public:
 	FName SocketNameProjectileSpawn;
 
 	UPROPERTY( EditAnywhere, Category = Combat )
-	TObjectPtr<class USkeletalMeshComponent> WeaponMeshComponent;
+	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent;
 
 	void InitDefaultAttributes() const;
 

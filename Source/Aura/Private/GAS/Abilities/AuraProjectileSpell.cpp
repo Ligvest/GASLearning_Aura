@@ -9,9 +9,11 @@ void UAuraProjectileSpell::ActivateAbility( const FGameplayAbilitySpecHandle Han
                                             const FGameplayEventData* TriggerEventData )
 {
 	Super::ActivateAbility( Handle, ActorInfo, ActivationInfo, TriggerEventData );
-
-	// Activate only if this is a serve
-	if ( !HasAuthority( &ActivationInfo ) )
+}
+void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation )
+{
+	// Activate only if this is a server
+	if ( !GetAvatarActorFromActorInfo()->HasAuthority() )
 	{
 		return;
 	}
@@ -26,8 +28,13 @@ void UAuraProjectileSpell::ActivateAbility( const FGameplayAbilitySpecHandle Han
 		SpawnLocation = CombatActor->GetProjectileSpawnSocketLocation();
 	}
 
+	FRotator Rotator = ( TargetLocation - SpawnLocation ).Rotation();
+	// Zero out pitch to make projectile fly ortogonal to surface
+	Rotator.Pitch = 0.f;
+
 	FTransform SpawnTransform;
 	SpawnTransform.SetLocation( SpawnLocation );
+	SpawnTransform.SetRotation( Rotator.Quaternion() );
 
 	// TODO: Set projectile rotation
 

@@ -34,6 +34,8 @@ protected:
 	void MoveWithButtons( const FInputActionValue& InputActionValue );
 	void MoveWithCursor();
 	void GeneratePathToPoint( FVector TargetPoint );
+	void ShiftPressed() { bShiftPressed = true; }
+	void ShiftReleased() { bShiftPressed = false; }
 	void AutoMoveAlongMovementSpline();
 	void CursorTrace();
 	void UpdateHightlightActor();
@@ -51,6 +53,9 @@ private:
 
 	UPROPERTY( EditAnywhere, Category = "Input" )
 	TObjectPtr<UInputAction> MoveAction;
+
+	UPROPERTY( EditAnywhere, Category = "Input" )
+	TObjectPtr<UInputAction> ShiftAction;
 
 	UPROPERTY( EditDefaultsOnly, Category = "Input" )
 	TObjectPtr<UAuraInputConfig> InputConfig;
@@ -72,6 +77,7 @@ private:
 	float AutoMoveDisableDistanceThreshold = 50.f;
 	bool bTargeting = false;
 	float FollowTime = 0.f;
+	bool bShiftPressed = false;
 
 	UPROPERTY( EditDefaultsOnly, Category = "Input" )
 	float HoldButtonThreshold = 0.3;

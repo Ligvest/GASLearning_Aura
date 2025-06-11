@@ -8,6 +8,8 @@
 AAuraProjectile::AAuraProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
+
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>( TEXT( "CollisionSphere" ) );
 	SetRootComponent( CollisionSphere );
 	// Disable blocking collisions and leave only QueryOnly type ( like Overlap, LineTrace )

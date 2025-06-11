@@ -2,6 +2,7 @@
 
 #include "Characters/AuraCharacterBase.h"
 
+#include "Components/CapsuleComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
 #include "Net/UnrealNetwork.h"
@@ -9,15 +10,18 @@
 AAuraCharacterBase::AAuraCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	WeaponMeshComponent = CreateDefaultSubobject<class USkeletalMeshComponent>( "WeaponMeshComponent" );
+	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>( "WeaponMeshComponent" );
 	WeaponMeshComponent->SetupAttachment( GetMesh(), SocketNameHandWeapon );
 	WeaponMeshComponent->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	GetCapsuleComponent()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
+	GetMesh()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
 }
 FVector AAuraCharacterBase::GetProjectileSpawnSocketLocation() const
 {
 	check( WeaponMeshComponent );
 	check( !SocketNameProjectileSpawn.IsNone() );
-	return WeaponMeshComponent->GetSocketLocation( SocketNameProjectileSpawn );
+	FVector SocketLocation = WeaponMeshComponent->GetSocketLocation( SocketNameProjectileSpawn );
+	return SocketLocation;
 }
 void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const
 {
