@@ -2,6 +2,7 @@
 
 #include "Characters/AuraCharacterBase.h"
 
+#include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
@@ -14,12 +15,16 @@ AAuraCharacterBase::AAuraCharacterBase()
 	WeaponMeshComponent->SetupAttachment( GetMesh(), SocketNameHandWeapon );
 	WeaponMeshComponent->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 	GetCapsuleComponent()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
+	GetMesh()->SetCollisionResponseToChannel( ECC_Projectile, ECR_Overlap );
 	GetMesh()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
+	GetMesh()->SetGenerateOverlapEvents( true );
 }
 FVector AAuraCharacterBase::GetProjectileSpawnSocketLocation() const
 {
 	check( WeaponMeshComponent );
 	check( !SocketNameProjectileSpawn.IsNone() );
+	// On the server the location of Socket will be default ( not the position in this exact moment of the animation )
+	// So to fix this I should pass the position to server it seems. Or ask server to play animations too
 	FVector SocketLocation = WeaponMeshComponent->GetSocketLocation( SocketNameProjectileSpawn );
 	return SocketLocation;
 }

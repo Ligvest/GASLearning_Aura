@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NiagaraSystem.h"
 #include "AuraProjectile.generated.h"
 
 class UProjectileMovementComponent;
@@ -17,15 +18,33 @@ class AURA_API AAuraProjectile : public AActor
 public:
 	AAuraProjectile();
 
+protected:
+	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
+
 	UFUNCTION()
 	void OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult );
 
-protected:
-	virtual void BeginPlay() override;
+	void PlayImpactEffects() const;
 
 	UPROPERTY( VisibleAnywhere, Category = "Collision" )
 	TObjectPtr<USphereComponent> CollisionSphere;
 
 	UPROPERTY( VisibleAnywhere, Category = "Movement" )
 	TObjectPtr<UProjectileMovementComponent> MovementComponent;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Fly" )
+	TObjectPtr<USoundBase> FlySound;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> FlySoundComponent;
+
+	float LifeSpan = 5.f;
+	bool bImpactHappened = false;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Impact" )
+	TObjectPtr<UNiagaraSystem> ImpactEffect;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Impact" )
+	TObjectPtr<USoundBase> ImpactSound;
 };

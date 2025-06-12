@@ -4,6 +4,10 @@
 
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Aura/Aura.h"
+#include "Components/AudioComponent.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -12,6 +16,9 @@ AAuraProjectile::AAuraProjectile()
 
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>( TEXT( "CollisionSphere" ) );
 	SetRootComponent( CollisionSphere );
+
+	CollisionSphere->SetCollisionObjectType( ECC_Projectile );
+
 	// Disable blocking collisions and leave only QueryOnly type ( like Overlap, LineTrace )
 	CollisionSphere->SetCollisionEnabled( ECollisionEnabled::QueryOnly );
 
@@ -29,13 +36,62 @@ AAuraProjectile::AAuraProjectile()
 	MovementComponent->ProjectileGravityScale = 0.f;
 }
 
-void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-                                                const FHitResult& SweepResult )
-{
-}
-
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	SetLifeSpan( LifeSpan );
 	CollisionSphere->OnComponentBeginOverlap.AddDynamic( this, &AAuraProjectile::OnCollisionSphereOverlap );
+	if ( !HasAuthority() )
+	{
+		// Only client will hear the flight sound
+		FlySoundComponent = UGameplayStatics::SpawnSoundAttached( FlySound, GetRootComponent() );
+	}
+}
+
+void AAuraProjectile::PlayImpactEffects() const
+{
+	check( ImpactEffect );
+	check( ImpactSound );
+
+	UGameplayStatics::PlaySoundAtLocation( this, ImpactSound, GetActorLocation() );
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation( this, ImpactEffect, GetActorLocation() );
+
+	if ( IsValid( FlySoundComponent ) )
+	{
+		FlySoundComponent->Stop();
+		FlySoundComponent->DestroyComponent();
+	}
+}
+
+void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                const FHitResult& SweepResult )
+{
+	if ( !bImpactHappened )
+	{
+		bImpactHappened = true;
+
+		// Show impact effects to client
+		if ( !HasAuthority() )
+		{
+			PlayImpactEffects();
+		}
+
+		// Only server destroys the projectile
+		if ( HasAuthority() )
+		{
+			Destroy();
+		}
+	}
+}
+
+void AAuraProjectile::Destroyed()
+{
+	// Only for clients which didn't see the effect
+	if ( !HasAuthority() && !bImpactHappened )
+	{
+		bImpactHappened = true;
+		PlayImpactEffects();
+	}
+
+	Super::Destroyed();
 }
