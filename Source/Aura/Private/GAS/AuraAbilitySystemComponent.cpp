@@ -11,7 +11,7 @@ void UAuraAbilitySystemComponent::Init()
 void UAuraAbilitySystemComponent::InitSubscriptions()
 {
 	// This delegate is called only on a server.
-	// So it don't replicate the call. Thats because we use a RPC instead of local function so that a server
+	// So it doesn't replicate the call. Thats because we use an RPC instead of local function so that a server
 	// replicated the call to the client for this ASC
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject( this, &UAuraAbilitySystemComponent::Client_OnEffectAppliedToSelf );
 }

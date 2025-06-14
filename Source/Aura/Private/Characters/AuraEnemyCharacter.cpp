@@ -2,8 +2,10 @@
 
 #include "Characters/AuraEnemyCharacter.h"
 
+#include "Components/WidgetComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
+#include "UI/WidgetController/AuraEnemyOverlayWC.h"
 
 AAuraEnemyCharacter::AAuraEnemyCharacter()
 {
@@ -13,13 +15,46 @@ AAuraEnemyCharacter::AAuraEnemyCharacter()
 	AbilitySystemComponent->SetReplicationMode( EGameplayEffectReplicationMode::Minimal );
 
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>( "AuraAttributeSet" );
+
+	FloatingWidget = CreateDefaultSubobject<UWidgetComponent>( TEXT( "OverlayWidget" ) );
+	FloatingWidget->SetupAttachment( GetRootComponent() );
 }
+
 void AAuraEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
 	AbilitySystemComponent->InitAbilityActorInfo( this, this );
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	check( AuraASC );
 	AuraASC->Init();
 	InitDefaultAttributes();
+	check( AttributeSet );
+
+	InitFloatingWC();
+	check( FloatingWC );
+
+	// Have additional function to setup widget controller for floating widget
+	// We have it because we need a place to bind callback from WC to Widget
+	// But we can't do this in BP begin play as it executes earlier than C++ begin play
+	// And in this case we still not initialized our FloatingWC to use it in BeginPlay of BP
+	SetupFloatingWidget();
+}
+
+UAuraEnemyOverlayWC* AAuraEnemyCharacter::GetOverlayWC() const
+{
+	return FloatingWC;
+}
+void AAuraEnemyCharacter::InitFloatingWC()
+{
+	FWidgetControllerParams WcParams;
+	WcParams.AbilitySystemComponent = AbilitySystemComponent;
+	WcParams.AttributeSet = AttributeSet;
+	// These don't make sense for NPC
+	WcParams.PlayerController = nullptr;
+	WcParams.PlayerState = nullptr;
+
+	check( FloatingWcClass );
+	FloatingWC = NewObject<UAuraEnemyOverlayWC>( this, FloatingWcClass );
+	FloatingWC->SetWidgetControllerParams( WcParams );
 }

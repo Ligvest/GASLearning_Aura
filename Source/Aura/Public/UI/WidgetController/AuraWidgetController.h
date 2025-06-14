@@ -14,7 +14,6 @@ struct FWidgetControllerParams
 {
 	GENERATED_BODY()
 
-	// TODO: Why expose to blueprints? Why EditAnywhere?
 	UPROPERTY( EditAnywhere, BlueprintReadWrite )
 	TObjectPtr<APlayerState> PlayerState;
 
@@ -27,6 +26,10 @@ struct FWidgetControllerParams
 	UPROPERTY( EditAnywhere, BlueprintReadWrite )
 	TObjectPtr<UAttributeSet> AttributeSet;
 };
+
+// Delegates
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnAttributeChangedSignature, float, NewValue );
+
 /**
  *
  */

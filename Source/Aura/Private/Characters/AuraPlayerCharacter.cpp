@@ -60,13 +60,6 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 void AAuraPlayerCharacter::InitGASInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	// TODO: Debug begin
-	APlayerController* D1PlayerController = GetLocalViewingPlayerController();
-	APlayerController* D2PlayerController = GetWorld()->GetFirstPlayerController();
-	APlayerController* D3PlayerController = UGameplayStatics::GetPlayerController( GetWorld(), 0 );
-	APlayerController* D4PlayerController = UGameplayStatics::GetPlayerController( this, 0 );
-	APlayerController* D5PlayerController = UGameplayStatics::GetPlayerController( AuraPlayerState, 0 );
-	// TODO: Debug end
 	check( AuraPlayerState );
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AbilitySystemComponent->InitAbilityActorInfo( AuraPlayerState, this );
