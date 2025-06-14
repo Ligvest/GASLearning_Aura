@@ -8,6 +8,8 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/AudioComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -41,11 +43,9 @@ void AAuraProjectile::BeginPlay()
 	Super::BeginPlay();
 	SetLifeSpan( LifeSpan );
 	CollisionSphere->OnComponentBeginOverlap.AddDynamic( this, &AAuraProjectile::OnCollisionSphereOverlap );
-	if ( !HasAuthority() )
-	{
-		// Only client will hear the flight sound
-		FlySoundComponent = UGameplayStatics::SpawnSoundAttached( FlySound, GetRootComponent() );
-	}
+
+	// Make fly sound for clients or ListenServer
+	FlySoundComponent = UGameplayStatics::SpawnSoundAttached( FlySound, GetRootComponent() );
 }
 
 void AAuraProjectile::PlayImpactEffects() const
@@ -70,15 +70,18 @@ void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedC
 	{
 		bImpactHappened = true;
 
-		// Show impact effects to client
-		if ( !HasAuthority() )
-		{
-			PlayImpactEffects();
-		}
+		// Show impact effects to clients or ListenServer
+		PlayImpactEffects();
 
 		// Only server destroys the projectile
 		if ( HasAuthority() )
 		{
+			UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent( OtherActor );
+			if ( TargetASC )
+			{
+				TargetASC->ApplyGameplayEffectSpecToSelf( *ImpactEffectHandle.Data );
+			}
+
 			Destroy();
 		}
 	}
@@ -87,7 +90,8 @@ void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedC
 void AAuraProjectile::Destroyed()
 {
 	// Only for clients which didn't see the effect
-	if ( !HasAuthority() && !bImpactHappened )
+	// And for ListenServer if the projectile was destroyed without overlap ( e.g. by LifeSpan )
+	if ( !bImpactHappened )
 	{
 		bImpactHappened = true;
 		PlayImpactEffects();

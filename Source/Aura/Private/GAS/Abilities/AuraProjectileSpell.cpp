@@ -2,6 +2,7 @@
 
 #include "GAS/Abilities/AuraProjectileSpell.h"
 
+#include "AbilitySystemComponent.h"
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
 
@@ -38,9 +39,12 @@ void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation )
 
 	// TODO: Set projectile rotation
 
-	AActor* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>( ProjectileClass, SpawnTransform, Owner, Instigator, ESpawnActorCollisionHandlingMethod::AlwaysSpawn );
+	AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>( ProjectileClass, SpawnTransform, Owner, Instigator, ESpawnActorCollisionHandlingMethod::AlwaysSpawn );
 
-	// TODO: Assign gameplay effect to damage
+	UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo();
+	check( SourceASC );
+	FGameplayEffectSpecHandle ImpactEffectHandle = SourceASC->MakeOutgoingSpec( ImpactEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext() );
+	SpawnedProjectile->SetImpactEffectHandle( std::move( ImpactEffectHandle ) );
 
 	SpawnedProjectile->FinishSpawning( SpawnTransform );
 }

@@ -14,10 +14,15 @@ AAuraCharacterBase::AAuraCharacterBase()
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>( "WeaponMeshComponent" );
 	WeaponMeshComponent->SetupAttachment( GetMesh(), SocketNameHandWeapon );
 	WeaponMeshComponent->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel( ECC_Projectile, ECR_Overlap );
 	GetCapsuleComponent()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
-	GetMesh()->SetCollisionResponseToChannel( ECC_Projectile, ECR_Overlap );
+	GetCapsuleComponent()->SetCollisionResponseToChannel( ECC_Visibility, ECR_Block );
+	GetCapsuleComponent()->SetGenerateOverlapEvents( true );
+
+	GetMesh()->SetCollisionResponseToChannel( ECC_Projectile, ECR_Ignore );
 	GetMesh()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
-	GetMesh()->SetGenerateOverlapEvents( true );
+	GetMesh()->SetGenerateOverlapEvents( false );
 }
 FVector AAuraCharacterBase::GetProjectileSpawnSocketLocation() const
 {

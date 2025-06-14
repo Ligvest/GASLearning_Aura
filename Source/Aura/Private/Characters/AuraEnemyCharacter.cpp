@@ -21,4 +21,5 @@ void AAuraEnemyCharacter::BeginPlay()
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	check( AuraASC );
 	AuraASC->Init();
+	InitDefaultAttributes();
 }

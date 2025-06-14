@@ -182,10 +182,13 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 	const FGameplayEffectContextHandle ContextHandle = Data.EffectSpec.GetContext();
 	UAbilitySystemComponent* SourceASCPtr = ContextHandle.GetOriginalInstigatorAbilitySystemComponent();
 	UAbilitySystemComponent& TargetASCRef = Data.Target;
-	// Fill EffectTargetProps
+	// Fill EffectSourceProps. Source = causer of the effect
 	FillEffectPropertiesWithASC( EffectSourceProperties, SourceASCPtr, ContextHandle );
-	// Fill EffectTargetProps
+	// Fill EffectTargetProps. Target = target of the effect (owner of this AS)
 	FillEffectPropertiesWithASC( EffectTargetProperties, &TargetASCRef, ContextHandle );
+
+	// TODO: Debug
+	UE_LOG( LogTemp, Warning, TEXT( "Changed Health on %s, Health: %f" ), *EffectTargetProperties.AvatarActor->GetName(), GetHealth() );
 }
 
 void UAuraAttributeSet::FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC, const FGameplayEffectContextHandle ContextHandle )
