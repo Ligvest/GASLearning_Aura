@@ -44,7 +44,7 @@ public:
 	UPROPERTY( EditAnywhere, Category = Combat )
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent;
 
-	void InitDefaultAttributes() const;
+	virtual void InitDefaultAttributes( int InCharacterLevel ) const;
 
 	void ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectClass, float EffectLevel = 1.f ) const;
 

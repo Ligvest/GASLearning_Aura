@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AuraAICharacter.h"
+#include "GAS/Data/AuraCharacterClassInfoDA.h"
 #include "AuraEnemyCharacter.generated.h"
 
 class UWidgetComponent;
@@ -34,6 +35,11 @@ protected:
 	void SetupFloatingWidget();
 
 	void InitFloatingWC();
+
+	UPROPERTY( EditDefaultsOnly, Category = "CharacterDefaults" )
+	ECharacterClass CharacterClass = ECharacterClass::Default;
+
+	virtual void InitDefaultAttributes( int InCharacterLevel ) const override;
 
 	GENERATED_BODY()
 };

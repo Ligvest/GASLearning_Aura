@@ -5,7 +5,10 @@
 #include "Components/WidgetComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
+#include "GAS/Data/AuraCharacterClassInfoDA.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/WidgetController/AuraEnemyOverlayWC.h"
+#include "Game/AuraGameModeBase.h"
 
 AAuraEnemyCharacter::AAuraEnemyCharacter()
 {
@@ -28,7 +31,7 @@ void AAuraEnemyCharacter::BeginPlay()
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	check( AuraASC );
 	AuraASC->Init();
-	InitDefaultAttributes();
+	InitDefaultAttributes( CharacterLevel );
 	check( AttributeSet );
 
 	InitFloatingWC();
@@ -45,6 +48,7 @@ UAuraEnemyOverlayWC* AAuraEnemyCharacter::GetOverlayWC() const
 {
 	return FloatingWC;
 }
+
 void AAuraEnemyCharacter::InitFloatingWC()
 {
 	FWidgetControllerParams WcParams;
@@ -57,4 +61,24 @@ void AAuraEnemyCharacter::InitFloatingWC()
 	check( FloatingWcClass );
 	FloatingWC = NewObject<UAuraEnemyOverlayWC>( this, FloatingWcClass );
 	FloatingWC->SetWidgetControllerParams( WcParams );
+}
+
+void AAuraEnemyCharacter::InitDefaultAttributes( int InCharacterLevel ) const
+{
+	if ( !HasAuthority() )
+	{
+		return;
+	}
+
+	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
+	UAuraCharacterClassInfoDA* DefaultCharacterInfoDA = AuraGM->GetDefaultCharacterInfoDA();
+
+	// Should be set in defaults
+	check( CharacterClass != ECharacterClass::Default );
+	TSubclassOf<UGameplayEffect> InitPrimaryAttribsEffectClass = DefaultCharacterInfoDA->GetClassDefaultInfo( CharacterClass ).InitPrimaryAttributesEffectClass;
+	TSubclassOf<UGameplayEffect> InitSecondaryAttribsEffectClass = DefaultCharacterInfoDA->InitSecondaryAttributesEffectClass;
+	TSubclassOf<UGameplayEffect> InitVitalAttribsEffectClass = DefaultCharacterInfoDA->InitVitalAttributesEffectClass;
+	ApplyEffectToSelf( InitPrimaryAttribsEffectClass, InCharacterLevel );
+	ApplyEffectToSelf( InitSecondaryAttribsEffectClass, InCharacterLevel );
+	ApplyEffectToSelf( InitVitalAttribsEffectClass, InCharacterLevel );
 }

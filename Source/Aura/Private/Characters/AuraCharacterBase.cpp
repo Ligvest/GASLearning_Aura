@@ -39,7 +39,7 @@ void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimePrope
 	DOREPLIFETIME( AAuraCharacterBase, CharacterLevel );
 }
 
-void AAuraCharacterBase::InitDefaultAttributes() const
+void AAuraCharacterBase::InitDefaultAttributes( int InCharacterLevel ) const
 {
 	ApplyEffectToSelf( InitPrimaryAttributesEffectClass );
 	ApplyEffectToSelf( InitSecondaryAttributesEffectClass );
@@ -55,7 +55,7 @@ void AAuraCharacterBase::ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectC
 	FGameplayEffectContextHandle EffectContextHandle = ASC->MakeEffectContext();
 	EffectContextHandle.AddSourceObject( this );
 	const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec( EffectClass, EffectLevel, EffectContextHandle );
-	ASC->ApplyGameplayEffectSpecToTarget( *EffectSpecHandle.Data, ASC );
+	ASC->ApplyGameplayEffectSpecToSelf( *EffectSpecHandle.Data );
 }
 void AAuraCharacterBase::GrantDefaultAbilities() const
 {
