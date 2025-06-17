@@ -73,14 +73,6 @@ void AAuraPlayerCharacter::InitGASInfo()
 void AAuraPlayerCharacter::InitHUD() const
 {
 	const APlayerController* PC = Cast<APlayerController>( GetController() );
-	// TODO: Debug
-	APlayerState* D1PC = GetPlayerState();
-	APlayerController* D1PlayerController = GetLocalViewingPlayerController();
-	APlayerController* D2PlayerController = GetWorld()->GetFirstPlayerController();
-	APlayerController* D3PlayerController = UGameplayStatics::GetPlayerController( GetWorld(), 0 );
-	APlayerController* D4PlayerController = UGameplayStatics::GetPlayerController( this, 0 );
-	APlayerController* D5PlayerController = UGameplayStatics::GetPlayerController( D1PC, 0 );
-	// TODO: Debug end
 	AAuraHUD* HUD = PC->GetHUD<AAuraHUD>();
 	check( HUD );
 	HUD->InitHUDWidget();

@@ -178,6 +178,20 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 		SetMana( FMath::Clamp( GetMana(), 0.0f, GetMaxMana() ) );
 	}
 
+	if ( Data.EvaluatedData.Attribute == GetIncomingDamageAttribute() )
+	{
+		// Consume damage
+		float ReceivedDamage = GetIncomingDamage();
+		SetIncomingDamage( 0.f );
+
+		float NewHealth = GetHealth() - ReceivedDamage;
+		SetHealth( std::clamp( NewHealth, 0.0f, GetMaxHealth() ) );
+		if ( NewHealth <= 0.f )
+		{
+			// You are dead
+		}
+	}
+
 	const FGameplayEffectContextHandle ContextHandle = Data.EffectSpec.GetContext();
 	UAbilitySystemComponent* SourceASCPtr = ContextHandle.GetOriginalInstigatorAbilitySystemComponent();
 	UAbilitySystemComponent& TargetASCRef = Data.Target;

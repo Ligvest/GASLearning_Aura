@@ -3,6 +3,7 @@
 #include "GAS/Abilities/AuraProjectileSpell.h"
 
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
 
@@ -37,13 +38,16 @@ void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation )
 	SpawnTransform.SetLocation( SpawnLocation );
 	SpawnTransform.SetRotation( Rotator.Quaternion() );
 
-	// TODO: Set projectile rotation
-
 	AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>( ProjectileClass, SpawnTransform, Owner, Instigator, ESpawnActorCollisionHandlingMethod::AlwaysSpawn );
 
 	UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo();
 	check( SourceASC );
-	FGameplayEffectSpecHandle ImpactEffectHandle = SourceASC->MakeOutgoingSpec( ImpactEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext() );
+	float AbilityLevel = GetAbilityLevel();
+	FGameplayEffectSpecHandle ImpactEffectHandle = SourceASC->MakeOutgoingSpec( ImpactEffectClass, AbilityLevel, SourceASC->MakeEffectContext() );
+
+	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
+	float DamageValue = Magnitude.GetValueAtLevel( AbilityLevel );
+	ImpactEffectHandle.Data->SetSetByCallerMagnitude( AuraTags.Values_Damage, DamageValue );
 	SpawnedProjectile->SetImpactEffectHandle( std::move( ImpactEffectHandle ) );
 
 	SpawnedProjectile->FinishSpawning( SpawnTransform );

@@ -43,9 +43,13 @@ public:
 	FGameplayTag AuraInput_3;
 	FGameplayTag AuraInput_4;
 
+	// Values Tags
+	FGameplayTag Values_Damage;
+
 private:
 	static FAuraGameplayTags GameplayTags;
 	const FString SecondaryAttributesPrefix{ "Attributes.Secondary." };
 	const FString PrimaryAttributesPrefix{ "Attributes.Primary." };
 	const FString InputPrefix{ "AuraInput." };
+	const FString ValuesPrefix{ "Values." };
 };

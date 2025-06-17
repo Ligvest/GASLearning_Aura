@@ -17,4 +17,7 @@ class AURA_API UAuraGameplayAbility : public UGameplayAbility
 public:
 	UPROPERTY( EditDefaultsOnly )
 	FGameplayTag DefaultAbilityTag;
+
+	UPROPERTY( EditDefaultsOnly )
+	FScalableFloat Magnitude;
 };

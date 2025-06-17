@@ -32,6 +32,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	AuraInput_2 = AddGameplayTag( InputPrefix, "2", "Key \"2\"" );
 	AuraInput_3 = AddGameplayTag( InputPrefix, "3", "Key \"3\"" );
 	AuraInput_4 = AddGameplayTag( InputPrefix, "4", "Key \"4\"" );
+
+	// Values Tags
+	Values_Damage = AddGameplayTag( ValuesPrefix, "Damage", "ValueTag: Damage" );
 }
 FGameplayTag FAuraGameplayTags::AddGameplayTag( const FString& AttributeNamePrefix, const FString& AttributeName, const FString& AttributeHint )
 {

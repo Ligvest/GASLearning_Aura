@@ -155,6 +155,11 @@ public:
 	FGameplayAttributeData CriticalHitResistance;
 	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, CriticalHitResistance );
 
+	UPROPERTY( BlueprintReadOnly, Category = "Meta Attributes" )
+	FGameplayAttributeData IncomingDamage;
+	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, IncomingDamage );
+
+public:
 	// Health
 	// When using ReplicatedUsing - after server changes a value it updates Health and calls this function
 	// So in OldHealth will be previous value of client's Health before replication
