@@ -29,6 +29,7 @@ public:
 	//~ Begin of ICombatInterface
 	virtual int GetActorLevel() const override { return GetCharacterLevel(); };
 	virtual FVector GetProjectileSpawnSocketLocation() const override;
+	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	//~ End of ICombatInterface
 
 	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
@@ -46,6 +47,7 @@ public:
 
 	virtual void InitDefaultAttributes( int InCharacterLevel ) const;
 
+	UFUNCTION( BlueprintCallable, Category = "GAS" )
 	void ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectClass, float EffectLevel = 1.f ) const;
 
 	void GrantDefaultAbilities() const;
@@ -65,6 +67,9 @@ protected:
 
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<UGameplayEffect> InitVitalAttributesEffectClass;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
+	TObjectPtr<UAnimMontage> HitReactMontage;
 
 	virtual void BeginPlay() override;
 

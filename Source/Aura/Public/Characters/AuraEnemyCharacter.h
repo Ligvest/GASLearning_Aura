@@ -31,6 +31,12 @@ protected:
 	UPROPERTY( VisibleAnywhere, BlueprintReadOnly )
 	TObjectPtr<UWidgetComponent> FloatingWidget;
 
+	bool bHitReacting = false;
+
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Movement" )
+	float BaseMaxWalkSpeed = 250.f;
+
+protected:
 	UFUNCTION( BlueprintImplementableEvent )
 	void SetupFloatingWidget();
 
@@ -38,6 +44,14 @@ protected:
 
 	UPROPERTY( EditDefaultsOnly, Category = "CharacterDefaults" )
 	ECharacterClass CharacterClass = ECharacterClass::Default;
+
+	void InitReactionOnBeingHit();
+
+	UFUNCTION()
+	void ReactOnBeingHit( const FGameplayTag HitTag, const int NewTagCount );
+
+	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
+	TSubclassOf<UGameplayAbility> HitReactAbilityClass;
 
 	virtual void InitDefaultAttributes( int InCharacterLevel ) const override;
 

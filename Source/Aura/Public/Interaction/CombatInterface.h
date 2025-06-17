@@ -27,4 +27,11 @@ public:
 
 	UFUNCTION( BlueprintCallable, BlueprintImplementableEvent )
 	void UpdateFacingLocation( FVector TargetLocation );
+
+	// Why BlueprintNativeEvent?
+	// We want to create a virtual function and implement in children
+	// But interface doesn't let you have virtual C++ functions with BlueprintCallable specifier
+	// So here is a workaround
+	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
+	UAnimMontage* GetHitReactMontage();
 };

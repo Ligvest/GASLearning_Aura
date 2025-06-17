@@ -46,10 +46,14 @@ public:
 	// Values Tags
 	FGameplayTag Values_Damage;
 
+	// Status Effects Tags
+	FGameplayTag Effects_HitReact;
+
 private:
 	static FAuraGameplayTags GameplayTags;
 	const FString SecondaryAttributesPrefix{ "Attributes.Secondary." };
 	const FString PrimaryAttributesPrefix{ "Attributes.Primary." };
 	const FString InputPrefix{ "AuraInput." };
 	const FString ValuesPrefix{ "Values." };
+	const FString EffectsPrefix{ "Effects." };
 };

@@ -2,6 +2,7 @@
 
 #include "Characters/AuraEnemyCharacter.h"
 
+#include "AuraGameplayTags.h"
 #include "Components/WidgetComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
@@ -9,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/WidgetController/AuraEnemyOverlayWC.h"
 #include "Game/AuraGameModeBase.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AAuraEnemyCharacter::AAuraEnemyCharacter()
 {
@@ -42,6 +44,7 @@ void AAuraEnemyCharacter::BeginPlay()
 	// But we can't do this in BP begin play as it executes earlier than C++ begin play
 	// And in this case we still not initialized our FloatingWC to use it in BeginPlay of BP
 	SetupFloatingWidget();
+	InitReactionOnBeingHit();
 }
 
 UAuraEnemyOverlayWC* AAuraEnemyCharacter::GetOverlayWC() const
@@ -61,6 +64,28 @@ void AAuraEnemyCharacter::InitFloatingWC()
 	check( FloatingWcClass );
 	FloatingWC = NewObject<UAuraEnemyOverlayWC>( this, FloatingWcClass );
 	FloatingWC->SetWidgetControllerParams( WcParams );
+}
+
+void AAuraEnemyCharacter::InitReactionOnBeingHit()
+{
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	check( ASC );
+
+	auto& OnHitReactTagToggledDelegate = ASC->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved );
+	OnHitReactTagToggledDelegate.AddUObject( this, &ThisClass::ReactOnBeingHit );
+}
+void AAuraEnemyCharacter::ReactOnBeingHit( const FGameplayTag HitTag, const int NewTagCount )
+{
+	bHitReacting = NewTagCount > 0;
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if ( bHitReacting )
+	{
+		MovementComponent->MaxWalkSpeed = 0.f;
+	}
+	else
+	{
+		MovementComponent->MaxWalkSpeed = BaseMaxWalkSpeed;
+	}
 }
 
 void AAuraEnemyCharacter::InitDefaultAttributes( int InCharacterLevel ) const

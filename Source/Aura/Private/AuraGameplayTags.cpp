@@ -35,6 +35,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	// Values Tags
 	Values_Damage = AddGameplayTag( ValuesPrefix, "Damage", "ValueTag: Damage" );
+
+	// Effects Tags
+	Effects_HitReact = AddGameplayTag( EffectsPrefix, "HitReact", "Tag granted to react to hit" );
 }
 FGameplayTag FAuraGameplayTags::AddGameplayTag( const FString& AttributeNamePrefix, const FString& AttributeName, const FString& AttributeHint )
 {
