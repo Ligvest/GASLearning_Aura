@@ -4,7 +4,10 @@
 #include "AbilitySystemComponent.h"
 #include "AuraGameplayTags.h"
 #include "GameplayEffectExtension.h"
+#include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/AuraPlayerController.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -165,6 +168,14 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 {
 	Super::PostGameplayEffectExecute( Data );
 
+	const FGameplayEffectContextHandle ContextHandle = Data.EffectSpec.GetContext();
+	UAbilitySystemComponent* SourceASCPtr = ContextHandle.GetOriginalInstigatorAbilitySystemComponent();
+	UAbilitySystemComponent& TargetASCRef = Data.Target;
+	// Fill EffectSourceProps. Source = causer of the effect
+	FillEffectPropertiesWithASC( EffectSourceProperties, SourceASCPtr, ContextHandle );
+	// Fill EffectTargetProps. Target = target of the effect (owner of this AS)
+	FillEffectPropertiesWithASC( EffectTargetProperties, &TargetASCRef, ContextHandle );
+
 	// Clamping sketch
 	// Clamping BaseValue of Health
 	if ( Data.EvaluatedData.Attribute == GetHealthAttribute() )
@@ -186,19 +197,33 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 
 		float NewHealth = GetHealth() - ReceivedDamage;
 		SetHealth( std::clamp( NewHealth, 0.0f, GetMaxHealth() ) );
-		if ( NewHealth <= 0.f )
+
+		bool bFatal = NewHealth <= 0.f;
+		if ( bFatal )
 		{
 			// You are dead
+			ICombatInterface* CombatActor = Cast<ICombatInterface>( EffectTargetProperties.AvatarActor );
+			if ( CombatActor )
+			{
+				CombatActor->Die();
+			}
+		}
+		else
+		{
+			FGameplayTagContainer TagContainer;
+			TagContainer.AddTag( FAuraGameplayTags::Get().Effects_HitReact );
+			EffectTargetProperties.ASC->TryActivateAbilitiesByTag( TagContainer );
+		}
+
+		// AuraAttributeSet is just a UObject which doesn't know about world so using TargetActor for world context object
+		APlayerController* PC = UGameplayStatics::GetPlayerController( EffectTargetProperties.AvatarActor, 0 );
+		AAuraPlayerController* AuraPC = Cast<AAuraPlayerController>( PC );
+
+		if ( AuraPC && ( EffectSourceProperties.Character != EffectTargetProperties.Character ) )
+		{
+			AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character );
 		}
 	}
-
-	const FGameplayEffectContextHandle ContextHandle = Data.EffectSpec.GetContext();
-	UAbilitySystemComponent* SourceASCPtr = ContextHandle.GetOriginalInstigatorAbilitySystemComponent();
-	UAbilitySystemComponent& TargetASCRef = Data.Target;
-	// Fill EffectSourceProps. Source = causer of the effect
-	FillEffectPropertiesWithASC( EffectSourceProperties, SourceASCPtr, ContextHandle );
-	// Fill EffectTargetProps. Target = target of the effect (owner of this AS)
-	FillEffectPropertiesWithASC( EffectTargetProperties, &TargetASCRef, ContextHandle );
 
 	// TODO: Debug
 	UE_LOG( LogTemp, Warning, TEXT( "Changed Health on %s, Health: %f" ), *EffectTargetProperties.AvatarActor->GetName(), GetHealth() );

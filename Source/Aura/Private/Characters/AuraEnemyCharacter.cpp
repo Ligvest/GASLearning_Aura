@@ -44,6 +44,7 @@ void AAuraEnemyCharacter::BeginPlay()
 	// But we can't do this in BP begin play as it executes earlier than C++ begin play
 	// And in this case we still not initialized our FloatingWC to use it in BeginPlay of BP
 	SetupFloatingWidget();
+	GrantDefaultAbilities();
 	InitReactionOnBeingHit();
 }
 
@@ -74,6 +75,7 @@ void AAuraEnemyCharacter::InitReactionOnBeingHit()
 	auto& OnHitReactTagToggledDelegate = ASC->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved );
 	OnHitReactTagToggledDelegate.AddUObject( this, &ThisClass::ReactOnBeingHit );
 }
+
 void AAuraEnemyCharacter::ReactOnBeingHit( const FGameplayTag HitTag, const int NewTagCount )
 {
 	bHitReacting = NewTagCount > 0;
@@ -86,6 +88,12 @@ void AAuraEnemyCharacter::ReactOnBeingHit( const FGameplayTag HitTag, const int 
 	{
 		MovementComponent->MaxWalkSpeed = BaseMaxWalkSpeed;
 	}
+}
+
+void AAuraEnemyCharacter::Die()
+{
+	SetLifeSpan( CorpseLifeSpan );
+	Super::Die();
 }
 
 void AAuraEnemyCharacter::InitDefaultAttributes( int InCharacterLevel ) const

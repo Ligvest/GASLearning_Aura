@@ -30,9 +30,23 @@ public:
 	virtual int GetActorLevel() const override { return GetCharacterLevel(); };
 	virtual FVector GetProjectileSpawnSocketLocation() const override;
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
+	virtual void Die() override;
 	//~ End of ICombatInterface
 
 	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
+
+	// Death and dissolve
+
+	UFUNCTION( NetMulticast, Reliable )
+	virtual void MulticastHandleDeath();
+
+	void DissolveCorpse();
+
+	UFUNCTION( BlueprintImplementableEvent, Category = "Death" )
+	void StartDissolvingMesh( UMaterialInstanceDynamic* DynamicMatInst );
+
+	UFUNCTION( BlueprintImplementableEvent, Category = "Death" )
+	void StartDissolvingWeaponMesh( UMaterialInstanceDynamic* DynamicMatInst );
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
@@ -84,4 +98,11 @@ protected:
 
 	UPROPERTY( EditDefaultsOnly )
 	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilityClasses;
+
+	// Death and Dissolve
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Death" )
+	TObjectPtr<UMaterialInstance> DissolveMaterialInstance;
+
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Death" )
+	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
 };

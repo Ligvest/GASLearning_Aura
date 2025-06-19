@@ -36,6 +36,10 @@ protected:
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Movement" )
 	float BaseMaxWalkSpeed = 250.f;
 
+	// Death and Dissolve
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Death" )
+	float CorpseLifeSpan = 5.f;
+
 protected:
 	UFUNCTION( BlueprintImplementableEvent )
 	void SetupFloatingWidget();
@@ -50,10 +54,10 @@ protected:
 	UFUNCTION()
 	void ReactOnBeingHit( const FGameplayTag HitTag, const int NewTagCount );
 
-	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
-	TSubclassOf<UGameplayAbility> HitReactAbilityClass;
-
 	virtual void InitDefaultAttributes( int InCharacterLevel ) const override;
+
+	// Death and Dissolve
+	virtual void Die() override;
 
 	GENERATED_BODY()
 };

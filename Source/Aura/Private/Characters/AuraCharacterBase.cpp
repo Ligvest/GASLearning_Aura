@@ -33,14 +33,57 @@ FVector AAuraCharacterBase::GetProjectileSpawnSocketLocation() const
 	FVector SocketLocation = WeaponMeshComponent->GetSocketLocation( SocketNameProjectileSpawn );
 	return SocketLocation;
 }
+
 UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
 {
 	return HitReactMontage;
 }
+
+void AAuraCharacterBase::Die()
+{
+	MulticastHandleDeath();
+}
+
 void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const
 {
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
 	DOREPLIFETIME( AAuraCharacterBase, CharacterLevel );
+}
+
+void AAuraCharacterBase::DissolveCorpse()
+{
+	if ( IsValid( DissolveMaterialInstance ) )
+	{
+		UMaterialInstanceDynamic* MeshDissolveMaterial = UMaterialInstanceDynamic::Create( DissolveMaterialInstance, this );
+		constexpr int MaterialIndex = 0;
+		GetMesh()->SetMaterial( MaterialIndex, MeshDissolveMaterial );
+		StartDissolvingMesh( MeshDissolveMaterial );
+	}
+
+	if ( IsValid( WeaponDissolveMaterialInstance ) )
+	{
+		UMaterialInstanceDynamic* WeaponDissolveMaterial = UMaterialInstanceDynamic::Create( WeaponDissolveMaterialInstance, this );
+		constexpr int MaterialIndex = 0;
+		WeaponMeshComponent->SetMaterial( MaterialIndex, WeaponDissolveMaterial );
+		StartDissolvingWeaponMesh( WeaponDissolveMaterial );
+	}
+}
+
+void AAuraCharacterBase::MulticastHandleDeath_Implementation()
+{
+	WeaponMeshComponent->DetachFromComponent( FDetachmentTransformRules( EDetachmentRule::KeepWorld, true ) );
+	WeaponMeshComponent->SetSimulatePhysics( true );
+	WeaponMeshComponent->SetEnableGravity( true );
+	WeaponMeshComponent->SetCollisionEnabled( ECollisionEnabled::PhysicsOnly );
+
+	USkeletalMeshComponent* CharacterMesh = GetMesh();
+	CharacterMesh->SetSimulatePhysics( true );
+	CharacterMesh->SetEnableGravity( true );
+	CharacterMesh->SetCollisionEnabled( ECollisionEnabled::PhysicsOnly );
+
+	GetCapsuleComponent()->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+
+	DissolveCorpse();
 }
 
 void AAuraCharacterBase::InitDefaultAttributes( int InCharacterLevel ) const

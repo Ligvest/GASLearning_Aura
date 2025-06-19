@@ -34,4 +34,6 @@ public:
 	// So here is a workaround
 	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
 	UAnimMontage* GetHitReactMontage();
+
+	virtual void Die() = 0;
 };

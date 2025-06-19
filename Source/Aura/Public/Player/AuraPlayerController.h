@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AuraPlayerController.generated.h"
 
+class UDamageTextComponent;
 class USplineComponent;
 // Forward declaration
 class IHighlightActorInterface;
@@ -25,6 +26,9 @@ class AURA_API AAuraPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	AAuraPlayerController();
+
+	UFUNCTION( Client, Reliable )
+	void ShowDamageNumber( float Damage, ACharacter* TargetCharacter ) const;
 
 protected:
 	virtual void PlayerTick( float DeltaSeconds ) override;
@@ -81,6 +85,9 @@ private:
 
 	UPROPERTY( EditDefaultsOnly, Category = "Input" )
 	float HoldButtonThreshold = 0.3;
+
+	UPROPERTY( EditDefaultsOnly, Category = "UI" )
+	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
 
 	// Debug
 public:

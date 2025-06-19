@@ -12,6 +12,7 @@
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "Input/AuraInputComponent.h"
 #include "Interaction/HighlightActorInterface.h"
+#include "UI/WidgetComponent/DamageTextComponent.h"
 
 void AAuraPlayerController::DrawSplineDebug( USplineComponent* Spline, FColor Color, float Step )
 {
@@ -133,6 +134,27 @@ void AAuraPlayerController::AbilityInputTagHeld( FGameplayTag InputTag )
 		}
 	}
 }
+
+void AAuraPlayerController::ShowDamageNumber_Implementation( float Damage, ACharacter* TargetCharacter ) const
+{
+	check( DamageTextComponentClass );
+	if ( IsValid( TargetCharacter ) )
+	{
+		// For Outer I could use "this" and it would make sense as it's a UI part of the player
+		// But I decided to use TargetCharacter as another precaution if I'll mess up with lifespan of the widgetcomponent
+		// If so, the widgetcomponent will die and be destroyed with the enemy character
+		UDamageTextComponent* FloatingDamageText = NewObject<UDamageTextComponent>( TargetCharacter, DamageTextComponentClass );
+		// Registering component when creating it not in constructor
+		FloatingDamageText->RegisterComponent();
+		// The best way is to use SetWorldLocation + SocketLocation of the characters socket under the head
+		FloatingDamageText->SetWorldLocation( TargetCharacter->GetActorLocation() );
+		// Another way to set location is to attach and detach. But the method above is a prefferable
+		// FloatingDamageText->AttachToComponent( TargetCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform );
+		// FloatingDamageText->DetachFromComponent( FDetachmentTransformRules::KeepWorldTransform );
+		FloatingDamageText->SetDamageText( Damage );
+	}
+}
+
 void AAuraPlayerController::MoveWithButtons( const FInputActionValue& InputActionValue )
 {
 	FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
