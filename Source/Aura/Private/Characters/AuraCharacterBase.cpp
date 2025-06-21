@@ -52,12 +52,13 @@ void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimePrope
 
 void AAuraCharacterBase::DissolveCorpse()
 {
+	TArray<UMaterialInstanceDynamic*> DynamicMatInstances;
 	if ( IsValid( DissolveMaterialInstance ) )
 	{
 		UMaterialInstanceDynamic* MeshDissolveMaterial = UMaterialInstanceDynamic::Create( DissolveMaterialInstance, this );
 		constexpr int MaterialIndex = 0;
 		GetMesh()->SetMaterial( MaterialIndex, MeshDissolveMaterial );
-		StartDissolvingMesh( MeshDissolveMaterial );
+		DynamicMatInstances.Add( MeshDissolveMaterial );
 	}
 
 	if ( IsValid( WeaponDissolveMaterialInstance ) )
@@ -65,7 +66,12 @@ void AAuraCharacterBase::DissolveCorpse()
 		UMaterialInstanceDynamic* WeaponDissolveMaterial = UMaterialInstanceDynamic::Create( WeaponDissolveMaterialInstance, this );
 		constexpr int MaterialIndex = 0;
 		WeaponMeshComponent->SetMaterial( MaterialIndex, WeaponDissolveMaterial );
-		StartDissolvingWeaponMesh( WeaponDissolveMaterial );
+		DynamicMatInstances.Add( WeaponDissolveMaterial );
+	}
+
+	if ( !DynamicMatInstances.IsEmpty() )
+	{
+		StartDissolving( DynamicMatInstances );
 	}
 }
 

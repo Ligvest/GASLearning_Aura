@@ -43,10 +43,7 @@ public:
 	void DissolveCorpse();
 
 	UFUNCTION( BlueprintImplementableEvent, Category = "Death" )
-	void StartDissolvingMesh( UMaterialInstanceDynamic* DynamicMatInst );
-
-	UFUNCTION( BlueprintImplementableEvent, Category = "Death" )
-	void StartDissolvingWeaponMesh( UMaterialInstanceDynamic* DynamicMatInst );
+	void StartDissolving( const TArray<UMaterialInstanceDynamic*>& DynamicMatInstances );
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
@@ -90,7 +87,7 @@ protected:
 	FORCEINLINE int GetCharacterLevel() const { return CharacterLevel; }
 	FORCEINLINE void SetCharacterLevel( int NewValue ) { CharacterLevel = NewValue; }
 
-	UPROPERTY( BlueprintReadOnly, ReplicatedUsing = Rep_CharacterLevel )
+	UPROPERTY( EditAnywhere, BlueprintReadOnly, ReplicatedUsing = Rep_CharacterLevel )
 	int CharacterLevel = 1;
 
 	UFUNCTION()

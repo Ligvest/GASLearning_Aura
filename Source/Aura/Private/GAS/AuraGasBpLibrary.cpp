@@ -2,6 +2,7 @@
 
 #include "GAS/AuraGasBpLibrary.h"
 
+#include "Game/AuraGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
 #include "UI/HUD/AuraHUD.h"
@@ -31,6 +32,12 @@ UAuraAttributeWindowWC* UAuraGasBpLibrary::GetAttributeWindowWC( const UObject* 
 	check( HUD );
 
 	return HUD->TryGetAttributeWindowWC( WidgetControllerParams );
+}
+
+UAuraCharacterClassInfoDA* UAuraGasBpLibrary::GetCharacterClassInfoDA( const UObject* WorldContext )
+{
+	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( WorldContext ) );
+	return AuraGM->GetDefaultCharacterInfoDA();
 }
 
 // I believe this function should be called after PlayerState replicated and is up to date

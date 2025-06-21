@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/AuraCharacterClassInfoDA.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraGasBpLibrary.generated.h"
@@ -22,6 +23,9 @@ public:
 
 	UFUNCTION( BlueprintPure )
 	static UAuraAttributeWindowWC* GetAttributeWindowWC( const UObject* WorldContext );
+
+	UFUNCTION( BlueprintPure )
+	static UAuraCharacterClassInfoDA* GetCharacterClassInfoDA( const UObject* WorldContext );
 
 private:
 	static FWidgetControllerParams GetWidgetControllerParams( const UObject* WorldContext );

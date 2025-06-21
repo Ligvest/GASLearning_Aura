@@ -46,4 +46,7 @@ public:
 
 	UPROPERTY( EditDefaultsOnly, Category = "Common Class Defaults" )
 	TSubclassOf<UGameplayEffect> InitVitalAttributesEffectClass;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Common Class Defaults" )
+	TObjectPtr<UCurveTable> CalculationCoefficientsCT;
 };
