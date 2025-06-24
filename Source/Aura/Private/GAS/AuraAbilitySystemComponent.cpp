@@ -30,7 +30,8 @@ void UAuraAbilitySystemComponent::GrantAbilities( const TArray<TSubclassOf<UGame
 		if ( const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>( AbilitySpec.Ability ) )
 		{
 			// Add to dynamic tags a ability input tag to run it when the input fires up
-			AbilitySpec.DynamicAbilityTags.AddTag( AuraAbility->DefaultAbilityTag );
+			// AbilitySpec.DynamicAbilityTags.AddTag( AuraAbility->DefaultAbilityTag ); // Deprecated
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag( AuraAbility->DefaultAbilityTag );
 		}
 
 		GiveAbility( AbilitySpec );

@@ -43,12 +43,25 @@ void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation )
 	UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo();
 	check( SourceASC );
 	float AbilityLevel = GetAbilityLevel();
-	FGameplayEffectSpecHandle ImpactEffectHandle = SourceASC->MakeOutgoingSpec( ImpactEffectClass, AbilityLevel, SourceASC->MakeEffectContext() );
+
+	// Example of things we can add to EffectContextHandle to get them later.
+	// E.g. in AttributeSet functions such as PostGameplayEffectExecute or PreAttributeChange
+	FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+	EffectContextHandle.SetAbility( this );
+	EffectContextHandle.AddSourceObject( SpawnedProjectile );
+	TArray<TWeakObjectPtr<AActor>> Actors;
+	Actors.Add( SpawnedProjectile );
+	EffectContextHandle.AddActors( Actors );
+	FHitResult HitResult;
+	HitResult.Location = TargetLocation;
+	EffectContextHandle.AddHitResult( HitResult );
+
+	FGameplayEffectSpecHandle ImpactEffectSpecHandle = SourceASC->MakeOutgoingSpec( ImpactEffectClass, AbilityLevel, EffectContextHandle );
 
 	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
 	float DamageValue = Magnitude.GetValueAtLevel( 20 );
-	ImpactEffectHandle.Data->SetSetByCallerMagnitude( AuraTags.Values_Damage, DamageValue );
-	SpawnedProjectile->SetImpactEffectHandle( std::move( ImpactEffectHandle ) );
+	ImpactEffectSpecHandle.Data->SetSetByCallerMagnitude( AuraTags.Values_Damage, DamageValue );
+	SpawnedProjectile->SetImpactEffectHandle( std::move( ImpactEffectSpecHandle ) );
 
 	SpawnedProjectile->FinishSpawning( SpawnTransform );
 }
