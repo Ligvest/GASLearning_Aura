@@ -66,6 +66,12 @@ void AAuraProjectile::PlayImpactEffects() const
 void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                                 const FHitResult& SweepResult )
 {
+	bool bCauserSameAsTarget = ImpactEffectHandle.Data.IsValid() && ImpactEffectHandle.Data->GetEffectContext().GetEffectCauser() == OtherActor;
+	if ( bCauserSameAsTarget )
+	{
+		return;
+	}
+
 	if ( !bImpactHappened )
 	{
 		bImpactHappened = true;

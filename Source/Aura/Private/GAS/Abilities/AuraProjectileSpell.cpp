@@ -58,10 +58,14 @@ void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation )
 
 	FGameplayEffectSpecHandle ImpactEffectSpecHandle = SourceASC->MakeOutgoingSpec( ImpactEffectClass, AbilityLevel, EffectContextHandle );
 
-	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
-	float DamageValue = Magnitude.GetValueAtLevel( 20 );
-	ImpactEffectSpecHandle.Data->SetSetByCallerMagnitude( AuraTags.Values_Damage, DamageValue );
-	SpawnedProjectile->SetImpactEffectHandle( std::move( ImpactEffectSpecHandle ) );
+	float DamageValue = 0.f;
+	for ( const auto& [DamageTypeTag, DamageScalableFloat] : DamageTypeTagToScalableFloat )
+	{
+		DamageValue = DamageScalableFloat.GetValueAtLevel( AbilityLevel );
+		// Pass DamageValue to PostGameplayEffectExecute and label it with DamageTypeTag
+		ImpactEffectSpecHandle.Data->SetSetByCallerMagnitude( DamageTypeTag, DamageValue );
+	}
 
+	SpawnedProjectile->SetImpactEffectHandle( std::move( ImpactEffectSpecHandle ) );
 	SpawnedProjectile->FinishSpawning( SpawnTransform );
 }

@@ -34,7 +34,7 @@ public:
 	virtual void Execute_Implementation( const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput ) const override;
 
 private:
-	void ModifyDamageByBlockChance( float& OutDamage, const CalculationInfo& CalcInfo ) const;
+	void ModifyDamageByBlockChance( float& OutDamage, const CalculationInfo& CalcInfo, bool& bOutBlockedHit ) const;
 	void ModifyDamageByArmor( float& OutDamage, const CalculationInfo& CalcInfo ) const;
-	void ModifyDamageByCriticalHit( float& OutDamage, const CalculationInfo& CalcInfo ) const;
+	void ModifyDamageByCriticalHit( float& OutDamage, const CalculationInfo& CalcInfo, bool& bOutCriticalHit ) const;
 };

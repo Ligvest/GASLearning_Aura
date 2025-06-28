@@ -27,6 +27,20 @@ public:
 	UFUNCTION( BlueprintPure )
 	static UAuraCharacterClassInfoDA* GetCharacterClassInfoDA( const UObject* WorldContext );
 
+	// I don't think that these functions are necessary here
+	// but I added them in case Stephan will use them later in blueprints
+	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|GameplayEffects" )
+	static bool IsBlockedHit( const FGameplayEffectContextHandle& EffectContextHandle );
+
+	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|GameplayEffects" )
+	static bool IsCriticalHit( const FGameplayEffectContextHandle& EffectContextHandle );
+
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayEffects" )
+	static void SetIsBlockedHit( UPARAM( ref ) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit );
+
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayEffects" )
+	static void SetIsCriticalHit( UPARAM( ref ) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit );
+
 private:
 	static FWidgetControllerParams GetWidgetControllerParams( const UObject* WorldContext );
 };

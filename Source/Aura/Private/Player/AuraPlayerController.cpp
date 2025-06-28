@@ -135,7 +135,7 @@ void AAuraPlayerController::AbilityInputTagHeld( FGameplayTag InputTag )
 	}
 }
 
-void AAuraPlayerController::ShowDamageNumber_Implementation( float Damage, ACharacter* TargetCharacter ) const
+void AAuraPlayerController::ShowDamageNumber_Implementation( float Damage, ACharacter* TargetCharacter, bool bIsBlockedHit, bool bIsCriticalHit ) const
 {
 	check( DamageTextComponentClass );
 	if ( IsValid( TargetCharacter ) )
@@ -151,7 +151,22 @@ void AAuraPlayerController::ShowDamageNumber_Implementation( float Damage, AChar
 		// Another way to set location is to attach and detach. But the method above is a prefferable
 		// FloatingDamageText->AttachToComponent( TargetCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform );
 		// FloatingDamageText->DetachFromComponent( FDetachmentTransformRules::KeepWorldTransform );
-		FloatingDamageText->SetDamageText( Damage );
+		EDamageTextType DamageTextType = EDamageTextType::Normal;
+
+		if ( bIsBlockedHit && bIsCriticalHit )
+		{
+			DamageTextType = EDamageTextType::BlockedCritical;
+		}
+		else if ( bIsBlockedHit )
+		{
+			DamageTextType = EDamageTextType::Blocked;
+		}
+		else if ( bIsCriticalHit )
+		{
+			DamageTextType = EDamageTextType::Critical;
+		}
+
+		FloatingDamageText->SetDamageText( Damage, DamageTextType );
 	}
 }
 

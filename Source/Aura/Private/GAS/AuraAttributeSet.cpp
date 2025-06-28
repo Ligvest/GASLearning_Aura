@@ -4,6 +4,8 @@
 #include "AbilitySystemComponent.h"
 #include "AuraGameplayTags.h"
 #include "GameplayEffectExtension.h"
+#include "GAS/AuraGasBpLibrary.h"
+#include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -41,6 +43,12 @@ UAuraAttributeSet::UAuraAttributeSet()
 	TagsToAttributes.Add( GameplayTags.Attributes_Secondary_HealthRegeneration, GetHealthRegenerationAttribute() );
 	TagsToAttributes.Add( GameplayTags.Attributes_Secondary_MaxMana, GetMaxManaAttribute() );
 	TagsToAttributes.Add( GameplayTags.Attributes_Secondary_ManaRegeneration, GetManaRegenerationAttribute() );
+
+	// Resistance Attributes
+	TagsToAttributes.Add( GameplayTags.Attributes_Resistance_Fire, GetFireResistanceAttribute() );
+	TagsToAttributes.Add( GameplayTags.Attributes_Resistance_Arcane, GetArcaneResistanceAttribute() );
+	TagsToAttributes.Add( GameplayTags.Attributes_Resistance_Lightning, GetLightningResistanceAttribute() );
+	TagsToAttributes.Add( GameplayTags.Attributes_Resistance_Physical, GetPhysicalResistanceAttribute() );
 }
 
 // If in UPROPERTY we specify HOW the field is replicated in the function we specify WHEN the prop is replicated
@@ -71,6 +79,11 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps( TArray<class FLifetimeProper
 	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, CriticalHitChance, COND_None, REPNOTIFY_Always );
 	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, CriticalHitDamage, COND_None, REPNOTIFY_Always );
 	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, CriticalHitResistance, COND_None, REPNOTIFY_Always );
+
+	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, ArcaneResistance, COND_None, REPNOTIFY_Always );
+	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, FireResistance, COND_None, REPNOTIFY_Always );
+	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, LightningResistance, COND_None, REPNOTIFY_Always );
+	DOREPLIFETIME_CONDITION_NOTIFY( UAuraAttributeSet, PhysicalResistance, COND_None, REPNOTIFY_Always );
 }
 
 // Health
@@ -146,8 +159,25 @@ void UAuraAttributeSet::OnRep_CriticalHitResistance( const FGameplayAttributeDat
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, CriticalHitResistance, OldCriticalHitResistance );
 }
+void UAuraAttributeSet::OnRep_ArcaneResistance( const FGameplayAttributeData& OldArcaneResistance ) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, ArcaneResistance, OldArcaneResistance );
+}
+void UAuraAttributeSet::OnRep_FireResistance( const FGameplayAttributeData& OldFireResistance ) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, FireResistance, OldFireResistance );
+}
+void UAuraAttributeSet::OnRep_LightningResistance( const FGameplayAttributeData& OldLightningResistance ) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, LightningResistance, OldLightningResistance );
+}
+void UAuraAttributeSet::OnRep_PhysicalResistance( const FGameplayAttributeData& OldPhysicalResistance ) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY( UAuraAttributeSet, PhysicalResistance, OldPhysicalResistance );
+}
 
 // This function is good for clamping CurrentValue of an attribute. To clamp BaseValue use PostGameplayEffectExecute
+// Is executed on both Server and Client
 void UAuraAttributeSet::PreAttributeChange( const FGameplayAttribute& Attribute, float& NewValue )
 {
 	Super::PreAttributeChange( Attribute, NewValue );
@@ -164,6 +194,8 @@ void UAuraAttributeSet::PreAttributeChange( const FGameplayAttribute& Attribute,
 		NewValue = FMath::Clamp( NewValue, 0.0f, GetMaxMana() );
 	}
 }
+
+// Is executed only on Server
 void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallbackData& Data )
 {
 	Super::PostGameplayEffectExecute( Data );
@@ -216,17 +248,18 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 		}
 
 		// AuraAttributeSet is just a UObject which doesn't know about world so using TargetActor for world context object
-		APlayerController* PC = UGameplayStatics::GetPlayerController( EffectTargetProperties.AvatarActor, 0 );
-		AAuraPlayerController* AuraPC = Cast<AAuraPlayerController>( PC );
-
+		// We can't use UGameplayStatics::GetPlayerController as the PostGameplayEffectExecute is executed only on Server
+		// so we would always get Server's local controller
+		// ShowDamageNumber is replicated to all clients. All Controllers exist on Server. But only one exists on each Client
+		// That's why the Damage Numbers appear only on a client with this controller
+		AAuraPlayerController* AuraPC = EffectSourceProperties.Character->GetController<AAuraPlayerController>();
 		if ( AuraPC && ( EffectSourceProperties.Character != EffectTargetProperties.Character ) )
 		{
-			AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character );
+			bool bIsBlockedHit = UAuraGasBpLibrary::IsBlockedHit( ContextHandle );
+			bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
+			AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
 		}
 	}
-
-	// TODO: Debug
-	UE_LOG( LogTemp, Warning, TEXT( "Changed Health on %s, Health: %f" ), *EffectTargetProperties.AvatarActor->GetName(), GetHealth() );
 }
 
 void UAuraAttributeSet::FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC, const FGameplayEffectContextHandle ContextHandle )

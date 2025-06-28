@@ -50,7 +50,9 @@ public:
 	// If in UPROPERTY we specify HOW the field is replicated in the function we specify WHEN the prop is replicated
 	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
 
+	// Is executed on both Server and Client
 	virtual void PreAttributeChange( const FGameplayAttribute& Attribute, float& NewValue ) override;
+	// Is executed only on Server
 	virtual void PostGameplayEffectExecute( const struct FGameplayEffectModCallbackData& Data ) override;
 
 	TMap<FGameplayTag, FGameplayAttribute> TagsToAttributes;
@@ -155,6 +157,34 @@ public:
 	FGameplayAttributeData CriticalHitResistance;
 	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, CriticalHitResistance );
 
+	// Percent of ignored Arcane damage
+	// Based on:
+	// Resilience
+	UPROPERTY( BlueprintReadOnly, ReplicatedUsing = OnRep_ArcaneResistance, Category = "Secondary Attributes" )
+	FGameplayAttributeData ArcaneResistance;
+	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, ArcaneResistance );
+
+	// Percent of ignored Fire damage
+	// Based on:
+	// Resilience
+	UPROPERTY( BlueprintReadOnly, ReplicatedUsing = OnRep_FireResistance, Category = "Secondary Attributes" )
+	FGameplayAttributeData FireResistance;
+	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, FireResistance );
+
+	// Percent of ignored Lightning damage
+	// Based on:
+	// Resilience
+	UPROPERTY( BlueprintReadOnly, ReplicatedUsing = OnRep_LightningResistance, Category = "Secondary Attributes" )
+	FGameplayAttributeData LightningResistance;
+	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, LightningResistance );
+
+	// Percent of ignored Physical damage
+	// Based on:
+	// Resilience
+	UPROPERTY( BlueprintReadOnly, ReplicatedUsing = OnRep_PhysicalResistance, Category = "Secondary Attributes" )
+	FGameplayAttributeData PhysicalResistance;
+	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, PhysicalResistance );
+
 	UPROPERTY( BlueprintReadOnly, Category = "Meta Attributes" )
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, IncomingDamage );
@@ -201,6 +231,16 @@ public:
 	void OnRep_CriticalHitDamage( const FGameplayAttributeData& OldCriticalHitDamage ) const;
 	UFUNCTION()
 	void OnRep_CriticalHitResistance( const FGameplayAttributeData& OldCriticalHitResistance ) const;
+
+	// Resistance attributes
+	UFUNCTION()
+	void OnRep_ArcaneResistance( const FGameplayAttributeData& OldArcaneResistance ) const;
+	UFUNCTION()
+	void OnRep_FireResistance( const FGameplayAttributeData& OldFireResistance ) const;
+	UFUNCTION()
+	void OnRep_LightningResistance( const FGameplayAttributeData& OldLightningResistance ) const;
+	UFUNCTION()
+	void OnRep_PhysicalResistance( const FGameplayAttributeData& OldPhysicalResistance ) const;
 
 protected:
 	FEffectProperties EffectTargetProperties;

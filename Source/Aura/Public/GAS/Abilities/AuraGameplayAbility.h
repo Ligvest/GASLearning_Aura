@@ -18,6 +18,8 @@ public:
 	UPROPERTY( EditDefaultsOnly )
 	FGameplayTag DefaultAbilityTag;
 
+	/*
 	UPROPERTY( EditDefaultsOnly )
 	FScalableFloat Magnitude;
+	*/
 };

@@ -6,6 +6,15 @@
 #include "Components/WidgetComponent.h"
 #include "DamageTextComponent.generated.h"
 
+UENUM( BlueprintType )
+enum class EDamageTextType : uint8
+{
+	Normal UMETA( DisplayName = "Normal" ),
+	Blocked UMETA( DisplayName = "Blocked" ),
+	Critical UMETA( DisplayName = "Critical" ),
+	BlockedCritical UMETA( DisplayName = "BlockedCritical" )
+};
+
 /**
  *
  */
@@ -15,5 +24,5 @@ class AURA_API UDamageTextComponent : public UWidgetComponent
 	GENERATED_BODY()
 public:
 	UFUNCTION( BlueprintImplementableEvent )
-	void SetDamageText( float Damage );
+	void SetDamageText( float Damage, const EDamageTextType DamageTextType );
 };

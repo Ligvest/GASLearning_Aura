@@ -2,6 +2,7 @@
 
 #include "GAS/AuraGasBpLibrary.h"
 
+#include "AuraAbilityTypes.h"
 #include "Game/AuraGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
@@ -36,8 +37,43 @@ UAuraAttributeWindowWC* UAuraGasBpLibrary::GetAttributeWindowWC( const UObject* 
 
 UAuraCharacterClassInfoDA* UAuraGasBpLibrary::GetCharacterClassInfoDA( const UObject* WorldContext )
 {
+	// GameMode available only on Server. Use GameState if you need to replicate GameMode specific data to clients
 	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( WorldContext ) );
 	return AuraGM->GetDefaultCharacterInfoDA();
+}
+
+bool UAuraGasBpLibrary::IsBlockedHit( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->IsBlockedHit();
+	}
+	return false;
+}
+
+bool UAuraGasBpLibrary::IsCriticalHit( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->IsCriticalHit();
+	}
+	return false;
+}
+
+void UAuraGasBpLibrary::SetIsBlockedHit( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetIsBlockedHit( bInIsBlockedHit );
+	}
+}
+
+void UAuraGasBpLibrary::SetIsCriticalHit( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetIsCriticalHit( bInIsCriticalHit );
+	}
 }
 
 // I believe this function should be called after PlayerState replicated and is up to date

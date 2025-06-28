@@ -44,7 +44,17 @@ public:
 	FGameplayTag AuraInput_4;
 
 	// Values Tags
-	FGameplayTag Values_Damage;
+	FGameplayTag Values_Damage_Arcane;
+	FGameplayTag Values_Damage_Fire;
+	FGameplayTag Values_Damage_Lightning;
+	FGameplayTag Values_Damage_Physical;
+
+	FGameplayTag Attributes_Resistance_Arcane;
+	FGameplayTag Attributes_Resistance_Fire;
+	FGameplayTag Attributes_Resistance_Lightning;
+	FGameplayTag Attributes_Resistance_Physical;
+
+	TMap<FGameplayTag, FGameplayTag> DamageTypeToDamageRes;
 
 	// Status Effects Tags
 	FGameplayTag Effects_HitReact;
@@ -52,8 +62,9 @@ public:
 private:
 	static FAuraGameplayTags GameplayTags;
 	const FString SecondaryAttributesPrefix{ "Attributes.Secondary." };
+	const FString ResistanceAttributesPrefix{ "Attributes.Resistance." };
 	const FString PrimaryAttributesPrefix{ "Attributes.Primary." };
 	const FString InputPrefix{ "AuraInput." };
-	const FString ValuesPrefix{ "Values." };
+	const FString DamageTypePrefix{ "Values.Damage." };
 	const FString EffectsPrefix{ "Effects." };
 };

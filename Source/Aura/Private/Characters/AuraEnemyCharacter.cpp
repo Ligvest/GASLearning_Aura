@@ -103,6 +103,7 @@ void AAuraEnemyCharacter::InitDefaultAttributes( int InCharacterLevel ) const
 		return;
 	}
 
+	// GameMode available only on Server. Use GameState if you need to replicate GameMode specific data to clients
 	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
 	UAuraCharacterClassInfoDA* DefaultCharacterInfoDA = AuraGM->GetDefaultCharacterInfoDA();
 
