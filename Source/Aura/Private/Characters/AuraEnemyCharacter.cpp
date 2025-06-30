@@ -23,6 +23,14 @@ AAuraEnemyCharacter::AAuraEnemyCharacter()
 
 	FloatingWidget = CreateDefaultSubobject<UWidgetComponent>( TEXT( "OverlayWidget" ) );
 	FloatingWidget->SetupAttachment( GetRootComponent() );
+
+	// Movement
+	// Disable rotation logic in pawn
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+	// Enable rotation logic in MovementComponent where it could be smooth
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 }
 
 void AAuraEnemyCharacter::BeginPlay()
@@ -35,6 +43,7 @@ void AAuraEnemyCharacter::BeginPlay()
 	AuraASC->Init();
 	InitDefaultAttributes( CharacterLevel );
 	check( AttributeSet );
+	GetCharacterMovement()->MaxWalkSpeed = BaseMaxWalkSpeed;
 
 	InitFloatingWC();
 	check( FloatingWC );

@@ -72,4 +72,7 @@ protected:
 
 	UPROPERTY( EditAnywhere )
 	bool bPickupable = false;
+
+	UPROPERTY( EditAnywhere )
+	bool bApplicableToEnemies = false;
 };

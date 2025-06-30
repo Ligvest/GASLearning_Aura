@@ -7,6 +7,8 @@
 #include "Interaction/HighlightActorInterface.h"
 #include "AuraAICharacter.generated.h"
 
+class UBehaviorTree;
+class AAuraAIController;
 enum class EHighlightActorType : uint8;
 /**
  *
@@ -16,13 +18,21 @@ class AURA_API AAuraAICharacter : public AAuraCharacterBase, public IHighlightAc
 {
 	GENERATED_BODY()
 public:
+	virtual void BeginPlay() override;
+	virtual void PossessedBy( AController* NewController ) override;
+
 	//~ Begin of IHightlightActorInterface
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 	//~ End of IHightlightActorInterface
 
-	virtual void BeginPlay() override;
-
+protected:
 	UPROPERTY( EditAnywhere, Category = Interaction )
 	EHighlightActorType HighlightActorType;
+
+	UPROPERTY( EditAnywhere, Category = AI )
+	TObjectPtr<AAuraAIController> AuraAIController;
+
+	UPROPERTY( EditAnywhere, Category = AI )
+	TObjectPtr<UBehaviorTree> BehaviorTree;
 };

@@ -1,6 +1,10 @@
 // Dovzhik Tolya
 
 #include "Characters/AuraAICharacter.h"
+
+#include "AI/AuraAIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Interaction/HighlightActorHelper.h"
 
 void AAuraAICharacter::HighlightActor()
@@ -29,4 +33,17 @@ void AAuraAICharacter::BeginPlay()
 	{
 		WeaponMeshComponent->SetCustomDepthStencilValue( DepthStencilValue );
 	}
+}
+void AAuraAICharacter::PossessedBy( AController* NewController )
+{
+	Super::PossessedBy( NewController );
+
+	if ( !HasAuthority() )
+	{
+		return;
+	}
+
+	AuraAIController = Cast<AAuraAIController>( NewController );
+	AuraAIController->GetBlackboardComponent()->InitializeBlackboard( *BehaviorTree->BlackboardAsset );
+	AuraAIController->RunBehaviorTree( BehaviorTree );
 }

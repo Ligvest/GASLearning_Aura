@@ -4,6 +4,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "Containers/Map.h"
+#include "GAS/AuraGasBpLibrary.h"
 
 AAuraEffectActor::AAuraEffectActor()
 {
@@ -22,6 +23,7 @@ void AAuraEffectActor::ApplyEffectToTarget( AActor* TargetActor, TSubclassOf<UGa
 	{
 		return;
 	}
+
 	check( GameplayEffectClass );
 
 	UAbilitySystemComponent* ASC = ASInterface->GetAbilitySystemComponent();
@@ -59,6 +61,12 @@ void AAuraEffectActor::RemoveInfiniteEffectFromTarget( AActor* TargetActor, TSub
 
 void AAuraEffectActor::OnBeginOverlap( AActor* TargetActor )
 {
+	// Don't apply to enemies if the flag is false
+	if ( !bApplicableToEnemies && UAuraGasBpLibrary::HasEnemyActorTag( TargetActor ) )
+	{
+		return;
+	}
+
 	// Instant gameplay effect
 	if ( InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnBeginOverlap )
 	{
@@ -85,6 +93,12 @@ void AAuraEffectActor::OnBeginOverlap( AActor* TargetActor )
 }
 void AAuraEffectActor::OnEndOverlap( AActor* TargetActor )
 {
+	// Don't apply to enemies if the flag is false
+	if ( !bApplicableToEnemies && UAuraGasBpLibrary::HasEnemyActorTag( TargetActor ) )
+	{
+		return;
+	}
+
 	// Instant gameplay effect
 	if ( InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap )
 	{

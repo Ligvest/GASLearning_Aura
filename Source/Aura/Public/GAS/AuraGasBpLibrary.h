@@ -41,6 +41,18 @@ public:
 	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayEffects" )
 	static void SetIsCriticalHit( UPARAM( ref ) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit );
 
+	UFUNCTION( BlueprintPure, Category = "Tags" )
+	static FName GetEnemyActorTag() { return TEXT( "Enemy" ); };
+
+	UFUNCTION( BlueprintPure, Category = "Tags" )
+	static FName GetPlayerActorTag() { return TEXT( "Player" ); };
+
+	UFUNCTION( BlueprintPure, Category = "Tags" )
+	static bool HasEnemyActorTag( const AActor* Actor ) { return Actor->ActorHasTag( GetEnemyActorTag() ); };
+
+	UFUNCTION( BlueprintPure, Category = "Tags" )
+	static bool HasPlayerActorTag( const AActor* Actor ) { return Actor->ActorHasTag( GetPlayerActorTag() ); };
+
 private:
 	static FWidgetControllerParams GetWidgetControllerParams( const UObject* WorldContext );
 };
