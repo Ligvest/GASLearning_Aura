@@ -4,6 +4,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
+#include "GAS/AuraGasBpLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameSession.h"
 #include "Kismet/GameplayStatics.h"
@@ -12,6 +13,8 @@
 
 AAuraPlayerCharacter::AAuraPlayerCharacter()
 {
+	Tags.Add( UAuraGasBpLibrary::GetPlayerActorTag() );
+
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	check( MovementComponent );
 

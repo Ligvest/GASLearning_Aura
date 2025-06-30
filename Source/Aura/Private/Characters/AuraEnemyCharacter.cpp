@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
+#include "GAS/AuraGasBpLibrary.h"
 #include "GAS/Data/AuraCharacterClassInfoDA.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/WidgetController/AuraEnemyOverlayWC.h"
@@ -14,6 +15,8 @@
 
 AAuraEnemyCharacter::AAuraEnemyCharacter()
 {
+	Tags.Add( UAuraGasBpLibrary::GetEnemyActorTag() );
+
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>( "AuraAbilitySystemComponent" );
 	// #lig Replication
 	AbilitySystemComponent->SetIsReplicated( true );
@@ -23,6 +26,7 @@ AAuraEnemyCharacter::AAuraEnemyCharacter()
 
 	FloatingWidget = CreateDefaultSubobject<UWidgetComponent>( TEXT( "OverlayWidget" ) );
 	FloatingWidget->SetupAttachment( GetRootComponent() );
+	FloatingWidget->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 
 	// Movement
 	// Disable rotation logic in pawn
@@ -81,12 +85,18 @@ void AAuraEnemyCharacter::InitReactionOnBeingHit()
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	check( ASC );
 
-	auto& OnHitReactTagToggledDelegate = ASC->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved );
+	// auto& OnHitReactTagToggledDelegate = ASC->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved );
+	auto& OnHitReactTagToggledDelegate = ASC->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::AnyCountChange );
 	OnHitReactTagToggledDelegate.AddUObject( this, &ThisClass::ReactOnBeingHit );
 }
 
 void AAuraEnemyCharacter::ReactOnBeingHit( const FGameplayTag HitTag, const int NewTagCount )
 {
+	if ( !HasAuthority() )
+	{
+		return;
+	}
+
 	bHitReacting = NewTagCount > 0;
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if ( bHitReacting )
