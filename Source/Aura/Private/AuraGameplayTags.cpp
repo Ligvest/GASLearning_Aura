@@ -53,6 +53,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	DamageTypeToDamageRes.Add( Values_Damage_Fire, Attributes_Resistance_Fire );
 	DamageTypeToDamageRes.Add( Values_Damage_Lightning, Attributes_Resistance_Lightning );
 	DamageTypeToDamageRes.Add( Values_Damage_Physical, Attributes_Resistance_Physical );
+
+	// Ability Tags
+	Abilities_Attack = AddGameplayTag( AbilitiesPrefix, "Attack", "Attack Ability Tag" );
 }
 FGameplayTag FAuraGameplayTags::AddGameplayTag( const FString& AttributeNamePrefix, const FString& AttributeName, const FString& AttributeHint )
 {

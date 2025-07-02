@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+enum class ECharacterClass : uint8;
 class UGameplayAbility;
 class UGameplayEffect;
 // Forward declarations
@@ -64,6 +65,9 @@ public:
 	void GrantDefaultAbilities() const;
 
 protected:
+	UPROPERTY( EditDefaultsOnly, Category = "CharacterDefaults" )
+	ECharacterClass CharacterClass;
+
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 

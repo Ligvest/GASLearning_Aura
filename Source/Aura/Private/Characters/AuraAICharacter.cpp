@@ -37,13 +37,4 @@ void AAuraAICharacter::BeginPlay()
 void AAuraAICharacter::PossessedBy( AController* NewController )
 {
 	Super::PossessedBy( NewController );
-
-	if ( !HasAuthority() )
-	{
-		return;
-	}
-
-	AuraAIController = Cast<AAuraAIController>( NewController );
-	AuraAIController->GetBlackboardComponent()->InitializeBlackboard( *BehaviorTree->BlackboardAsset );
-	AuraAIController->RunBehaviorTree( BehaviorTree );
 }

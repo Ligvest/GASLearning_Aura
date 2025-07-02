@@ -29,10 +29,4 @@ public:
 protected:
 	UPROPERTY( EditAnywhere, Category = Interaction )
 	EHighlightActorType HighlightActorType;
-
-	UPROPERTY( EditAnywhere, Category = AI )
-	TObjectPtr<AAuraAIController> AuraAIController;
-
-	UPROPERTY( EditAnywhere, Category = AI )
-	TObjectPtr<UBehaviorTree> BehaviorTree;
 };

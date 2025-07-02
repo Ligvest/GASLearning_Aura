@@ -56,6 +56,9 @@ public:
 
 	TMap<FGameplayTag, FGameplayTag> DamageTypeToDamageRes;
 
+	// Ability Tags
+	FGameplayTag Abilities_Attack;
+
 	// Status Effects Tags
 	FGameplayTag Effects_HitReact;
 
@@ -64,6 +67,7 @@ private:
 	const FString SecondaryAttributesPrefix{ "Attributes.Secondary." };
 	const FString ResistanceAttributesPrefix{ "Attributes.Resistance." };
 	const FString PrimaryAttributesPrefix{ "Attributes.Primary." };
+	const FString AbilitiesPrefix{ "Abilities." };
 	const FString InputPrefix{ "AuraInput." };
 	const FString DamageTypePrefix{ "Values.Damage." };
 	const FString EffectsPrefix{ "Effects." };

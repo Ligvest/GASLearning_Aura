@@ -3,6 +3,9 @@
 #include "Characters/AuraEnemyCharacter.h"
 
 #include "AuraGameplayTags.h"
+#include "AI/AuraAIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
@@ -65,6 +68,22 @@ UAuraEnemyOverlayWC* AAuraEnemyCharacter::GetOverlayWC() const
 {
 	return FloatingWC;
 }
+void AAuraEnemyCharacter::PossessedBy( AController* NewController )
+{
+	Super::PossessedBy( NewController );
+
+	if ( !HasAuthority() )
+	{
+		return;
+	}
+	AuraAIController = Cast<AAuraAIController>( NewController );
+	UBlackboardComponent* BlackboardComponent = AuraAIController->GetBlackboardComponent();
+	BlackboardComponent->InitializeBlackboard( *BehaviorTree->BlackboardAsset );
+	BlackboardComponent->SetValueAsBool( BBValueName_Ranged, IsRangedCharacter() );
+	BlackboardComponent->SetValueAsBool( BBValueName_UnderHitReaction, bHitReacting );
+	BlackboardComponent->SetValueAsFloat( BBValueName_DistanceToSeePlayer, DistanceToSeePlayer );
+	AuraAIController->RunBehaviorTree( BehaviorTree );
+}
 
 void AAuraEnemyCharacter::InitFloatingWC()
 {
@@ -85,8 +104,7 @@ void AAuraEnemyCharacter::InitReactionOnBeingHit()
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	check( ASC );
 
-	// auto& OnHitReactTagToggledDelegate = ASC->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved );
-	auto& OnHitReactTagToggledDelegate = ASC->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::AnyCountChange );
+	auto& OnHitReactTagToggledDelegate = ASC->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Effects_HitReact, EGameplayTagEventType::NewOrRemoved );
 	OnHitReactTagToggledDelegate.AddUObject( this, &ThisClass::ReactOnBeingHit );
 }
 
@@ -98,6 +116,7 @@ void AAuraEnemyCharacter::ReactOnBeingHit( const FGameplayTag HitTag, const int 
 	}
 
 	bHitReacting = NewTagCount > 0;
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool( BBValueName_UnderHitReaction, bHitReacting );
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if ( bHitReacting )
 	{
@@ -114,6 +133,10 @@ void AAuraEnemyCharacter::Die()
 	SetLifeSpan( CorpseLifeSpan );
 	Super::Die();
 }
+bool AAuraEnemyCharacter::IsRangedCharacter() const
+{
+	return CharacterClass != ECharacterClass::Warrior;
+}
 
 void AAuraEnemyCharacter::InitDefaultAttributes( int InCharacterLevel ) const
 {
@@ -127,7 +150,7 @@ void AAuraEnemyCharacter::InitDefaultAttributes( int InCharacterLevel ) const
 	UAuraCharacterClassInfoDA* DefaultCharacterInfoDA = AuraGM->GetDefaultCharacterInfoDA();
 
 	// Should be set in defaults
-	check( CharacterClass != ECharacterClass::Default );
+	check( CharacterClass != ECharacterClass::Empty );
 	TSubclassOf<UGameplayEffect> InitPrimaryAttribsEffectClass = DefaultCharacterInfoDA->GetClassDefaultInfo( CharacterClass ).InitPrimaryAttributesEffectClass;
 	TSubclassOf<UGameplayEffect> InitSecondaryAttribsEffectClass = DefaultCharacterInfoDA->InitSecondaryAttributesEffectClass;
 	TSubclassOf<UGameplayEffect> InitVitalAttribsEffectClass = DefaultCharacterInfoDA->InitVitalAttributesEffectClass;

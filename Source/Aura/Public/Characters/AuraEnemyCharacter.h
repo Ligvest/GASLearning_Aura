@@ -21,6 +21,11 @@ public:
 	UFUNCTION( BlueprintPure )
 	UAuraEnemyOverlayWC* GetOverlayWC() const;
 
+	virtual void PossessedBy( AController* NewController ) override;
+
+	UFUNCTION( BlueprintPure )
+	float GetDistanceToSeePlayer() const { return DistanceToSeePlayer; }
+
 protected:
 	UPROPERTY()
 	TObjectPtr<UAuraEnemyOverlayWC> FloatingWC;
@@ -40,14 +45,24 @@ protected:
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Death" )
 	float CorpseLifeSpan = 5.f;
 
+	UPROPERTY()
+	TObjectPtr<AAuraAIController> AuraAIController;
+
+	UPROPERTY( EditAnywhere, Category = AI )
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+
+	const FName BBValueName_Ranged = FName( "RangedAttacker" );
+	const FName BBValueName_UnderHitReaction = FName( "UnderHitReaction" );
+	const FName BBValueName_DistanceToSeePlayer = FName( "DistanceToSeePlayer" );
+
+	UPROPERTY( EditAnywhere, Category = AI )
+	float DistanceToSeePlayer = 1000.f;
+
 protected:
 	UFUNCTION( BlueprintImplementableEvent )
 	void SetupFloatingWidget();
 
 	void InitFloatingWC();
-
-	UPROPERTY( EditDefaultsOnly, Category = "CharacterDefaults" )
-	ECharacterClass CharacterClass = ECharacterClass::Default;
 
 	void InitReactionOnBeingHit();
 
@@ -58,6 +73,8 @@ protected:
 
 	// Death and Dissolve
 	virtual void Die() override;
+
+	bool IsRangedCharacter() const;
 
 	GENERATED_BODY()
 };

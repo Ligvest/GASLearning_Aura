@@ -6,12 +6,14 @@
 #include "Engine/DataAsset.h"
 #include "AuraCharacterClassInfoDA.generated.h"
 
+class UGameplayAbility;
 class UGameplayEffect;
 
 UENUM( BlueprintType )
 enum class ECharacterClass : uint8
 {
-	Default,
+	Empty,
+	Player,
 	Elementalist,
 	Warrior,
 	Ranger
@@ -24,6 +26,9 @@ struct FCharacterClassDefaultInfo
 
 	UPROPERTY( EditDefaultsOnly, Category = "Class Defaults" )
 	TSubclassOf<UGameplayEffect> InitPrimaryAttributesEffectClass;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Class Defaults" )
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbilityClasses;
 };
 
 /**

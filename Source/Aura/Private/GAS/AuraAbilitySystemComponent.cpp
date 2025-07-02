@@ -21,12 +21,11 @@ void UAuraAbilitySystemComponent::Client_OnEffectAppliedToSelf_Implementation( U
 	EffectSpec.GetAllAssetTags( TagContainer );
 	OnEffectWithTagsAppliedDelegate.Broadcast( TagContainer );
 }
-void UAuraAbilitySystemComponent::GrantAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses )
+void UAuraAbilitySystemComponent::GrantAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses, int AbilitiesLevel /* = 1 */ )
 {
 	for ( auto AbilityClass : AbilityClasses )
 	{
-		constexpr int DefaultAbilityLevel = 1;
-		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec( AbilityClass, DefaultAbilityLevel );
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec( AbilityClass, AbilitiesLevel );
 		if ( const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>( AbilitySpec.Ability ) )
 		{
 			// Add to dynamic tags a ability input tag to run it when the input fires up

@@ -13,6 +13,8 @@
 
 AAuraPlayerCharacter::AAuraPlayerCharacter()
 {
+	CharacterClass = ECharacterClass::Player;
+
 	Tags.Add( UAuraGasBpLibrary::GetPlayerActorTag() );
 
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();

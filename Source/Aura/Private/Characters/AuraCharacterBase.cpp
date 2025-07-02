@@ -6,9 +6,12 @@
 #include "Components/CapsuleComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
+#include "GAS/Data/AuraCharacterClassInfoDA.h"
+#include "Game/AuraGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
-AAuraCharacterBase::AAuraCharacterBase()
+AAuraCharacterBase::AAuraCharacterBase() : CharacterClass( ECharacterClass::Empty )
 {
 	PrimaryActorTick.bCanEverTick = false;
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>( "WeaponMeshComponent" );
@@ -24,6 +27,7 @@ AAuraCharacterBase::AAuraCharacterBase()
 	GetMesh()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
 	GetMesh()->SetGenerateOverlapEvents( false );
 }
+
 FVector AAuraCharacterBase::GetProjectileSpawnSocketLocation() const
 {
 	check( WeaponMeshComponent );
@@ -119,7 +123,13 @@ void AAuraCharacterBase::GrantDefaultAbilities() const
 	}
 
 	UAuraAbilitySystemComponent* ASC = CastChecked<UAuraAbilitySystemComponent>( AbilitySystemComponent );
-	ASC->GrantAbilities( DefaultAbilityClasses );
+	constexpr int DefaultAbilityLevel = 1;
+	ASC->GrantAbilities( DefaultAbilityClasses, DefaultAbilityLevel );
+
+	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
+	UAuraCharacterClassInfoDA* DefaultCharacterInfoDA = AuraGM->GetDefaultCharacterInfoDA();
+	const TArray<TSubclassOf<UGameplayAbility>>& CharacterClassStartupAbilities = DefaultCharacterInfoDA->GetClassDefaultInfo( CharacterClass ).StartupAbilityClasses;
+	ASC->GrantAbilities( CharacterClassStartupAbilities, CharacterLevel );
 }
 void AAuraCharacterBase::BeginPlay()
 {
