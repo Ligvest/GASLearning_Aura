@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AuraAICharacter.h"
 #include "GAS/Data/AuraCharacterClassInfoDA.h"
+#include "Interaction/EnemyInterface.h"
 #include "AuraEnemyCharacter.generated.h"
 
 class UWidgetComponent;
@@ -12,9 +13,14 @@ class UWidgetComponent;
  *
  */
 UCLASS()
-class AURA_API AAuraEnemyCharacter : public AAuraAICharacter
+class AURA_API AAuraEnemyCharacter : public AAuraAICharacter, public IEnemyInterface
 {
 public:
+	//~ Begin of IEnemyInterface
+	virtual void SetCombatActor_Implementation( AActor* InCombatActor ) override;
+	virtual AActor* GetCombatActor_Implementation() const override;
+	//~ End of IEnemyInterface
+
 	AAuraEnemyCharacter();
 	virtual void BeginPlay() override;
 
@@ -27,6 +33,8 @@ public:
 	float GetDistanceToSeePlayer() const { return DistanceToSeePlayer; }
 
 protected:
+	AActor* CombatActor = nullptr;
+
 	UPROPERTY()
 	TObjectPtr<UAuraEnemyOverlayWC> FloatingWC;
 

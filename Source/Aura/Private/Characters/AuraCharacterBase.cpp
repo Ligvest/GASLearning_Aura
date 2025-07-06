@@ -2,6 +2,7 @@
 
 #include "Characters/AuraCharacterBase.h"
 
+#include "AuraGameplayTags.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
@@ -25,16 +26,41 @@ AAuraCharacterBase::AAuraCharacterBase() : CharacterClass( ECharacterClass::Empt
 
 	GetMesh()->SetCollisionResponseToChannel( ECC_Projectile, ECR_Ignore );
 	GetMesh()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
+	GetMesh()->SetCollisionResponseToChannel( ECC_Pawn, ECR_Ignore );
 	GetMesh()->SetGenerateOverlapEvents( false );
 }
 
-FVector AAuraCharacterBase::GetProjectileSpawnSocketLocation() const
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation( FGameplayTag MontageAttackTag ) const
 {
-	check( WeaponMeshComponent );
-	check( !SocketNameProjectileSpawn.IsNone() );
 	// On the server the location of Socket will be default ( not the position in this exact moment of the animation )
 	// So to fix this I should pass the position to server it seems. Or ask server to play animations too
-	FVector SocketLocation = WeaponMeshComponent->GetSocketLocation( SocketNameProjectileSpawn );
+	// We choose to play animations on server
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	FVector SocketLocation;
+	if ( MontageAttackTag == GameplayTags.Montage_Attack_Weapon )
+	{
+		check( WeaponMeshComponent );
+		check( !WeaponCombatSocketName.IsNone() );
+		SocketLocation = WeaponMeshComponent->GetSocketLocation( WeaponCombatSocketName );
+		return SocketLocation;
+	}
+
+	if ( MontageAttackTag == GameplayTags.Montage_Attack_LeftHand )
+	{
+		check( !LeftHandCombatSocketName.IsNone() );
+		SocketLocation = GetMesh()->GetSocketLocation( LeftHandCombatSocketName );
+		return SocketLocation;
+	}
+
+	if ( MontageAttackTag == GameplayTags.Montage_Attack_RightHand )
+	{
+		check( !RightHandCombatSocketName.IsNone() );
+		SocketLocation = GetMesh()->GetSocketLocation( RightHandCombatSocketName );
+		return SocketLocation;
+	}
+
+	// We shouldn't get here
+	check( false );
 	return SocketLocation;
 }
 
@@ -46,6 +72,23 @@ UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
 void AAuraCharacterBase::Die()
 {
 	MulticastHandleDeath();
+}
+bool AAuraCharacterBase::IsDead_Implementation()
+{
+	return IsDead;
+}
+
+AActor* AAuraCharacterBase::GetAvatar_Implementation()
+{
+	return this;
+}
+
+FTaggedMontage AAuraCharacterBase::GetRandAttackMontage_Implementation()
+{
+	constexpr int MinIndex = 0;
+	int MaxIndex = AttackMontages.Num() - 1;
+	int ResultIndex = FMath::RandRange( MinIndex, MaxIndex );
+	return AttackMontages[ResultIndex];
 }
 
 void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const
@@ -94,6 +137,7 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 
 	DissolveCorpse();
+	IsDead = true;
 }
 
 void AAuraCharacterBase::InitDefaultAttributes( int InCharacterLevel ) const

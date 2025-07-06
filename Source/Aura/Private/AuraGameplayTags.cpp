@@ -56,6 +56,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	// Ability Tags
 	Abilities_Attack = AddGameplayTag( AbilitiesPrefix, "Attack", "Attack Ability Tag" );
+
+	// Montage Attacks
+	Montage_Attack_Weapon = AddGameplayTag( MontageAttackPrefix, "Weapon", "Montage weapon attack tag" );
+	Montage_Attack_LeftHand = AddGameplayTag( MontageAttackPrefix, "LeftHand", "Montage left hand attack tag" );
+	Montage_Attack_RightHand = AddGameplayTag( MontageAttackPrefix, "RightHand", "Montage right hand attack tag" );
 }
 FGameplayTag FAuraGameplayTags::AddGameplayTag( const FString& AttributeNamePrefix, const FString& AttributeName, const FString& AttributeHint )
 {

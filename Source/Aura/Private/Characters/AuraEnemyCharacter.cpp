@@ -16,6 +16,18 @@
 #include "Game/AuraGameModeBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+//~ Begin of IEnemyInterface
+void AAuraEnemyCharacter::SetCombatActor_Implementation( AActor* InCombatActor )
+{
+	CombatActor = InCombatActor;
+}
+
+AActor* AAuraEnemyCharacter::GetCombatActor_Implementation() const
+{
+	return CombatActor;
+}
+//~ End of IEnemyInterface
+
 AAuraEnemyCharacter::AAuraEnemyCharacter()
 {
 	Tags.Add( UAuraGasBpLibrary::GetEnemyActorTag() );

@@ -4,6 +4,7 @@
 
 #include "AuraAbilityTypes.h"
 #include "Game/AuraGameModeBase.h"
+#include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
 #include "UI/HUD/AuraHUD.h"
@@ -74,6 +75,95 @@ void UAuraGasBpLibrary::SetIsCriticalHit( FGameplayEffectContextHandle& EffectCo
 	{
 		AuraEffectContext->SetIsCriticalHit( bInIsCriticalHit );
 	}
+}
+
+void UAuraGasBpLibrary::GetLivePlayersInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
+                                               const FVector& SphereOrigin )
+{
+	// This code is just a low level versions of SphereOverlapActors and other methods of the same kind.
+	// E.g UKismetSystemLibrary::SphereOverlapComponents
+	// We use it to avoid unnecessary calculations
+	const UWorld* World = GEngine->GetWorldFromContextObject( WorldContextObject, EGetWorldErrorMode::LogAndReturnNull );
+	if ( World )
+	{
+		TArray<FOverlapResult> Overlaps;
+		FCollisionQueryParams SphereParams;
+		SphereParams.AddIgnoredActors( ActorsToIgnore );
+		FCollisionObjectQueryParams CollisionObjectQueryParams = ( FCollisionObjectQueryParams::InitType::AllDynamicObjects );
+
+		World->OverlapMultiByObjectType( Overlaps, SphereOrigin, FQuat::Identity, CollisionObjectQueryParams, FCollisionShape::MakeSphere( Radius ), SphereParams );
+		for ( FOverlapResult& Overlap : Overlaps )
+		{
+			AActor* OverlappedActor = Overlap.GetActor();
+			// Looking only for players
+			if ( !HasPlayerActorTag( OverlappedActor ) )
+			{
+				continue;
+			}
+
+			bool IsCombatInterface = Overlap.GetActor()->Implements<UCombatInterface>();
+			if ( IsCombatInterface && !ICombatInterface::Execute_IsDead( OverlappedActor ) )
+			{
+				OutOverlappingActors.AddUnique( ICombatInterface::Execute_GetAvatar( OverlappedActor ) );
+			}
+		}
+	}
+}
+
+void UAuraGasBpLibrary::GetLiveOpponentsInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
+                                                 const FVector& SphereOrigin, const AActor* MyActor )
+{
+	// This code is just a low level versions of SphereOverlapActors and other methods of the same kind.
+	// E.g UKismetSystemLibrary::SphereOverlapComponents
+	// We use it to avoid unnecessary calculations
+	const UWorld* World = GEngine->GetWorldFromContextObject( WorldContextObject, EGetWorldErrorMode::LogAndReturnNull );
+	if ( World )
+	{
+		const FName OpponentTag = GetOpponentActorTag( MyActor );
+		TArray<FOverlapResult> Overlaps;
+		FCollisionQueryParams SphereParams;
+		SphereParams.AddIgnoredActors( ActorsToIgnore );
+		FCollisionObjectQueryParams CollisionObjectQueryParams = ( FCollisionObjectQueryParams::InitType::AllDynamicObjects );
+
+		World->OverlapMultiByObjectType( Overlaps, SphereOrigin, FQuat::Identity, CollisionObjectQueryParams, FCollisionShape::MakeSphere( Radius ), SphereParams );
+		for ( FOverlapResult& Overlap : Overlaps )
+		{
+			AActor* OverlappedActor = Overlap.GetActor();
+			// Looking only for opponents to MyTag
+			if ( !OverlappedActor->ActorHasTag( OpponentTag ) )
+			{
+				continue;
+			}
+
+			bool IsCombatInterface = Overlap.GetActor()->Implements<UCombatInterface>();
+			if ( IsCombatInterface && !ICombatInterface::Execute_IsDead( OverlappedActor ) )
+			{
+				OutOverlappingActors.AddUnique( ICombatInterface::Execute_GetAvatar( OverlappedActor ) );
+			}
+		}
+	}
+}
+
+AActor* UAuraGasBpLibrary::GetClosestPlayerInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
+                                                    const FVector& SphereOrigin )
+{
+	check( false );
+	return nullptr;
+}
+
+FName UAuraGasBpLibrary::GetOpponentActorTag( const AActor* Actor )
+{
+	if ( Actor->ActorHasTag( GetEnemyActorTag() ) )
+	{
+		return GetPlayerActorTag();
+	}
+
+	if ( Actor->ActorHasTag( GetPlayerActorTag() ) )
+	{
+		return GetEnemyActorTag();
+	}
+
+	return FName();
 }
 
 // I believe this function should be called after PlayerState replicated and is up to date

@@ -258,6 +258,16 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 			bool bIsBlockedHit = UAuraGasBpLibrary::IsBlockedHit( ContextHandle );
 			bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
 			AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
+			return;
+		}
+
+		// To show numbers when player is being attacked by enemies
+		AuraPC = EffectTargetProperties.Character->GetController<AAuraPlayerController>();
+		if ( AuraPC && ( EffectSourceProperties.Character != EffectTargetProperties.Character ) )
+		{
+			bool bIsBlockedHit = UAuraGasBpLibrary::IsBlockedHit( ContextHandle );
+			bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
+			AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
 		}
 	}
 }

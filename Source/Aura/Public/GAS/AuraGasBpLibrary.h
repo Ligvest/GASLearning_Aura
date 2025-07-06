@@ -8,6 +8,7 @@
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraGasBpLibrary.generated.h"
 
+struct FGameplayEffectContextHandle;
 class UAuraHUDWidgetController;
 /**
  *
@@ -41,11 +42,26 @@ public:
 	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayEffects" )
 	static void SetIsCriticalHit( UPARAM( ref ) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit );
 
+	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|Interaction" )
+	static void GetLivePlayersInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin );
+
+	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|Interaction" )
+	static void GetLiveOpponentsInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin,
+	                                     const AActor* MyActor );
+
+	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|Interaction" )
+	static AActor* GetClosestPlayerInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
+	                                        const FVector& SphereOrigin );
+
 	UFUNCTION( BlueprintPure, Category = "Tags" )
 	static FName GetEnemyActorTag() { return TEXT( "Enemy" ); };
 
 	UFUNCTION( BlueprintPure, Category = "Tags" )
 	static FName GetPlayerActorTag() { return TEXT( "Player" ); };
+
+	// Return a tag which is an opposite ( or enemy ) to a given tag
+	UFUNCTION( BlueprintPure, Category = "Tags" )
+	static FName GetOpponentActorTag( const AActor* Actor );
 
 	UFUNCTION( BlueprintPure, Category = "Tags" )
 	static bool HasEnemyActorTag( const AActor* Actor ) { return Actor->ActorHasTag( GetEnemyActorTag() ); };

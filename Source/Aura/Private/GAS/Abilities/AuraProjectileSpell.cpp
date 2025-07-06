@@ -23,12 +23,8 @@ void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation )
 	AActor* Owner = GetOwningActorFromActorInfo();
 	APawn* Instigator = Cast<APawn>( Owner );
 	AActor* Avatar = GetAvatarActorFromActorInfo();
-	ICombatInterface* CombatActor = Cast<ICombatInterface>( Avatar );
-	FVector SpawnLocation = FVector::ZeroVector;
-	if ( CombatActor )
-	{
-		SpawnLocation = CombatActor->GetProjectileSpawnSocketLocation();
-	}
+	check( Avatar->Implements<UCombatInterface>() );
+	const FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation( Avatar, FAuraGameplayTags::Get().Montage_Attack_Weapon );
 
 	FRotator Rotator = ( TargetLocation - SpawnLocation ).Rotation();
 	// Zero out pitch to make projectile fly ortogonal to surface
@@ -56,7 +52,7 @@ void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation )
 	HitResult.Location = TargetLocation;
 	EffectContextHandle.AddHitResult( HitResult );
 
-	FGameplayEffectSpecHandle ImpactEffectSpecHandle = SourceASC->MakeOutgoingSpec( ImpactEffectClass, AbilityLevel, EffectContextHandle );
+	FGameplayEffectSpecHandle ImpactEffectSpecHandle = SourceASC->MakeOutgoingSpec( DamageEffectClass, AbilityLevel, EffectContextHandle );
 
 	float DamageValue = 0.f;
 	for ( const auto& [DamageTypeTag, DamageScalableFloat] : DamageTypeTagToScalableFloat )

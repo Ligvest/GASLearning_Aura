@@ -62,6 +62,11 @@ public:
 	// Status Effects Tags
 	FGameplayTag Effects_HitReact;
 
+	// Montage events
+	FGameplayTag Montage_Attack_Weapon;
+	FGameplayTag Montage_Attack_LeftHand;
+	FGameplayTag Montage_Attack_RightHand;
+
 private:
 	static FAuraGameplayTags GameplayTags;
 	const FString SecondaryAttributesPrefix{ "Attributes.Secondary." };
@@ -71,4 +76,5 @@ private:
 	const FString InputPrefix{ "AuraInput." };
 	const FString DamageTypePrefix{ "Values.Damage." };
 	const FString EffectsPrefix{ "Effects." };
+	const FString MontageAttackPrefix{ "Montage.Attack." };
 };
