@@ -48,7 +48,6 @@ public:
 	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
 
 	// Death and dissolve
-
 	UFUNCTION( NetMulticast, Reliable )
 	virtual void MulticastHandleDeath();
 
@@ -56,6 +55,9 @@ public:
 
 	UFUNCTION( BlueprintImplementableEvent, Category = "Death" )
 	void StartDissolving( const TArray<UMaterialInstanceDynamic*>& DynamicMatInstances );
+
+	UFUNCTION( BlueprintCallable )
+	USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMeshComponent; }
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 

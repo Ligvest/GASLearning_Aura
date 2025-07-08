@@ -10,6 +10,7 @@
 #include "Components/AudioComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "GAS/AuraGasBpLibrary.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -50,8 +51,13 @@ void AAuraProjectile::BeginPlay()
 
 void AAuraProjectile::PlayImpactEffects() const
 {
+	/*
+	 * Can't use checks here as this function is called in Destroyed method
+	 * And Destroyed method is called during compilation in BP when the engine tries to
+	 * remove all actors of this type from world and create new ones if necessary
 	check( ImpactEffect );
 	check( ImpactSound );
+	*/
 
 	UGameplayStatics::PlaySoundAtLocation( this, ImpactSound, GetActorLocation() );
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation( this, ImpactEffect, GetActorLocation() );
@@ -66,8 +72,15 @@ void AAuraProjectile::PlayImpactEffects() const
 void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                                 const FHitResult& SweepResult )
 {
-	bool bCauserSameAsTarget = ImpactEffectHandle.Data.IsValid() && ImpactEffectHandle.Data->GetEffectContext().GetEffectCauser() == OtherActor;
+	AActor* AttackerActor = ImpactEffectHandle.Data->GetEffectContext().GetEffectCauser();
+	bool bCauserSameAsTarget = ImpactEffectHandle.Data.IsValid() && AttackerActor == OtherActor;
 	if ( bCauserSameAsTarget )
+	{
+		return;
+	}
+
+	const FName OpponentTag = UAuraGasBpLibrary::GetOpponentActorTag( AttackerActor );
+	if ( !OtherActor->ActorHasTag( OpponentTag ) )
 	{
 		return;
 	}
