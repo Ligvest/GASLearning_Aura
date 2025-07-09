@@ -87,8 +87,8 @@ protected:
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<UGameplayEffect> InitVitalAttributesEffectClass;
 
-	UPROPERTY( EditDefaultsOnly, Category = SocketNames )
-	FName SocketNameHandWeapon = FName( "HandWeapon" );
+	// Can't be set in Editor as it's used in ctor
+	FName SocketNameHandWeapon = FName( TEXT( "HandWeapon" ) );
 
 	UPROPERTY( EditDefaultsOnly, Category = Combat )
 	FName WeaponCombatSocketName;

@@ -62,6 +62,11 @@ void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation )
 		ImpactEffectSpecHandle.Data->SetSetByCallerMagnitude( DamageTypeTag, DamageValue );
 	}
 
+	if ( ImpactEffectSpecHandle.Data == nullptr )
+	{
+		int i = 0;
+		i++;
+	}
 	SpawnedProjectile->SetImpactEffectHandle( std::move( ImpactEffectSpecHandle ) );
 	SpawnedProjectile->FinishSpawning( SpawnTransform );
 }

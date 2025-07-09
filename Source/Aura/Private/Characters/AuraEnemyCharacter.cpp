@@ -144,6 +144,8 @@ void AAuraEnemyCharacter::Die()
 {
 	SetLifeSpan( CorpseLifeSpan );
 	Super::Die();
+	// IsDead is Set in Super::Die()
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool( BBValueName_Dead, IsDead );
 }
 bool AAuraEnemyCharacter::IsRangedCharacter() const
 {

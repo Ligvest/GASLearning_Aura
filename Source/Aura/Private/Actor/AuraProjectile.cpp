@@ -72,6 +72,12 @@ void AAuraProjectile::PlayImpactEffects() const
 void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                                 const FHitResult& SweepResult )
 {
+	// If this is a client the we will get nullptr in ImpactEffectHandle as we set it only on server
+	if ( !HasAuthority() )
+	{
+		return;
+	}
+
 	AActor* AttackerActor = ImpactEffectHandle.Data->GetEffectContext().GetEffectCauser();
 	bool bCauserSameAsTarget = ImpactEffectHandle.Data.IsValid() && AttackerActor == OtherActor;
 	if ( bCauserSameAsTarget )

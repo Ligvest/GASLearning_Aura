@@ -61,6 +61,7 @@ protected:
 
 	const FName BBValueName_Ranged = FName( "RangedAttacker" );
 	const FName BBValueName_UnderHitReaction = FName( "UnderHitReaction" );
+	const FName BBValueName_Dead = FName( "Dead" );
 	const FName BBValueName_DistanceToSeePlayer = FName( "DistanceToSeePlayer" );
 
 	UPROPERTY( EditAnywhere, Category = AI )
