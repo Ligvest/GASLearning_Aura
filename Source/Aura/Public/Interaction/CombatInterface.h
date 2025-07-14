@@ -7,16 +7,26 @@
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
+class AAuraCharacterBase;
+class UNiagaraSystem;
+
 USTRUCT( BlueprintType )
 struct FTaggedMontage
 {
 	GENERATED_BODY()
 
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
-	UAnimMontage* Montage = nullptr;
+	TObjectPtr<UAnimMontage> Montage;
 
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
 	FGameplayTag MontageTag;
+
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+	FGameplayTag CombatSocketTag;
+
+	// Projectiles have it's own HitSound which is triggered on overlap
+	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+	TObjectPtr<USoundBase> MeleeHitSound;
 };
 
 // This class does not need to be modified.
@@ -58,6 +68,26 @@ public:
 	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
 	AActor* GetAvatar();
 
+	// TODO: Change return value to Pointer
 	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
 	FTaggedMontage GetRandAttackMontage();
+
+	// TODO: Change return value to Pointer
+	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
+	FTaggedMontage FindAttackMontageByTag( FGameplayTag MontageTag );
+
+	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
+	UNiagaraSystem* GetHurtNSEffect();
+
+	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
+	USoundBase* GetHurtSound();
+
+	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
+	int GetMinionsCount();
+
+	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
+	void AddMinionsCount( int Value );
+
+	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
+	void SetMasterActor( AActor* InMasterActor );
 };

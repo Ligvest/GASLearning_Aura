@@ -123,7 +123,8 @@ void UExecCalc_Damage::Execute_Implementation( const FGameplayEffectCustomExecut
 	{
 		// Read each type of damage passed to SetByCaller function
 		// If no such type the function returns 0
-		float DamageValue = Spec.GetSetByCallerMagnitude( DamageTypeTag );
+		constexpr bool bWarnIfNotFound = false;
+		float DamageValue = Spec.GetSetByCallerMagnitude( DamageTypeTag, bWarnIfNotFound );
 		if ( !DamageValue )
 		{
 			continue;

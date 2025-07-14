@@ -37,7 +37,7 @@ FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation( FGameplayTag
 	// We choose to play animations on server
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	FVector SocketLocation;
-	if ( MontageAttackTag == GameplayTags.Montage_Attack_Weapon )
+	if ( MontageAttackTag == GameplayTags.CombatSocket_Weapon )
 	{
 		check( WeaponMeshComponent );
 		check( !WeaponCombatSocketName.IsNone() );
@@ -45,17 +45,24 @@ FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation( FGameplayTag
 		return SocketLocation;
 	}
 
-	if ( MontageAttackTag == GameplayTags.Montage_Attack_LeftHand )
+	if ( MontageAttackTag == GameplayTags.CombatSocket_LeftHand )
 	{
 		check( !LeftHandCombatSocketName.IsNone() );
 		SocketLocation = GetMesh()->GetSocketLocation( LeftHandCombatSocketName );
 		return SocketLocation;
 	}
 
-	if ( MontageAttackTag == GameplayTags.Montage_Attack_RightHand )
+	if ( MontageAttackTag == GameplayTags.CombatSocket_RightHand )
 	{
 		check( !RightHandCombatSocketName.IsNone() );
 		SocketLocation = GetMesh()->GetSocketLocation( RightHandCombatSocketName );
+		return SocketLocation;
+	}
+
+	if ( MontageAttackTag == GameplayTags.CombatSocket_Tail )
+	{
+		check( !TailCombatSocketName.IsNone() );
+		SocketLocation = GetMesh()->GetSocketLocation( TailCombatSocketName );
 		return SocketLocation;
 	}
 
@@ -91,6 +98,46 @@ FTaggedMontage AAuraCharacterBase::GetRandAttackMontage_Implementation()
 	return AttackMontages[ResultIndex];
 }
 
+UNiagaraSystem* AAuraCharacterBase::GetHurtNSEffect_Implementation()
+{
+	return HurtNSEffect;
+}
+
+USoundBase* AAuraCharacterBase::GetHurtSound_Implementation()
+{
+	return HurtSound;
+}
+
+int AAuraCharacterBase::GetMinionsCount_Implementation()
+{
+	return MinionsCount;
+}
+
+void AAuraCharacterBase::AddMinionsCount_Implementation( int Value )
+{
+	MinionsCount += Value;
+}
+
+void AAuraCharacterBase::SetMasterActor_Implementation( AActor* InMasterActor )
+{
+	MasterActor = CastChecked<AAuraCharacterBase>( InMasterActor );
+}
+
+FTaggedMontage AAuraCharacterBase::FindAttackMontageByTag_Implementation( FGameplayTag InMontageTag )
+{
+	for ( const FTaggedMontage& Montage : AttackMontages )
+	{
+		if ( Montage.MontageTag.MatchesTagExact( InMontageTag ) )
+		{
+			return Montage;
+		}
+	}
+
+	// Not sure if I should be able to process the case when there is no Montage with the tag
+	check( false );
+	return FTaggedMontage{};
+}
+
 void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const
 {
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
@@ -124,6 +171,9 @@ void AAuraCharacterBase::DissolveCorpse()
 
 void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 {
+	check( DeathSound );
+	UGameplayStatics::SpawnSoundAtLocation( this, DeathSound, GetActorLocation(), GetActorRotation() );
+
 	WeaponMeshComponent->DetachFromComponent( FDetachmentTransformRules( EDetachmentRule::KeepWorld, true ) );
 	WeaponMeshComponent->SetSimulatePhysics( true );
 	WeaponMeshComponent->SetEnableGravity( true );
@@ -138,6 +188,12 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 
 	DissolveCorpse();
 	IsDead = true;
+
+	if ( IsValid( MasterActor ) )
+	{
+		// As this character dies it should decrement minions counter if it has a MasterActor which spawned it
+		--MasterActor->MinionsCount;
+	}
 }
 
 void AAuraCharacterBase::InitDefaultAttributes( int InCharacterLevel ) const

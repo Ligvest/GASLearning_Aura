@@ -58,14 +58,22 @@ public:
 
 	// Ability Tags
 	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
 
 	// Status Effects Tags
 	FGameplayTag Effects_HitReact;
 
 	// Montage events
-	FGameplayTag Montage_Attack_Weapon;
-	FGameplayTag Montage_Attack_LeftHand;
-	FGameplayTag Montage_Attack_RightHand;
+	FGameplayTag Montage_Attack_1;
+	FGameplayTag Montage_Attack_2;
+	FGameplayTag Montage_Attack_3;
+	FGameplayTag Montage_Attack_4;
+
+	// Combat Socket Tags
+	FGameplayTag CombatSocket_Weapon;
+	FGameplayTag CombatSocket_LeftHand;
+	FGameplayTag CombatSocket_RightHand;
+	FGameplayTag CombatSocket_Tail;
 
 private:
 	static FAuraGameplayTags GameplayTags;
@@ -77,4 +85,5 @@ private:
 	const FString DamageTypePrefix{ "Values.Damage." };
 	const FString EffectsPrefix{ "Effects." };
 	const FString MontageAttackPrefix{ "Montage.Attack." };
+	const FString CombatSocketPrefix{ "CombatSocket." };
 };

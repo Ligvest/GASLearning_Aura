@@ -20,7 +20,7 @@ class AURA_API UAuraProjectileSpell : public UAuraDamageGameplayAbility
 	                              const FGameplayEventData* TriggerEventData ) override;
 
 	UFUNCTION( BlueprintCallable, Category = "Projectile" )
-	void SpawnProjectile( FVector TargetLocation );
+	void SpawnProjectile( FVector TargetLocation, FGameplayTag SpawnCombatSocketTag );
 
 	UPROPERTY( EditDefaultsOnly, Category = "Projectile" )
 	TSubclassOf<AAuraProjectile> ProjectileClass;
