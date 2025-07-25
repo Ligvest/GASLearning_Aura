@@ -6,6 +6,7 @@
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
 #include "GAS/Data/AuraAttributeInfoDataAsset.h"
+#include "Player/AuraPlayerState.h"
 
 void UAuraAttributeWindowWC::BindCallbacksToAttributeChanges() const
 {
@@ -24,6 +25,12 @@ void UAuraAttributeWindowWC::BindCallbacksToAttributeChanges() const
 			    OnAttributeInfoChanged.Broadcast( AttributeInfo );
 		    } );
 	}
+
+	// PS Broadcasts to every client. But here we subscribe only to our own PSs OnPlayerStatChangedDelegate
+	// Thats why on LevelUp or other broadcast only 1 OnPlayerStatChangedDynamicDelegate is broadcasted
+	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
+	AuraPS->OnAttributePointsChangedDelegate.AddLambda( [this]( int32 NewValue ) { OnAttributePointsChangedDynamicDelegate.Broadcast( NewValue ); } );
+	AuraPS->OnSpellPointsChangedDelegate.AddLambda( [this]( int32 NewValue ) { OnSpellPointsChangedDynamicDelegate.Broadcast( NewValue ); } );
 }
 void UAuraAttributeWindowWC::BroadcastInitialValues() const
 {

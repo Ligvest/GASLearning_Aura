@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ScalableFloat.h"
 #include "Engine/DataAsset.h"
 #include "AuraCharacterClassInfoDA.generated.h"
 
@@ -29,6 +30,9 @@ struct FCharacterClassDefaultInfo
 
 	UPROPERTY( EditDefaultsOnly, Category = "Class Defaults" )
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilityClasses;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Class Defaults" )
+	FScalableFloat XpReward;
 };
 
 /**
@@ -44,7 +48,7 @@ protected:
 	TMap<ECharacterClass, FCharacterClassDefaultInfo> CharacterClassToDefaultInfo;
 
 public:
-	FCharacterClassDefaultInfo GetClassDefaultInfo( ECharacterClass CharacterClass ) { return CharacterClassToDefaultInfo.FindChecked( CharacterClass ); };
+	const FCharacterClassDefaultInfo& GetClassDefaultInfo( ECharacterClass CharacterClass ) { return CharacterClassToDefaultInfo.FindChecked( CharacterClass ); };
 
 	UPROPERTY( EditDefaultsOnly, Category = "Common Class Defaults" )
 	TSubclassOf<UGameplayEffect> InitSecondaryAttributesEffectClass;

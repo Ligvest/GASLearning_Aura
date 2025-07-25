@@ -11,6 +11,7 @@
 #include "Game/AuraGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/AuraPlayerState.h"
 
 AAuraCharacterBase::AAuraCharacterBase() : CharacterClass( ECharacterClass::Empty )
 {
@@ -28,6 +29,12 @@ AAuraCharacterBase::AAuraCharacterBase() : CharacterClass( ECharacterClass::Empt
 	GetMesh()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
 	GetMesh()->SetCollisionResponseToChannel( ECC_Pawn, ECR_Ignore );
 	GetMesh()->SetGenerateOverlapEvents( false );
+}
+
+int AAuraCharacterBase::GetCharacterLevel() const
+{
+	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( GetPlayerState() );
+	return AuraPS->GetPlayerLevel();
 }
 
 FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation( FGameplayTag MontageAttackTag ) const
@@ -122,6 +129,10 @@ void AAuraCharacterBase::SetMasterActor_Implementation( AActor* InMasterActor )
 {
 	MasterActor = CastChecked<AAuraCharacterBase>( InMasterActor );
 }
+ECharacterClass AAuraCharacterBase::GetCharacterClass_Implementation() const
+{
+	return CharacterClass;
+}
 
 FTaggedMontage AAuraCharacterBase::FindAttackMontageByTag_Implementation( FGameplayTag InMontageTag )
 {
@@ -136,12 +147,6 @@ FTaggedMontage AAuraCharacterBase::FindAttackMontageByTag_Implementation( FGamep
 	// Not sure if I should be able to process the case when there is no Montage with the tag
 	check( false );
 	return FTaggedMontage{};
-}
-
-void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const
-{
-	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
-	DOREPLIFETIME( AAuraCharacterBase, CharacterLevel );
 }
 
 void AAuraCharacterBase::DissolveCorpse()
@@ -229,7 +234,9 @@ void AAuraCharacterBase::GrantDefaultAbilities() const
 	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
 	UAuraCharacterClassInfoDA* DefaultCharacterInfoDA = AuraGM->GetDefaultCharacterInfoDA();
 	const TArray<TSubclassOf<UGameplayAbility>>& CharacterClassStartupAbilities = DefaultCharacterInfoDA->GetClassDefaultInfo( CharacterClass ).StartupAbilityClasses;
-	ASC->GrantAbilities( CharacterClassStartupAbilities, CharacterLevel );
+	ASC->GrantAbilities( CharacterClassStartupAbilities, GetCharacterLevel() );
+
+	ASC->GrantPassiveAbilities( DefaultPassiveAbilityClasses, DefaultAbilityLevel );
 }
 void AAuraCharacterBase::BeginPlay()
 {

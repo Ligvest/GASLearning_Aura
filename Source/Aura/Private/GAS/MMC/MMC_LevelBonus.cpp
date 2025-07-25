@@ -45,7 +45,7 @@ float UMMC_LevelBonus::CalculateBaseMagnitude_Implementation( const FGameplayEff
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>( EffectSource );
 	if ( CombatInterface )
 	{
-		ActorLevel = CombatInterface->GetActorLevel();
+		ActorLevel = CombatInterface->GetCharacterLevel();
 	}
 
 	// Get BaseAttribute

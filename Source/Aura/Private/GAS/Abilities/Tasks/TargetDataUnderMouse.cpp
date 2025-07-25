@@ -9,6 +9,7 @@ UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse( UGamep
 	UTargetDataUnderMouse* MyObj = NewAbilityTask<UTargetDataUnderMouse>( OwningAbility );
 	return MyObj;
 }
+
 void UTargetDataUnderMouse::Activate()
 {
 	Super::Activate();
@@ -27,11 +28,12 @@ void UTargetDataUnderMouse::Activate()
 		// Ability handle
 		FGameplayAbilitySpecHandle SpecHandle = GetAbilitySpecHandle();
 
-		// Prediction key which was passed to the GampleAbility on activation
+		// Prediction key which was passed to the GameplayAbility on activation
 		// Allows server and client to be sure that they are talking about the same ability
 		FPredictionKey ActivationPredictionKey = GetActivationPredictionKey();
 
 		// Bind callback to run on receiving TargetData for given ActivationPredictionKey and SpecHandle
+		// This delegate is used for all TargetDatas including this. So we don't need to specify any information about this TargetData
 		AbilitySystemComponent.Get()->AbilityTargetDataSetDelegate( SpecHandle, ActivationPredictionKey ).AddUObject( this, &UTargetDataUnderMouse::OnTargetDataReplicatedCallback );
 		// Call delegates with TargetDataHandle for given ActivationPredictionKay and SpecHandle
 		const bool bCalledDelegate = AbilitySystemComponent.Get()->CallReplicatedTargetDataDelegatesIfSet( SpecHandle, ActivationPredictionKey );

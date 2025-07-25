@@ -48,6 +48,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Values_Damage_Lightning = AddGameplayTag( DamageTypePrefix, "Lightning", "ValueTag: Lightning Damage" );
 	Values_Damage_Physical = AddGameplayTag( DamageTypePrefix, "Physical", "ValueTag: Physical Damage" );
 
+	// Values
+	Values_XP = AddGameplayTag( ValuesPrefix, "XP", "ValueTag: XP" );
+
 	// Associate Damage with Resistance
 	DamageTypeToDamageRes.Add( Values_Damage_Arcane, Attributes_Resistance_Arcane );
 	DamageTypeToDamageRes.Add( Values_Damage_Fire, Attributes_Resistance_Fire );
@@ -57,6 +60,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	// Ability Tags
 	Abilities_Attack = AddGameplayTag( AbilitiesPrefix, "Attack", "Attack Ability Tag" );
 	Abilities_Summon = AddGameplayTag( AbilitiesPrefix, "Summon", "Summon Ability Tag" );
+	Abilities_Fire_FireBolt = AddGameplayTag( AbilitiesPrefix, "Fire.FireBolt", "Firebolt Ability Tag" );
+
+	// Cooldowns Tags
+	Cooldowns_Fire_FireBolt = AddGameplayTag( CooldownsPrefix, "Fire.FireBolt", "Firebolt Ability CooldownTag" );
 
 	// Montage Attacks
 	Montage_Attack_1 = AddGameplayTag( MontageAttackPrefix, "1", "Montage Attack option 1" );
@@ -69,6 +76,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	CombatSocket_LeftHand = AddGameplayTag( CombatSocketPrefix, "LeftHand", "Left hand socket attack tag" );
 	CombatSocket_RightHand = AddGameplayTag( CombatSocketPrefix, "RightHand", "Right hand socket attack tag" );
 	CombatSocket_Tail = AddGameplayTag( CombatSocketPrefix, "Tail", "Tail socket attack tag" );
+
+	// Meta Attributes Tags
+	Attributes_Meta_IncomingXP = AddGameplayTag( MetaAttributesPrefix, "IncomingXP", "IncomingXP meta attribute tag" );
 }
 FGameplayTag FAuraGameplayTags::AddGameplayTag( const FString& AttributeNamePrefix, const FString& AttributeName, const FString& AttributeHint )
 {

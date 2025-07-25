@@ -185,9 +185,14 @@ public:
 	FGameplayAttributeData PhysicalResistance;
 	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, PhysicalResistance );
 
+	// Meta Attributes
 	UPROPERTY( BlueprintReadOnly, Category = "Meta Attributes" )
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, IncomingDamage );
+
+	UPROPERTY( BlueprintReadOnly, Category = "Meta Attributes" )
+	FGameplayAttributeData IncomingXP;
+	ATTRIBUTE_ACCESSORS( UAuraAttributeSet, IncomingXP );
 
 public:
 	// Health
@@ -245,6 +250,11 @@ public:
 protected:
 	FEffectProperties EffectTargetProperties;
 	FEffectProperties EffectSourceProperties;
+
+	void ProcessIncomingDamage( const FGameplayEffectContextHandle& ContextHandle );
+	void ProcessIncomingXP( const FGameplayEffectContextHandle& ContextHandle );
+	void ProcessDeath();
+	void ShowFloatingDamage( const FGameplayEffectContextHandle& ContextHandle, const int ReceivedDamage ) const;
 
 	void FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC, const FGameplayEffectContextHandle ContextHandle );
 };

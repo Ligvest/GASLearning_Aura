@@ -28,6 +28,13 @@ AActor* AAuraEnemyCharacter::GetCombatActor_Implementation() const
 }
 //~ End of IEnemyInterface
 
+//~ Begin of ICombatInterface
+int AAuraEnemyCharacter::GetCharacterLevel() const
+{
+	return EnemyLevel;
+}
+//~ End of ICombatInterface
+
 AAuraEnemyCharacter::AAuraEnemyCharacter()
 {
 	Tags.Add( UAuraGasBpLibrary::GetEnemyActorTag() );
@@ -60,7 +67,7 @@ void AAuraEnemyCharacter::BeginPlay()
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	check( AuraASC );
 	AuraASC->Init();
-	InitDefaultAttributes( CharacterLevel );
+	InitDefaultAttributes( GetCharacterLevel() );
 	check( AttributeSet );
 	GetCharacterMovement()->MaxWalkSpeed = BaseMaxWalkSpeed;
 
@@ -74,6 +81,21 @@ void AAuraEnemyCharacter::BeginPlay()
 	SetupFloatingWidget();
 	GrantDefaultAbilities();
 	InitReactionOnBeingHit();
+
+	if ( HasAuthority() )
+	{
+		if ( GetMesh() && GetMesh()->GetSkinnedAsset() == nullptr )
+		{
+			UE_LOG( LogTemp, Error, TEXT( "Client: Enemy has NO mesh!" ) );
+		}
+	}
+	else
+	{
+		if ( GetMesh() && GetMesh()->GetSkinnedAsset() == nullptr )
+		{
+			UE_LOG( LogTemp, Error, TEXT( "Client: Enemy has NO mesh!" ) );
+		}
+	}
 }
 
 UAuraEnemyOverlayWC* AAuraEnemyCharacter::GetOverlayWC() const

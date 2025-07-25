@@ -2,6 +2,7 @@
 
 #include "GAS/AuraAbilitySystemComponent.h"
 
+#include "AuraGameplayTags.h"
 #include "GAS/Abilities/AuraGameplayAbility.h"
 
 void UAuraAbilitySystemComponent::Init()
@@ -35,6 +36,18 @@ void UAuraAbilitySystemComponent::GrantAbilities( const TArray<TSubclassOf<UGame
 
 		GiveAbility( AbilitySpec );
 	}
+
+	bStartupAbilitiesGranted = true;
+	OnAbilitiesGrantedDelegate.Broadcast( this );
+}
+
+void UAuraAbilitySystemComponent::GrantPassiveAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses, int AbilitiesLevel )
+{
+	for ( auto AbilityClass : AbilityClasses )
+	{
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec( AbilityClass, AbilitiesLevel );
+		GiveAbilityAndActivateOnce( AbilitySpec );
+	}
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagPressed( const FGameplayTag& InputTag )
@@ -59,6 +72,62 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld( const FGameplayTag& Input
 				TryActivateAbility( AbilitySpec.Handle );
 			}
 		}
+	}
+}
+
+void UAuraAbilitySystemComponent::ForEachAbility( const FForEachAbility& Delegate )
+{
+	FScopedAbilityListLock ActiveScopeLock( *this );
+	for ( const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
+	{
+		if ( !Delegate.ExecuteIfBound( AbilitySpec ) )
+		{
+			UE_LOG( LogTemp, Error, TEXT( "Failed to execute delegate in %hs" ), __FUNCTION__ );
+		}
+	}
+}
+
+FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec( const FGameplayAbilitySpec& AbilitySpec )
+{
+	if ( AbilitySpec.Ability )
+	{
+		for ( FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags )
+		{
+			if ( Tag.MatchesTag( FGameplayTag::RequestGameplayTag( FName( "Abilities" ) ) ) )
+			{
+				return Tag;
+			}
+		}
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec( const FGameplayAbilitySpec& AbilitySpec )
+{
+	for ( FGameplayTag Tag : AbilitySpec.DynamicAbilityTags )
+	{
+		// could it work?
+		// FAuraGameplayTags::Get().InputPrefix;
+		if ( Tag.MatchesTag( FGameplayTag::RequestGameplayTag( FName( "AuraInput" ) ) ) )
+		{
+			return Tag;
+		}
+	}
+	return FGameplayTag();
+}
+
+void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
+{
+	Super::OnRep_ActivateAbilities();
+
+	// We do these lines on server to send info about abilities to widgets
+	// so the spell globes could set theirs ability icons
+	// But to call these lines on cline we should use OnRep
+	// Not sure if ActivateAbilities will be called after all abilities are set.
+	if ( !bStartupAbilitiesGranted )
+	{
+		bStartupAbilitiesGranted = true;
+		OnAbilitiesGrantedDelegate.Broadcast( this );
 	}
 }
 

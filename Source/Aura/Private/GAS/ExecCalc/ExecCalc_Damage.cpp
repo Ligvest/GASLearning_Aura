@@ -109,12 +109,12 @@ void UExecCalc_Damage::Execute_Implementation( const FGameplayEffectCustomExecut
 	CalcInfo.CharacterClassInfo = UAuraGasBpLibrary::GetCharacterClassInfoDA( TargetAvatar );
 	if ( CalcInfo.SourceCombatInterface )
 	{
-		CalcInfo.SourceActorLevel = CalcInfo.SourceCombatInterface->GetActorLevel();
+		CalcInfo.SourceActorLevel = CalcInfo.SourceCombatInterface->GetCharacterLevel();
 	}
 
 	if ( CalcInfo.TargetCombatInterface )
 	{
-		CalcInfo.TargetActorLevel = CalcInfo.TargetCombatInterface->GetActorLevel();
+		CalcInfo.TargetActorLevel = CalcInfo.TargetCombatInterface->GetCharacterLevel();
 	}
 
 	// Captured Damage with Values_Damage tag from SetByCaller

@@ -25,9 +25,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	FORCEINLINE int GetCharacterLevel() const { return CharacterLevel; }
-	FORCEINLINE void SetCharacterLevel( int NewValue ) { CharacterLevel = NewValue; }
-
 	UFUNCTION()
 	void Rep_CharacterLevel( int OldCharacterLevel );
 
@@ -36,7 +33,7 @@ public:
 	//~ End of IAbilitySystemInterface
 
 	//~ Begin of ICombatInterface
-	virtual int GetActorLevel() const override { return GetCharacterLevel(); };
+	virtual int GetCharacterLevel() const override;
 	virtual FVector GetCombatSocketLocation_Implementation( FGameplayTag MontageAttackTag ) const override;
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	virtual void Die() override;
@@ -49,9 +46,8 @@ public:
 	virtual int GetMinionsCount_Implementation() override;
 	virtual void AddMinionsCount_Implementation( int Value ) override;
 	virtual void SetMasterActor_Implementation( AActor* InMasterActor ) override;
+	virtual ECharacterClass GetCharacterClass_Implementation() const override;
 	//~ End of ICombatInterface
-
-	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
 
 	// Death and dissolve
 	UFUNCTION( NetMulticast, Reliable )
@@ -134,11 +130,11 @@ protected:
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Combat" )
 	AAuraCharacterBase* MasterActor;
 
-	UPROPERTY( EditAnywhere, BlueprintReadOnly, ReplicatedUsing = Rep_CharacterLevel )
-	int CharacterLevel = 1;
-
 	UPROPERTY( EditDefaultsOnly )
 	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilityClasses;
+
+	UPROPERTY( EditDefaultsOnly )
+	TArray<TSubclassOf<UGameplayAbility>> DefaultPassiveAbilityClasses;
 
 	// Death and Dissolve
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Death" )

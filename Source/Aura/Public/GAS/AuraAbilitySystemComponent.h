@@ -7,6 +7,9 @@
 #include "AuraAbilitySystemComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam( FOnEffectWithTagsApplied, const FGameplayTagContainer& /* TagContainer */ );
+DECLARE_MULTICAST_DELEGATE_OneParam( FOnAbilitiesGrantedDelegate, UAuraAbilitySystemComponent* /* AuraASC */ );
+DECLARE_DELEGATE_OneParam( FForEachAbility, const FGameplayAbilitySpec& );
+
 /**
  *
  */
@@ -17,14 +20,23 @@ class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
 public:
 	void Init();
 
+	bool bStartupAbilitiesGranted = false;
+
 	FOnEffectWithTagsApplied OnEffectWithTagsAppliedDelegate;
+	FOnAbilitiesGrantedDelegate OnAbilitiesGrantedDelegate;
 
 	void GrantAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses, int AbilitiesLevel = 1 );
+	void GrantPassiveAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses, int AbilitiesLevel = 1 );
 	void AbilityInputTagPressed( const FGameplayTag& InputTag );
 	void AbilityInputTagReleased( const FGameplayTag& InputTag );
 	void AbilityInputTagHeld( const FGameplayTag& InputTag );
+	void ForEachAbility( const FForEachAbility& Delegate );
 
-private:
+	static FGameplayTag GetAbilityTagFromSpec( const FGameplayAbilitySpec& AbilitySpec );
+	static FGameplayTag GetInputTagFromSpec( const FGameplayAbilitySpec& AbilitySpec );
+
+protected:
+	virtual void OnRep_ActivateAbilities() override;
 	void InitSubscriptions();
 
 	/** OnGameplayEffectAppliedDelegateToSelf Called on server whenever a GE is applied to self. This includes instant and duration based GEs. */

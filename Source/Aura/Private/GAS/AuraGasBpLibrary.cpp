@@ -166,6 +166,21 @@ FName UAuraGasBpLibrary::GetOpponentActorTag( const AActor* Actor )
 	return FName();
 }
 
+int32 UAuraGasBpLibrary::GetXpRewardForClassAndLevel( const UObject* WorldContextObject, ECharacterClass CharacterClass, int32 Level )
+{
+	UAuraCharacterClassInfoDA* CharacterClassInfoDA = UAuraGasBpLibrary::GetCharacterClassInfoDA( WorldContextObject );
+	if ( !CharacterClassInfoDA )
+	{
+		return 0;
+	}
+
+	const FCharacterClassDefaultInfo& ClassInfo = CharacterClassInfoDA->GetClassDefaultInfo( CharacterClass );
+
+	const float XpReward = ClassInfo.XpReward.GetValueAtLevel( Level );
+
+	return static_cast<int32>( XpReward );
+}
+
 // I believe this function should be called after PlayerState replicated and is up to date
 FWidgetControllerParams UAuraGasBpLibrary::GetWidgetControllerParams( const UObject* WorldContext )
 {

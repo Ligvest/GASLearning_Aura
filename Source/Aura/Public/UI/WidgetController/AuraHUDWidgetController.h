@@ -26,8 +26,13 @@ struct FEffectMessageRow : public FTableRowBase
 	UTexture2D* EffectImage;
 };
 
+// FWD
+class UAuraAbilityInfo_DA;
+class UAuraAbilitySystemComponent;
+
 // Delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FEffectMessageRowDelegate, const FEffectMessageRow&, TagMessageRow );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FAbilityInfoSignature, const FAuraAbilityInfo&, AbilityInfo );
 
 /**
  *
@@ -52,13 +57,29 @@ public:
 	FOnAttributeChangedSignature OnMaxManaChanged;
 
 	UPROPERTY( BlueprintAssignable )
+	FOnAttributeChangedSignature OnXpPercentageChangedDelegate;
+
+	UPROPERTY( BlueprintAssignable )
+	FOnPlayerStatChangedDynamicSignature OnPlayerLevelChangedDynamicDelegate;
+
+	UPROPERTY( BlueprintAssignable )
 	FEffectMessageRowDelegate EffectMessageRowDelegate;
+
+	UPROPERTY( BlueprintAssignable )
+	FAbilityInfoSignature AbilityInfoDelegate;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Abilities" )
+	TObjectPtr<UAuraAbilityInfo_DA> AbilityInfoDataAsset;
 
 protected:
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "Tag message" )
 	TObjectPtr<UDataTable> EffectMessageTable;
 
+	// Callbacks
+	void OnXpChanged( int32 NewXP ) const;
+
 	void OnEffectWithTagsApplied( const FGameplayTagContainer& TagContainer ) const;
+	void OnAbilitiesGranted( UAuraAbilitySystemComponent* AuraASC ) const;
 	// Here we bind callbacks to be called whenever our attributes changes ( damage to Health etc. )
 	virtual void BindCallbacksToAttributeChanges() const override;
 

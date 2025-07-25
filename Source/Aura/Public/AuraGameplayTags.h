@@ -48,6 +48,7 @@ public:
 	FGameplayTag Values_Damage_Fire;
 	FGameplayTag Values_Damage_Lightning;
 	FGameplayTag Values_Damage_Physical;
+	FGameplayTag Values_XP;
 
 	FGameplayTag Attributes_Resistance_Arcane;
 	FGameplayTag Attributes_Resistance_Fire;
@@ -59,6 +60,10 @@ public:
 	// Ability Tags
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
+	FGameplayTag Abilities_Fire_FireBolt;
+
+	// Cooldown Tags
+	FGameplayTag Cooldowns_Fire_FireBolt;
 
 	// Status Effects Tags
 	FGameplayTag Effects_HitReact;
@@ -75,15 +80,21 @@ public:
 	FGameplayTag CombatSocket_RightHand;
 	FGameplayTag CombatSocket_Tail;
 
+	// Meta Attribute Tags
+	FGameplayTag Attributes_Meta_IncomingXP;
+
 private:
 	static FAuraGameplayTags GameplayTags;
 	const FString SecondaryAttributesPrefix{ "Attributes.Secondary." };
 	const FString ResistanceAttributesPrefix{ "Attributes.Resistance." };
+	const FString MetaAttributesPrefix{ "Attributes.Meta." };
 	const FString PrimaryAttributesPrefix{ "Attributes.Primary." };
-	const FString AbilitiesPrefix{ "Abilities." };
 	const FString InputPrefix{ "AuraInput." };
 	const FString DamageTypePrefix{ "Values.Damage." };
 	const FString EffectsPrefix{ "Effects." };
 	const FString MontageAttackPrefix{ "Montage.Attack." };
 	const FString CombatSocketPrefix{ "CombatSocket." };
+	const FString AbilitiesPrefix{ "Abilities." };
+	const FString CooldownsPrefix{ "Cooldowns." };
+	const FString ValuesPrefix{ "Values." };
 };

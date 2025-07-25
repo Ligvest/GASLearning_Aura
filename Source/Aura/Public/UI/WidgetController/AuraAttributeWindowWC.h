@@ -21,6 +21,12 @@ public:
 	UPROPERTY( BlueprintAssignable )
 	FOnAttributeInfoChanged OnAttributeInfoChanged;
 
+	UPROPERTY( BlueprintAssignable )
+	FOnPlayerStatChangedDynamicSignature OnAttributePointsChangedDynamicDelegate;
+
+	UPROPERTY( BlueprintAssignable )
+	FOnPlayerStatChangedDynamicSignature OnSpellPointsChangedDynamicDelegate;
+
 protected:
 	UFUNCTION( BlueprintCallable )
 	virtual void BindCallbacksToAttributeChanges() const override;

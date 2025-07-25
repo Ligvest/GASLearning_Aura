@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "GAS/Data/AuraCharacterClassInfoDA.h"
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
@@ -45,7 +46,7 @@ class AURA_API ICombatInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual int GetActorLevel() const = 0;
+	virtual int GetCharacterLevel() const = 0;
 
 	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
 	FVector GetCombatSocketLocation( FGameplayTag MontageAttackTag ) const;
@@ -90,4 +91,7 @@ public:
 
 	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
 	void SetMasterActor( AActor* InMasterActor );
+
+	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
+	ECharacterClass GetCharacterClass() const;
 };

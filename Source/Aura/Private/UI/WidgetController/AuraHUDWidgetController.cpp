@@ -4,6 +4,9 @@
 
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
+#include "GAS/Data/AuraAbilityInfo_DA.h"
+#include "GAS/Data/AuraLevelUpInfo_DA.h"
+#include "Player/AuraPlayerState.h"
 
 void UAuraHUDWidgetController::BroadcastInitialValues() const
 {
@@ -12,6 +15,9 @@ void UAuraHUDWidgetController::BroadcastInitialValues() const
 	OnMaxHealthChanged.Broadcast( AuraAttributeSet->GetMaxHealth() );
 	OnManaChanged.Broadcast( AuraAttributeSet->GetMana() );
 	OnMaxManaChanged.Broadcast( AuraAttributeSet->GetMaxMana() );
+
+	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
+	OnXpChanged( AuraPS->GetXP() );
 }
 
 void UAuraHUDWidgetController::BindCallbacksToAttributeChanges() const
@@ -43,6 +49,40 @@ void UAuraHUDWidgetController::BindCallbacksToAttributeChanges() const
 
 	// Bind OnEffectWithTagsApplied to call when an effect with tags is applied
 	AuraASC->OnEffectWithTagsAppliedDelegate.AddUObject( this, &UAuraHUDWidgetController::OnEffectWithTagsApplied );
+
+	// PS Broadcasts to every client. But here we subscribe only to our own PSs OnPlayerStatChangedDelegate
+	// Thats why on LevelUp or other broadcast only 1 OnPlayerStatChangedDynamicDelegate is broadcasted
+	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
+	AuraPS->OnXpChangedDelegate.AddUObject( this, &UAuraHUDWidgetController::OnXpChanged );
+	AuraPS->OnLevelChangedDelegate.AddLambda( [this]( int32 NewValue ) { OnPlayerLevelChangedDynamicDelegate.Broadcast( NewValue ); } );
+
+	if ( AuraASC->bStartupAbilitiesGranted )
+	{
+		OnAbilitiesGranted( AuraASC );
+	}
+	else
+	{
+		// TODO: Should I do it in "else"?
+		AuraASC->OnAbilitiesGrantedDelegate.AddUObject( this, &UAuraHUDWidgetController::OnAbilitiesGranted );
+	}
+}
+
+void UAuraHUDWidgetController::OnXpChanged( int32 NewXP ) const
+{
+	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
+	const int CurrentLevel = AuraPS->LevelUpInfo_DA->FindLevelForXp( NewXP );
+	const int PreviousLevel = CurrentLevel - 1;
+
+	// The level can't be less than 1 and we have a placeholder for level 0 in LevelUpInfo so we don't need to check it
+	const int PrevLevelMaxXP = AuraPS->LevelUpInfo_DA->FindLevelUpInfoForLevel( PreviousLevel ).LevelUpXpRequirement;
+	const int CurrentLevelMaxXP = AuraPS->LevelUpInfo_DA->FindLevelUpInfoForLevel( CurrentLevel ).LevelUpXpRequirement;
+
+	const float XpAmountInProgressBar = static_cast<float>( NewXP - PrevLevelMaxXP );
+	const float XpAmountToFillProgressBar = static_cast<float>( CurrentLevelMaxXP - PrevLevelMaxXP );
+
+	const float XpBarPercent = XpAmountInProgressBar / XpAmountToFillProgressBar;
+
+	OnXpPercentageChangedDelegate.Broadcast( XpBarPercent );
 }
 
 void UAuraHUDWidgetController::OnEffectWithTagsApplied( const FGameplayTagContainer& TagContainer ) const
@@ -56,4 +96,21 @@ void UAuraHUDWidgetController::OnEffectWithTagsApplied( const FGameplayTagContai
 			EffectMessageRowDelegate.Broadcast( *EffectMessageRow );
 		}
 	}
+}
+
+void UAuraHUDWidgetController::OnAbilitiesGranted( UAuraAbilitySystemComponent* AuraASC ) const
+{
+	// TODO Get information about all given abilities, look up their Ability Info, and broadcast it to widgets.
+	FForEachAbility BroadcastDelegate;
+	BroadcastDelegate.BindLambda(
+	    [this, AuraASC]( const FGameplayAbilitySpec& AbilitySpec )
+	    {
+		    // TODO need a way to figure out the ability tag for a given ability spec.
+		    FGameplayTag AbilityTag = AuraASC->GetAbilityTagFromSpec( AbilitySpec );
+		    FAuraAbilityInfo AbilityInfo = AbilityInfoDataAsset->FindAbilityInfoForTag( AbilityTag );
+		    AbilityInfo.InputTag = AuraASC->GetInputTagFromSpec( AbilitySpec );
+		    AbilityInfoDelegate.Broadcast( AbilityInfo );
+	    } );
+
+	AuraASC->ForEachAbility( BroadcastDelegate );
 }

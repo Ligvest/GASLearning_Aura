@@ -29,6 +29,7 @@ struct FWidgetControllerParams
 
 // Delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnAttributeChangedSignature, float, NewValue );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnPlayerStatChangedDynamicSignature, const int32, NewValue );
 
 /**
  *

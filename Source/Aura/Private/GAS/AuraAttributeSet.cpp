@@ -1,12 +1,15 @@
 // Dovzhik Tolya
 
 #include "GAS/AuraAttributeSet.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AuraGameplayTags.h"
 #include "GameplayEffectExtension.h"
 #include "GAS/AuraGasBpLibrary.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
+#include "Interaction/PlayerInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/AuraPlayerController.h"
@@ -221,55 +224,135 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 		SetMana( FMath::Clamp( GetMana(), 0.0f, GetMaxMana() ) );
 	}
 
+	// IncomingDamage Meta Attribute
 	if ( Data.EvaluatedData.Attribute == GetIncomingDamageAttribute() )
 	{
-		// Consume damage
-		float ReceivedDamage = GetIncomingDamage();
-		SetIncomingDamage( 0.f );
+		ProcessIncomingDamage( ContextHandle );
+	}
 
-		float NewHealth = GetHealth() - ReceivedDamage;
-		SetHealth( std::clamp( NewHealth, 0.0f, GetMaxHealth() ) );
+	// IncomingXP Meta Attribute
+	if ( Data.EvaluatedData.Attribute == GetIncomingXPAttribute() )
+	{
+		ProcessIncomingXP( ContextHandle );
+	}
+}
 
-		bool bFatal = NewHealth <= 0.f;
-		if ( bFatal )
+void UAuraAttributeSet::ProcessIncomingDamage( const FGameplayEffectContextHandle& ContextHandle )
+{
+	// Consume damage
+	float ReceivedDamage = GetIncomingDamage();
+	SetIncomingDamage( 0.f );
+
+	float NewHealth = GetHealth() - ReceivedDamage;
+	SetHealth( std::clamp( NewHealth, 0.0f, GetMaxHealth() ) );
+
+	bool bFatal = NewHealth <= 0.f;
+	if ( bFatal )
+	{
+		ProcessDeath();
+	}
+	else
+	{
+		FGameplayTagContainer TagContainer;
+		TagContainer.AddTag( FAuraGameplayTags::Get().Effects_HitReact );
+		EffectTargetProperties.ASC->TryActivateAbilitiesByTag( TagContainer );
+	}
+
+	ShowFloatingDamage( ContextHandle, ReceivedDamage );
+}
+
+void UAuraAttributeSet::ProcessIncomingXP( const FGameplayEffectContextHandle& ContextHandle )
+{
+	// Source Character is the owner, since GA_ListenForEvents applies GE_EventBasedEffect, adding to IncomingXP
+	ACharacter* TargetCharacter = EffectTargetProperties.Character;
+	ICombatInterface* CombatInterface = Cast<ICombatInterface>( TargetCharacter );
+	if ( TargetCharacter->Implements<UPlayerInterface>() )
+	{
+		float ReceivedXP = GetIncomingXP();
+		SetIncomingXP( 0.f );
+		UE_LOG( LogTemp, Warning, TEXT( "IncomingXP: %f" ), ReceivedXP );
+
+		const int32 CurrentLevel = CombatInterface->GetCharacterLevel();
+		const int32 CurrentXP = IPlayerInterface::Execute_GetXP( TargetCharacter );
+
+		const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP( TargetCharacter, CurrentXP + ReceivedXP );
+		const int32 NumLevelUps = NewLevel - CurrentLevel;
+		if ( NumLevelUps > 0 )
 		{
-			// You are dead
-			ICombatInterface* CombatActor = Cast<ICombatInterface>( EffectTargetProperties.AvatarActor );
-			if ( CombatActor )
-			{
-				CombatActor->Die();
-			}
-		}
-		else
-		{
-			FGameplayTagContainer TagContainer;
-			TagContainer.AddTag( FAuraGameplayTags::Get().Effects_HitReact );
-			EffectTargetProperties.ASC->TryActivateAbilitiesByTag( TagContainer );
+			const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward( TargetCharacter, CurrentLevel );
+			const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward( TargetCharacter, CurrentLevel );
+
+			IPlayerInterface::Execute_AddToPlayerLevel( TargetCharacter, NumLevelUps );
+			IPlayerInterface::Execute_AddToAttributePoints( TargetCharacter, AttributePointsReward );
+			IPlayerInterface::Execute_AddToSpellPoints( TargetCharacter, SpellPointsReward );
+
+			SetHealth( GetMaxHealth() );
+			SetMana( GetMaxMana() );
+
+			IPlayerInterface::Execute_LevelUp( TargetCharacter );
 		}
 
-		// AuraAttributeSet is just a UObject which doesn't know about world so using TargetActor for world context object
-		// We can't use UGameplayStatics::GetPlayerController as the PostGameplayEffectExecute is executed only on Server
-		// so we would always get Server's local controller
-		// ShowDamageNumber is replicated to all clients. All Controllers exist on Server. But only one exists on each Client
-		// That's why the Damage Numbers appear only on a client with this controller
-		AAuraPlayerController* AuraPC = EffectSourceProperties.Character->GetController<AAuraPlayerController>();
-		if ( AuraPC && ( EffectSourceProperties.Character != EffectTargetProperties.Character ) )
-		{
-			bool bIsBlockedHit = UAuraGasBpLibrary::IsBlockedHit( ContextHandle );
-			bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
-			AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
-			return;
-		}
+		IPlayerInterface::Execute_AddToXP( TargetCharacter, ReceivedXP );
+	}
+}
 
+void UAuraAttributeSet::ProcessDeath()
+{
+	// You are dead
+	AActor* TargetActor = EffectTargetProperties.AvatarActor;
+	ICombatInterface* CombatActor = Cast<ICombatInterface>( TargetActor );
+	if ( CombatActor )
+	{
+		CombatActor->Die();
+
+		// Send Event With XP
+		ECharacterClass CharacterClass = ICombatInterface::Execute_GetCharacterClass( TargetActor );
+		int32 CharacterLevel = CombatActor->GetCharacterLevel();
+		int32 XpReward = UAuraGasBpLibrary::GetXpRewardForClassAndLevel( TargetActor, CharacterClass, CharacterLevel );
+		const FAuraGameplayTags& Tags = FAuraGameplayTags::Get();
+		FGameplayEventData Payload;
+		// Seems like it's being overriden to the function argument whether I set it before or not
+		// Payload.EventTag = Tags.Values_XP;
+		Payload.EventMagnitude = XpReward;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor( EffectSourceProperties.Character, Tags.Attributes_Meta_IncomingXP, Payload );
+	}
+}
+void UAuraAttributeSet::ShowFloatingDamage( const FGameplayEffectContextHandle& ContextHandle, const int ReceivedDamage ) const
+{
+	// AuraAttributeSet is just a UObject which doesn't know about world so using TargetActor for world context object
+	// We can't use UGameplayStatics::GetPlayerController as the PostGameplayEffectExecute is executed only on Server
+	// so we would always get Server's local controller
+	// ShowDamageNumber is replicated to all clients. All Controllers exist on Server. But only one exists on each Client
+	// That's why the Damage Numbers appear only on a client with this controller
+	AAuraPlayerController* AuraPC = EffectSourceProperties.Character->GetController<AAuraPlayerController>();
+	// If Player is not Attacker
+	if ( !AuraPC )
+	{
 		// To show numbers when player is being attacked by enemies
 		AuraPC = EffectTargetProperties.Character->GetController<AAuraPlayerController>();
-		if ( AuraPC && ( EffectSourceProperties.Character != EffectTargetProperties.Character ) )
-		{
-			bool bIsBlockedHit = UAuraGasBpLibrary::IsBlockedHit( ContextHandle );
-			bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
-			AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
-		}
 	}
+	// If Player is not Being Attacked
+	if ( !AuraPC )
+	{
+		return;
+	}
+
+	if ( EffectSourceProperties.Character != EffectTargetProperties.Character )
+	{
+		bool bIsBlockedHit = UAuraGasBpLibrary::IsBlockedHit( ContextHandle );
+		bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
+		AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
+	}
+
+	/*
+	AuraPC = EffectTargetProperties.Character->GetController<AAuraPlayerController>();
+	if ( AuraPC && ( EffectSourceProperties.Character != EffectTargetProperties.Character ) )
+	{
+	    bool bIsBlockedHit = UAuraGasBpLibrary::IsBlockedHit( ContextHandle );
+	    bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
+	    AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
+	}
+*/
 }
 
 void UAuraAttributeSet::FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC, const FGameplayEffectContextHandle ContextHandle )

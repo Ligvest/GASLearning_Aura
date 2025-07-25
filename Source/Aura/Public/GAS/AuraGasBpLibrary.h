@@ -69,6 +69,9 @@ public:
 	UFUNCTION( BlueprintPure, Category = "Tags" )
 	static bool HasPlayerActorTag( const AActor* Actor ) { return Actor->ActorHasTag( GetPlayerActorTag() ); };
 
+	UFUNCTION( BlueprintPure, Category = "Tags" )
+	static int32 GetXpRewardForClassAndLevel( const UObject* WorldContextObject, ECharacterClass CharacterClass, int32 Level );
+
 private:
 	static FWidgetControllerParams GetWidgetControllerParams( const UObject* WorldContext );
 };

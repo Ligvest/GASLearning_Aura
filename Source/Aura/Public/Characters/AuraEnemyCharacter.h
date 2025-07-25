@@ -21,6 +21,10 @@ public:
 	virtual AActor* GetCombatActor_Implementation() const override;
 	//~ End of IEnemyInterface
 
+	//~ Begin of ICombatInterface
+	virtual int GetCharacterLevel() const override;
+	//~ End of ICombatInterface
+
 	AAuraEnemyCharacter();
 	virtual void BeginPlay() override;
 
@@ -52,6 +56,9 @@ protected:
 	// Death and Dissolve
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Death" )
 	float CorpseLifeSpan = 5.f;
+
+	UPROPERTY( EditAnywhere, BlueprintReadOnly, Category = "Combat" )
+	int32 EnemyLevel = 1;
 
 	UPROPERTY()
 	TObjectPtr<AAuraAIController> AuraAIController;

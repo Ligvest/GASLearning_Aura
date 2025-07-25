@@ -3,19 +3,101 @@
 #include "Characters/AuraPlayerCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "NiagaraComponent.h"
+#include "Camera/CameraComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraGasBpLibrary.h"
+#include "GAS/Data/AuraLevelUpInfo_DA.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/GameSession.h"
-#include "Kismet/GameplayStatics.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Player/AuraPlayerState.h"
 #include "UI/HUD/AuraHUD.h"
+
+int32 AAuraPlayerCharacter::FindLevelForXP_Implementation( int32 InXP ) const
+{
+	check( AuraPS );
+	return AuraPS->LevelUpInfo_DA->FindLevelForXp( InXP );
+}
+
+void AAuraPlayerCharacter::AddToXP_Implementation( int32 XpToAdd )
+{
+	check( AuraPS );
+	AuraPS->AddToXP( XpToAdd );
+}
+
+int32 AAuraPlayerCharacter::GetXP_Implementation() const
+{
+	check( AuraPS );
+	return AuraPS->GetXP();
+}
+
+void AAuraPlayerCharacter::AddToPlayerLevel_Implementation( int32 LevelToAdd )
+{
+	check( AuraPS );
+	AuraPS->AddToLevel( LevelToAdd );
+}
+
+void AAuraPlayerCharacter::LevelUp_Implementation()
+{
+	MulticastLevelUpParticles();
+}
+
+void AAuraPlayerCharacter::MulticastLevelUpParticles_Implementation() const
+{
+	if ( IsValid( LevelUpNiagaraComponent ) )
+	{
+		const FVector CameraLocation = TopDownCameraComponent->GetComponentLocation();
+		const FVector NiagaraSystemLocation = LevelUpNiagaraComponent->GetComponentLocation();
+		const FRotator ToCameraRotation = ( CameraLocation - NiagaraSystemLocation ).Rotation();
+		LevelUpNiagaraComponent->SetWorldRotation( ToCameraRotation );
+		LevelUpNiagaraComponent->Activate( true );
+	}
+}
+
+void AAuraPlayerCharacter::AddToAttributePoints_Implementation( int32 InAttributePoints )
+{
+	// TODO: AddToAttributePoints
+	// check( AuraPS );
+}
+
+int32 AAuraPlayerCharacter::GetAttributePointsReward_Implementation( int32 Level ) const
+{
+	check( AuraPS );
+	FAuraLevelUpInfo LevelUpInfo = AuraPS->LevelUpInfo_DA->FindLevelUpInfoForLevel( Level );
+	return LevelUpInfo.AttributePointsReward;
+}
+
+void AAuraPlayerCharacter::AddToSpellPoints_Implementation( int32 InSpellPoints )
+{
+	// TODO: AddToSpellPoints
+	// check( AuraPS );
+}
+
+int32 AAuraPlayerCharacter::GetSpellPointsReward_Implementation( int32 Level ) const
+{
+	check( AuraPS );
+	FAuraLevelUpInfo LevelUpInfo = AuraPS->LevelUpInfo_DA->FindLevelUpInfoForLevel( Level );
+	return LevelUpInfo.SpellPointsReward;
+}
 
 AAuraPlayerCharacter::AAuraPlayerCharacter()
 {
 	CharacterClass = ECharacterClass::Player;
 
 	Tags.Add( UAuraGasBpLibrary::GetPlayerActorTag() );
+
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>( "CameraBoom" );
+	CameraBoom->SetupAttachment( GetRootComponent() );
+	CameraBoom->SetUsingAbsoluteRotation( true );
+	CameraBoom->bDoCollisionTest = false;
+
+	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>( "TopDownCameraComponent" );
+	TopDownCameraComponent->SetupAttachment( CameraBoom, USpringArmComponent::SocketName );
+	TopDownCameraComponent->bUsePawnControlRotation = false;
+
+	LevelUpNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>( "LevelUpNiagaraComponent" );
+	LevelUpNiagaraComponent->SetupAttachment( GetRootComponent() );
+	LevelUpNiagaraComponent->bAutoActivate = false;
 
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	check( MovementComponent );
@@ -46,6 +128,8 @@ void AAuraPlayerCharacter::PossessedBy( AController* NewController )
 {
 	Super::PossessedBy( NewController );
 
+	AuraPS = CastChecked<AAuraPlayerState>( GetPlayerState() );
+
 	// For initializing AbilityComponent we use PossessedBy because without controlling the character the abilities don't make sense
 	// Init ability actor info for Server
 	InitGASInfoAndHUD();
@@ -57,11 +141,14 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
+	AuraPS = CastChecked<AAuraPlayerState>( GetPlayerState() );
+
 	// For initializing AbilityComponent we use OnRep_PlayerState instead of AknowledgePossession on a client
 	// because we need to be sure that PlayerState is replicated and has all valid data so we can use it
 	// Init ability actor info for Client
 	InitGASInfoAndHUD();
 }
+
 void AAuraPlayerCharacter::InitGASInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
@@ -73,7 +160,7 @@ void AAuraPlayerCharacter::InitGASInfo()
 	AuraASC->Init();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 	// It can be called only on the server as attributes will be replicated regardless
-	InitDefaultAttributes( CharacterLevel );
+	InitDefaultAttributes( GetCharacterLevel() );
 }
 void AAuraPlayerCharacter::InitHUD() const
 {
