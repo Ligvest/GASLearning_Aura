@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraAttributeWindowWC.generated.h"
 
@@ -27,12 +28,15 @@ public:
 	UPROPERTY( BlueprintAssignable )
 	FOnPlayerStatChangedDynamicSignature OnSpellPointsChangedDynamicDelegate;
 
+	UFUNCTION( BlueprintCallable )
+	void UpgradeAttribute( const FGameplayTag AttributeTag );
+
 protected:
 	UFUNCTION( BlueprintCallable )
-	virtual void BindCallbacksToAttributeChanges() const override;
+	virtual void BindCallbacksToAttributeChanges() override;
 
 	UFUNCTION( BlueprintCallable )
-	virtual void BroadcastInitialValues() const override;
+	virtual void BroadcastInitialValues() override;
 
 	UPROPERTY( EditDefaultsOnly )
 	TObjectPtr<UAuraAttributeInfoDataAsset> AttributeInfoDataAsset;

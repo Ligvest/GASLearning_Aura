@@ -8,6 +8,11 @@
 
 class UAttributeSet;
 class UAbilitySystemComponent;
+class UAuraAbilityInfo_DA;
+class AAuraPlayerController;
+class AAuraPlayerState;
+class UAuraAbilitySystemComponent;
+class UAuraAttributeSet;
 
 USTRUCT( BlueprintType )
 struct FWidgetControllerParams
@@ -30,6 +35,7 @@ struct FWidgetControllerParams
 // Delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnAttributeChangedSignature, float, NewValue );
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnPlayerStatChangedDynamicSignature, const int32, NewValue );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FAbilityInfoSignature, const FAuraAbilityInfo&, AbilityInfo );
 
 /**
  *
@@ -43,12 +49,21 @@ public:
 	UFUNCTION( BlueprintCallable )
 	void SetWidgetControllerParams( const FWidgetControllerParams& WidgetControllerParams );
 
-	virtual void BroadcastInitialValues() const;
+	virtual void BroadcastInitialValues();
+
+	UPROPERTY( BlueprintAssignable )
+	FAbilityInfoSignature AbilityInfoDelegate;
+
+	void BroadcastAbilityInfo();
 
 protected:
-	virtual void BindCallbacksToAttributeChanges() const;
+	UPROPERTY( EditDefaultsOnly, Category = "Abilities" )
+	TObjectPtr<UAuraAbilityInfo_DA> AbilityInfoDataAsset;
 
-	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" ) TObjectPtr<APlayerState> PlayerState;
+	virtual void BindCallbacksToAttributeChanges();
+
+	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
+	TObjectPtr<APlayerState> PlayerState;
 
 	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
 	TObjectPtr<APlayerController> PlayerController;
@@ -58,4 +73,21 @@ protected:
 
 	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
+	TObjectPtr<AAuraPlayerController> AuraPlayerController;
+
+	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
+	TObjectPtr<AAuraPlayerState> AuraPlayerState;
+
+	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
+	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent;
+
+	UPROPERTY( BlueprintReadOnly, Category = "WidgetController" )
+	TObjectPtr<UAuraAttributeSet> AuraAttributeSet;
+
+	AAuraPlayerController* GetAuraPC();
+	AAuraPlayerState* GetAuraPS();
+	UAuraAbilitySystemComponent* GetAuraASC();
+	UAuraAttributeSet* GetAuraAS();
 };

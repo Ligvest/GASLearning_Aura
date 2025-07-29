@@ -7,7 +7,7 @@
 #include "AuraAbilitySystemComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam( FOnEffectWithTagsApplied, const FGameplayTagContainer& /* TagContainer */ );
-DECLARE_MULTICAST_DELEGATE_OneParam( FOnAbilitiesGrantedDelegate, UAuraAbilitySystemComponent* /* AuraASC */ );
+DECLARE_MULTICAST_DELEGATE( FOnAbilitiesGrantedDelegate );
 DECLARE_DELEGATE_OneParam( FForEachAbility, const FGameplayAbilitySpec& );
 
 /**
@@ -31,6 +31,11 @@ public:
 	void AbilityInputTagReleased( const FGameplayTag& InputTag );
 	void AbilityInputTagHeld( const FGameplayTag& InputTag );
 	void ForEachAbility( const FForEachAbility& Delegate );
+
+	void UpgradeAttribute( const FGameplayTag AttributeTag );
+
+	UFUNCTION( Server, Reliable )
+	void ServerUpgradeAttribute( const FGameplayTag& AttributeTag );
 
 	static FGameplayTag GetAbilityTagFromSpec( const FGameplayAbilitySpec& AbilitySpec );
 	static FGameplayTag GetInputTagFromSpec( const FGameplayAbilitySpec& AbilitySpec );

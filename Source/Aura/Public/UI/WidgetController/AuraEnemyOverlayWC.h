@@ -16,7 +16,7 @@ class AURA_API UAuraEnemyOverlayWC : public UAuraWidgetController
 
 public:
 	UFUNCTION( BlueprintCallable )
-	virtual void BroadcastInitialValues() const override;
+	virtual void BroadcastInitialValues() override;
 
 	UPROPERTY( BlueprintAssignable )
 	FOnAttributeChangedSignature OnHealthChanged;
@@ -25,5 +25,5 @@ public:
 	FOnAttributeChangedSignature OnMaxHealthChanged;
 
 protected:
-	virtual void BindCallbacksToAttributeChanges() const override;
+	virtual void BindCallbacksToAttributeChanges() override;
 };

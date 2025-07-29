@@ -56,8 +56,20 @@ void AAuraPlayerCharacter::MulticastLevelUpParticles_Implementation() const
 
 void AAuraPlayerCharacter::AddToAttributePoints_Implementation( int32 InAttributePoints )
 {
-	// TODO: AddToAttributePoints
-	// check( AuraPS );
+	check( AuraPS );
+	AuraPS->AddToAttributePoints( InAttributePoints );
+}
+
+int32 AAuraPlayerCharacter::GetAttributePoints_Implementation() const
+{
+	check( AuraPS );
+	return AuraPS->GetPlayerAttributePoints();
+}
+
+int32 AAuraPlayerCharacter::GetSpellPoints_Implementation() const
+{
+	check( AuraPS );
+	return AuraPS->GetPlayerSpellPoints();
 }
 
 int32 AAuraPlayerCharacter::GetAttributePointsReward_Implementation( int32 Level ) const
@@ -69,8 +81,8 @@ int32 AAuraPlayerCharacter::GetAttributePointsReward_Implementation( int32 Level
 
 void AAuraPlayerCharacter::AddToSpellPoints_Implementation( int32 InSpellPoints )
 {
-	// TODO: AddToSpellPoints
-	// check( AuraPS );
+	check( AuraPS );
+	AuraPS->AddToSpellPoints( InSpellPoints );
 }
 
 int32 AAuraPlayerCharacter::GetSpellPointsReward_Implementation( int32 Level ) const

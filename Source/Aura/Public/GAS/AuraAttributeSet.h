@@ -50,10 +50,13 @@ public:
 	// If in UPROPERTY we specify HOW the field is replicated in the function we specify WHEN the prop is replicated
 	virtual void GetLifetimeReplicatedProps( TArray<class FLifetimeProperty>& OutLifetimeProps ) const override;
 
-	// Is executed on both Server and Client
+	// Called on both Server and Client when an attribute is about to change
 	virtual void PreAttributeChange( const FGameplayAttribute& Attribute, float& NewValue ) override;
-	// Is executed only on Server
+	// Called only on the Server when a GameplayEffect is executed
 	virtual void PostGameplayEffectExecute( const struct FGameplayEffectModCallbackData& Data ) override;
+	// Called on the Server when an attribute changes,
+	// and on the Client if the attribute is replicated
+	virtual void PostAttributeChange( const FGameplayAttribute& Attribute, float OldValue, float NewValue ) override;
 
 	TMap<FGameplayTag, FGameplayAttribute> TagsToAttributes;
 
@@ -250,6 +253,8 @@ public:
 protected:
 	FEffectProperties EffectTargetProperties;
 	FEffectProperties EffectSourceProperties;
+	bool bTopOffHealth = false;
+	bool bTopOffMana = false;
 
 	void ProcessIncomingDamage( const FGameplayEffectContextHandle& ContextHandle );
 	void ProcessIncomingXP( const FGameplayEffectContextHandle& ContextHandle );

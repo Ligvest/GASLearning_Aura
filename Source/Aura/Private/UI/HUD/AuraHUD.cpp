@@ -8,6 +8,7 @@
 #include "UI/Widget/AuraUserWidget.h"
 #include "UI/WidgetController/AuraAttributeWindowWC.h"
 #include "UI/WidgetController/AuraHUDWidgetController.h"
+#include "UI/WidgetController/AuraSpellsWindowWC.h"
 
 void AAuraHUD::InitHUDWidget()
 {
@@ -35,6 +36,7 @@ UAuraHUDWidgetController* AAuraHUD::TryGetHudWC( const FWidgetControllerParams& 
 	}
 	return HUDWidgetController;
 }
+
 UAuraAttributeWindowWC* AAuraHUD::TryGetAttributeWindowWC( const FWidgetControllerParams& Params )
 {
 	if ( !AttributeWindowWC )
@@ -43,4 +45,14 @@ UAuraAttributeWindowWC* AAuraHUD::TryGetAttributeWindowWC( const FWidgetControll
 		AttributeWindowWC->SetWidgetControllerParams( Params );
 	}
 	return AttributeWindowWC;
+}
+
+UAuraSpellsWindowWC* AAuraHUD::TryGetSpellsWindowWC( const FWidgetControllerParams& Params )
+{
+	if ( !SpellsWindowWC )
+	{
+		SpellsWindowWC = NewObject<UAuraSpellsWindowWC>( this, SpellsWindowWcClass );
+		SpellsWindowWC->SetWidgetControllerParams( Params );
+	}
+	return SpellsWindowWC;
 }

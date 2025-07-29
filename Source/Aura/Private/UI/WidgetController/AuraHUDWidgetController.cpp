@@ -8,9 +8,9 @@
 #include "GAS/Data/AuraLevelUpInfo_DA.h"
 #include "Player/AuraPlayerState.h"
 
-void UAuraHUDWidgetController::BroadcastInitialValues() const
+void UAuraHUDWidgetController::BroadcastInitialValues()
 {
-	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>( AttributeSet );
+	check( GetAuraAS() );
 	OnHealthChanged.Broadcast( AuraAttributeSet->GetHealth() );
 	OnMaxHealthChanged.Broadcast( AuraAttributeSet->GetMaxHealth() );
 	OnManaChanged.Broadcast( AuraAttributeSet->GetMana() );
@@ -20,9 +20,9 @@ void UAuraHUDWidgetController::BroadcastInitialValues() const
 	OnXpChanged( AuraPS->GetXP() );
 }
 
-void UAuraHUDWidgetController::BindCallbacksToAttributeChanges() const
+void UAuraHUDWidgetController::BindCallbacksToAttributeChanges()
 {
-	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>( AttributeSet );
+	check( GetAuraAS() );
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	// AuraASC should always be a base class for ASC for this project
 	check( AuraASC );
@@ -58,12 +58,12 @@ void UAuraHUDWidgetController::BindCallbacksToAttributeChanges() const
 
 	if ( AuraASC->bStartupAbilitiesGranted )
 	{
-		OnAbilitiesGranted( AuraASC );
+		BroadcastAbilityInfo();
 	}
 	else
 	{
 		// TODO: Should I do it in "else"?
-		AuraASC->OnAbilitiesGrantedDelegate.AddUObject( this, &UAuraHUDWidgetController::OnAbilitiesGranted );
+		AuraASC->OnAbilitiesGrantedDelegate.AddUObject( this, &UAuraHUDWidgetController::BroadcastAbilityInfo );
 	}
 }
 
@@ -96,21 +96,4 @@ void UAuraHUDWidgetController::OnEffectWithTagsApplied( const FGameplayTagContai
 			EffectMessageRowDelegate.Broadcast( *EffectMessageRow );
 		}
 	}
-}
-
-void UAuraHUDWidgetController::OnAbilitiesGranted( UAuraAbilitySystemComponent* AuraASC ) const
-{
-	// TODO Get information about all given abilities, look up their Ability Info, and broadcast it to widgets.
-	FForEachAbility BroadcastDelegate;
-	BroadcastDelegate.BindLambda(
-	    [this, AuraASC]( const FGameplayAbilitySpec& AbilitySpec )
-	    {
-		    // TODO need a way to figure out the ability tag for a given ability spec.
-		    FGameplayTag AbilityTag = AuraASC->GetAbilityTagFromSpec( AbilitySpec );
-		    FAuraAbilityInfo AbilityInfo = AbilityInfoDataAsset->FindAbilityInfoForTag( AbilityTag );
-		    AbilityInfo.InputTag = AuraASC->GetInputTagFromSpec( AbilitySpec );
-		    AbilityInfoDelegate.Broadcast( AbilityInfo );
-	    } );
-
-	AuraASC->ForEachAbility( BroadcastDelegate );
 }

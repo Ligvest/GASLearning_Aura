@@ -2,6 +2,7 @@
 
 #include "UI/Widget/AuraUserWidget.h"
 
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/WidgetController/AuraWidgetController.h"
@@ -27,6 +28,15 @@ void UAuraUserWidget::Open( UAuraUserWidget* InParentWidget, UButton* OpenButton
 		ParentButton->SetIsEnabled( false );
 	}
 
+	// Disable input for character
+	{
+		APlayerController* PC = GetOwningPlayer();
+		check( PC );
+		FInputModeUIOnly InputMode;
+		InputMode.SetLockMouseToViewportBehavior( EMouseLockMode::DoNotLock );
+		PC->SetInputMode( InputMode );
+	}
+
 	AddToViewport();
 }
 void UAuraUserWidget::Close()
@@ -39,6 +49,17 @@ void UAuraUserWidget::Close()
 	if ( ParentButton )
 	{
 		ParentButton->SetIsEnabled( true );
+	}
+
+	// Return input to character
+	// If I want to open several windows then I should make a bool for each window and check it here I believe.
+	// Or make good and beautiful stack ;)
+	{
+		APlayerController* PC = GetOwningPlayer();
+		check( PC );
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior( EMouseLockMode::DoNotLock );
+		PC->SetInputMode( InputMode );
 	}
 
 	OnWidgetClosed.Broadcast();

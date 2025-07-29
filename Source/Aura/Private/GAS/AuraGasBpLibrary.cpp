@@ -36,6 +36,18 @@ UAuraAttributeWindowWC* UAuraGasBpLibrary::GetAttributeWindowWC( const UObject* 
 	return HUD->TryGetAttributeWindowWC( WidgetControllerParams );
 }
 
+UAuraSpellsWindowWC* UAuraGasBpLibrary::GetSpellsWindowWC( const UObject* WorldContext )
+{
+	// Init Params
+	FWidgetControllerParams WidgetControllerParams( GetWidgetControllerParams( WorldContext ) );
+
+	// Get HUD
+	AAuraHUD* HUD = WidgetControllerParams.PlayerController->GetHUD<AAuraHUD>();
+	check( HUD );
+
+	return HUD->TryGetSpellsWindowWC( WidgetControllerParams );
+}
+
 UAuraCharacterClassInfoDA* UAuraGasBpLibrary::GetCharacterClassInfoDA( const UObject* WorldContext )
 {
 	// GameMode available only on Server. Use GameState if you need to replicate GameMode specific data to clients

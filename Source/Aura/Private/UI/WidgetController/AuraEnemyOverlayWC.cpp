@@ -5,15 +5,15 @@
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
 
-void UAuraEnemyOverlayWC::BroadcastInitialValues() const
+void UAuraEnemyOverlayWC::BroadcastInitialValues()
 {
-	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>( AttributeSet );
+	check( GetAuraAS() );
 	OnHealthChanged.Broadcast( AuraAttributeSet->GetHealth() );
 	OnMaxHealthChanged.Broadcast( AuraAttributeSet->GetMaxHealth() );
 }
-void UAuraEnemyOverlayWC::BindCallbacksToAttributeChanges() const
+void UAuraEnemyOverlayWC::BindCallbacksToAttributeChanges()
 {
-	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>( AttributeSet );
+	check( GetAuraAS() );
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	// AuraASC should always be a base class for ASC for this project
 	check( AuraASC );

@@ -32,7 +32,6 @@ class UAuraAbilitySystemComponent;
 
 // Delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FEffectMessageRowDelegate, const FEffectMessageRow&, TagMessageRow );
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FAbilityInfoSignature, const FAuraAbilityInfo&, AbilityInfo );
 
 /**
  *
@@ -42,7 +41,7 @@ class AURA_API UAuraHUDWidgetController : public UAuraWidgetController
 {
 	GENERATED_BODY()
 public:
-	virtual void BroadcastInitialValues() const override;
+	virtual void BroadcastInitialValues() override;
 
 	UPROPERTY( BlueprintAssignable )
 	FOnAttributeChangedSignature OnHealthChanged;
@@ -65,12 +64,6 @@ public:
 	UPROPERTY( BlueprintAssignable )
 	FEffectMessageRowDelegate EffectMessageRowDelegate;
 
-	UPROPERTY( BlueprintAssignable )
-	FAbilityInfoSignature AbilityInfoDelegate;
-
-	UPROPERTY( EditDefaultsOnly, Category = "Abilities" )
-	TObjectPtr<UAuraAbilityInfo_DA> AbilityInfoDataAsset;
-
 protected:
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "Tag message" )
 	TObjectPtr<UDataTable> EffectMessageTable;
@@ -79,9 +72,8 @@ protected:
 	void OnXpChanged( int32 NewXP ) const;
 
 	void OnEffectWithTagsApplied( const FGameplayTagContainer& TagContainer ) const;
-	void OnAbilitiesGranted( UAuraAbilitySystemComponent* AuraASC ) const;
 	// Here we bind callbacks to be called whenever our attributes changes ( damage to Health etc. )
-	virtual void BindCallbacksToAttributeChanges() const override;
+	virtual void BindCallbacksToAttributeChanges() override;
 
 private:
 	template <typename T>

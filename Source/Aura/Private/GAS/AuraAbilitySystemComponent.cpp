@@ -2,8 +2,10 @@
 
 #include "GAS/AuraAbilitySystemComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AuraGameplayTags.h"
 #include "GAS/Abilities/AuraGameplayAbility.h"
+#include "Interaction/PlayerInterface.h"
 
 void UAuraAbilitySystemComponent::Init()
 {
@@ -38,7 +40,7 @@ void UAuraAbilitySystemComponent::GrantAbilities( const TArray<TSubclassOf<UGame
 	}
 
 	bStartupAbilitiesGranted = true;
-	OnAbilitiesGrantedDelegate.Broadcast( this );
+	OnAbilitiesGrantedDelegate.Broadcast();
 }
 
 void UAuraAbilitySystemComponent::GrantPassiveAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses, int AbilitiesLevel )
@@ -87,6 +89,41 @@ void UAuraAbilitySystemComponent::ForEachAbility( const FForEachAbility& Delegat
 	}
 }
 
+void UAuraAbilitySystemComponent::UpgradeAttribute( const FGameplayTag AttributeTag )
+{
+	AActor* LocalAvatarActor = GetAvatarActor();
+	if ( !LocalAvatarActor->Implements<UPlayerInterface>() )
+	{
+		return;
+	}
+
+	if ( IPlayerInterface::Execute_GetAttributePoints( LocalAvatarActor ) <= 0 )
+	{
+		return;
+	}
+
+	ServerUpgradeAttribute( AttributeTag );
+}
+
+void UAuraAbilitySystemComponent::ServerUpgradeAttribute_Implementation( const FGameplayTag& AttributeTag )
+{
+	AActor* LocalAvatarActor = GetAvatarActor();
+	if ( !LocalAvatarActor->Implements<UPlayerInterface>() )
+	{
+		return;
+	}
+
+	// Decrement AttributePoints
+	IPlayerInterface::Execute_AddToAttributePoints( LocalAvatarActor, -1 );
+
+	FGameplayEventData Payload;
+	Payload.EventTag = AttributeTag;
+	Payload.EventMagnitude = 1.f;
+
+	// Send GameplayEvent to apply effect to increase attribute
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor( LocalAvatarActor, AttributeTag, Payload );
+}
+
 FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec( const FGameplayAbilitySpec& AbilitySpec )
 {
 	if ( AbilitySpec.Ability )
@@ -127,7 +164,7 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 	if ( !bStartupAbilitiesGranted )
 	{
 		bStartupAbilitiesGranted = true;
-		OnAbilitiesGrantedDelegate.Broadcast( this );
+		OnAbilitiesGrantedDelegate.Broadcast();
 	}
 }
 

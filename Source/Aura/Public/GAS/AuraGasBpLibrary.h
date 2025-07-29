@@ -28,6 +28,9 @@ public:
 	UFUNCTION( BlueprintPure )
 	static UAuraCharacterClassInfoDA* GetCharacterClassInfoDA( const UObject* WorldContext );
 
+	UFUNCTION( BlueprintPure, meta = ( DefaultToSelf = "WorldContext" ) )
+	static UAuraSpellsWindowWC* GetSpellsWindowWC( const UObject* WorldContext );
+
 	// I don't think that these functions are necessary here
 	// but I added them in case Stephan will use them later in blueprints
 	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|GameplayEffects" )

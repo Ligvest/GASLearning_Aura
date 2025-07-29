@@ -10,6 +10,7 @@
 // Forward declarations
 class UAuraHUDWidgetController;
 class UAuraAttributeWindowWC;
+class UAuraSpellsWindowWC;
 
 /**
  *
@@ -40,7 +41,15 @@ protected:
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<UAuraAttributeWindowWC> AttributeWindowWcClass;
 
+	// Spell Window WC
+	UPROPERTY()
+	TObjectPtr<UAuraSpellsWindowWC> SpellsWindowWC;
+
+	UPROPERTY( EditAnywhere )
+	TSubclassOf<UAuraSpellsWindowWC> SpellsWindowWcClass;
+
 public:
 	UAuraHUDWidgetController* TryGetHudWC( const FWidgetControllerParams& Params );
 	UAuraAttributeWindowWC* TryGetAttributeWindowWC( const FWidgetControllerParams& Params );
+	UAuraSpellsWindowWC* TryGetSpellsWindowWC( const FWidgetControllerParams& Params );
 };
