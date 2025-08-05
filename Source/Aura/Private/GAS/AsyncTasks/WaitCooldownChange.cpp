@@ -29,6 +29,7 @@ void UWaitCooldownChange::EndTask()
 {
 	if ( !IsValid( ASC ) ) return;
 	ASC->RegisterGameplayTagEvent( CooldownTag, EGameplayTagEventType::NewOrRemoved ).RemoveAll( this );
+	ASC->OnActiveGameplayEffectAddedDelegateToSelf.RemoveAll( this );
 
 	// Allow GC to remove and free the object
 	SetReadyToDestroy();

@@ -22,3 +22,15 @@ void UAuraDamageGameplayAbility::CauseDamage( AActor* TargetActor )
 	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent( TargetActor );
 	SourceASC->ApplyGameplayEffectSpecToTarget( *DamageSpecHandle.Data, TargetASC );
 }
+
+int32 UAuraDamageGameplayAbility::GetDamageByDamageTag( const int32 AbilityLevel, const FGameplayTag DamageValueTag ) const
+{
+	int32 Damage = 0;
+	const FScalableFloat* ScalableDamage = DamageTypeTagToScalableFloat.Find( DamageValueTag );
+	if ( ScalableDamage )
+	{
+		Damage = ScalableDamage->GetValueAtLevel( AbilityLevel );
+	}
+
+	return Damage;
+}

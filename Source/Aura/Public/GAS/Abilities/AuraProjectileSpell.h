@@ -24,4 +24,8 @@ class AURA_API UAuraProjectileSpell : public UAuraDamageGameplayAbility
 
 	UPROPERTY( EditDefaultsOnly, Category = "Projectile" )
 	TSubclassOf<AAuraProjectile> ProjectileClass;
+
+protected:
+	UPROPERTY( EditDefaultsOnly )
+	int32 NumProjectiles = 5;
 };

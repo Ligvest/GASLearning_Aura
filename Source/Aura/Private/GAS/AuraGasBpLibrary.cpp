@@ -48,11 +48,20 @@ UAuraSpellsWindowWC* UAuraGasBpLibrary::GetSpellsWindowWC( const UObject* WorldC
 	return HUD->TryGetSpellsWindowWC( WidgetControllerParams );
 }
 
+// Server only
 UAuraCharacterClassInfoDA* UAuraGasBpLibrary::GetCharacterClassInfoDA( const UObject* WorldContext )
 {
 	// GameMode available only on Server. Use GameState if you need to replicate GameMode specific data to clients
 	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( WorldContext ) );
 	return AuraGM->GetDefaultCharacterInfoDA();
+}
+
+// Server only
+UAuraAbilityInfo_DA* UAuraGasBpLibrary::GetAbilityInfoDA( const UObject* WorldContext )
+{
+	// GameMode available only on Server. Use GameState if you need to replicate GameMode specific data to clients
+	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( WorldContext ) );
+	return AuraGM->GetAbilityInfoDA();
 }
 
 bool UAuraGasBpLibrary::IsBlockedHit( const FGameplayEffectContextHandle& EffectContextHandle )

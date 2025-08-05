@@ -7,13 +7,18 @@ FAuraGameplayTags FAuraGameplayTags::GameplayTags;
 
 void FAuraGameplayTags::InitializeNativeGameplayTags()
 {
+	// None tag
+	None = UGameplayTagsManager::Get().AddNativeGameplayTag( "None", "Tag alternative to nullptr" );
+
 	// Input
-	AuraInput_LBM = AddGameplayTag( InputPrefix, "LBM", "Left Mouse Button" );
-	AuraInput_RBM = AddGameplayTag( InputPrefix, "RBM", "Right Mouse Button" );
+	AuraInput_LMB = AddGameplayTag( InputPrefix, "LMB", "Left Mouse Button" );
+	AuraInput_RMB = AddGameplayTag( InputPrefix, "RMB", "Right Mouse Button" );
 	AuraInput_1 = AddGameplayTag( InputPrefix, "1", "Key \"1\"" );
 	AuraInput_2 = AddGameplayTag( InputPrefix, "2", "Key \"2\"" );
 	AuraInput_3 = AddGameplayTag( InputPrefix, "3", "Key \"3\"" );
 	AuraInput_4 = AddGameplayTag( InputPrefix, "4", "Key \"4\"" );
+	AuraInput_Passive_1 = AddGameplayTag( InputPrefix, "Passive.1", "Passive (meta) tag for equipped passive ability 1" );
+	AuraInput_Passive_2 = AddGameplayTag( InputPrefix, "Passive.2", "Passive (meta) tag for equipped passive ability 2" );
 
 	// Effects Tags
 	Effects_HitReact = AddGameplayTag( EffectsPrefix, "HitReact", "Tag granted to react to hit" );
@@ -58,9 +63,24 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	DamageTypeToDamageRes.Add( Values_Damage_Physical, Attributes_Resistance_Physical );
 
 	// Ability Tags
+	Abilities_None = AddGameplayTag( AbilitiesPrefix, "None", "No Ability Tag" );
 	Abilities_Attack = AddGameplayTag( AbilitiesPrefix, "Attack", "Attack Ability Tag" );
 	Abilities_Summon = AddGameplayTag( AbilitiesPrefix, "Summon", "Summon Ability Tag" );
-	Abilities_Fire_FireBolt = AddGameplayTag( AbilitiesPrefix, "Fire.FireBolt", "Firebolt Ability Tag" );
+	Abilities_Fire_FireBolt = AddGameplayTag( AbilitiesFirePrefix, "FireBolt", "Firebolt Ability Tag" );
+	Abilities_Lightning_Electrocute = AddGameplayTag( AbilitiesLightningPrefix, "Electrocute", "Electrocute Ability Tag" );
+
+	Abilities_HitReact = AddGameplayTag( AbilitiesPrefix, "HitReact", "HitReact Ability Tag" );
+
+	// Ability Statuses
+	Abilities_Status_Locked = AddGameplayTag( AbilitiesPrefix + StatusPrefix, "Locked", "Locked status Tag" );
+	Abilities_Status_Eligible = AddGameplayTag( AbilitiesPrefix + StatusPrefix, "Eligible", "Eligible status Tag" );
+	Abilities_Status_Unlocked = AddGameplayTag( AbilitiesPrefix + StatusPrefix, "Unlocked", "Unlocked status Tag" );
+	Abilities_Status_Equipped = AddGameplayTag( AbilitiesPrefix + StatusPrefix, "Equipped", "Equipped status Tag" );
+
+	// Ability Types
+	Abilities_Type_Offensive = AddGameplayTag( AbilitiesPrefix + TypePrefix, "Offensive", "Offensive status Tag" );
+	Abilities_Type_Passive = AddGameplayTag( AbilitiesPrefix + TypePrefix, "Passive", "Passive status Tag" );
+	Abilities_Type_None = AddGameplayTag( AbilitiesPrefix + TypePrefix, "None", "None status Tag" );
 
 	// Cooldowns Tags
 	Cooldowns_Fire_FireBolt = AddGameplayTag( CooldownsPrefix, "Fire.FireBolt", "Firebolt Ability CooldownTag" );

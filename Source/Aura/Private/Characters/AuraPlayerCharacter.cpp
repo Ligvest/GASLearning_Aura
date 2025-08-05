@@ -35,6 +35,10 @@ void AAuraPlayerCharacter::AddToPlayerLevel_Implementation( int32 LevelToAdd )
 {
 	check( AuraPS );
 	AuraPS->AddToLevel( LevelToAdd );
+
+	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( GetAbilitySystemComponent() );
+	check( AuraASC );
+	AuraASC->UpdateAbilityStatuses( AuraPS->GetPlayerLevel() );
 }
 
 void AAuraPlayerCharacter::LevelUp_Implementation()

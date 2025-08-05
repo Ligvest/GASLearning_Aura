@@ -59,6 +59,7 @@ void UAuraUserWidget::Close()
 		check( PC );
 		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior( EMouseLockMode::DoNotLock );
+		InputMode.SetHideCursorDuringCapture( false );
 		PC->SetInputMode( InputMode );
 	}
 

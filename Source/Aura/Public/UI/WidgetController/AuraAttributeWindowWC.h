@@ -25,9 +25,6 @@ public:
 	UPROPERTY( BlueprintAssignable )
 	FOnPlayerStatChangedDynamicSignature OnAttributePointsChangedDynamicDelegate;
 
-	UPROPERTY( BlueprintAssignable )
-	FOnPlayerStatChangedDynamicSignature OnSpellPointsChangedDynamicDelegate;
-
 	UFUNCTION( BlueprintCallable )
 	void UpgradeAttribute( const FGameplayTag AttributeTag );
 

@@ -17,6 +17,9 @@ public:
 	void InitializeNativeGameplayTags();
 	FGameplayTag AddGameplayTag( const FString& AttributeNamePrefix, const FString& AttributeName, const FString& AttributeHint );
 
+	// None Tag
+	FGameplayTag None;
+
 	// Primary Attributes Tags
 	FGameplayTag Attributes_Primary_Strength;
 	FGameplayTag Attributes_Primary_Intelligence;
@@ -36,12 +39,14 @@ public:
 	FGameplayTag Attributes_Secondary_MaxMana;
 
 	// Input
-	FGameplayTag AuraInput_LBM;
-	FGameplayTag AuraInput_RBM;
+	FGameplayTag AuraInput_LMB;
+	FGameplayTag AuraInput_RMB;
 	FGameplayTag AuraInput_1;
 	FGameplayTag AuraInput_2;
 	FGameplayTag AuraInput_3;
 	FGameplayTag AuraInput_4;
+	FGameplayTag AuraInput_Passive_1;
+	FGameplayTag AuraInput_Passive_2;
 
 	// Values Tags
 	FGameplayTag Values_Damage_Arcane;
@@ -58,9 +63,22 @@ public:
 	TMap<FGameplayTag, FGameplayTag> DamageTypeToDamageRes;
 
 	// Ability Tags
+	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
 	FGameplayTag Abilities_Fire_FireBolt;
+	FGameplayTag Abilities_Lightning_Electrocute;
+
+	FGameplayTag Abilities_HitReact;
+
+	FGameplayTag Abilities_Status_Locked;
+	FGameplayTag Abilities_Status_Eligible;
+	FGameplayTag Abilities_Status_Unlocked;
+	FGameplayTag Abilities_Status_Equipped;
+
+	FGameplayTag Abilities_Type_Offensive;
+	FGameplayTag Abilities_Type_Passive;
+	FGameplayTag Abilities_Type_None;
 
 	// Cooldown Tags
 	FGameplayTag Cooldowns_Fire_FireBolt;
@@ -94,7 +112,12 @@ private:
 	const FString EffectsPrefix{ "Effects." };
 	const FString MontageAttackPrefix{ "Montage.Attack." };
 	const FString CombatSocketPrefix{ "CombatSocket." };
-	const FString AbilitiesPrefix{ "Abilities." };
 	const FString CooldownsPrefix{ "Cooldowns." };
 	const FString ValuesPrefix{ "Values." };
+
+	const FString AbilitiesPrefix{ "Abilities." };
+	const FString AbilitiesFirePrefix{ "Abilities.Fire." };
+	const FString AbilitiesLightningPrefix{ "Abilities.Lightning." };
+	const FString StatusPrefix{ "Status." };
+	const FString TypePrefix{ "Type." };
 };

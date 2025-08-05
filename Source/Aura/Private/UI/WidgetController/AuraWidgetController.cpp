@@ -30,6 +30,7 @@ void UAuraWidgetController::BroadcastAbilityInfo()
 		    FGameplayTag AbilityTag = AuraAbilitySystemComponent->GetAbilityTagFromSpec( AbilitySpec );
 		    FAuraAbilityInfo AbilityInfo = AbilityInfoDataAsset->FindAbilityInfoForTag( AbilityTag );
 		    AbilityInfo.InputTag = AuraAbilitySystemComponent->GetInputTagFromSpec( AbilitySpec );
+		    AbilityInfo.AbilityStatusTag = AuraAbilitySystemComponent->GetStatusTagFromSpec( AbilitySpec );
 		    AbilityInfoDelegate.Broadcast( AbilityInfo );
 	    } );
 

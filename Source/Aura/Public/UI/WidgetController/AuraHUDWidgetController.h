@@ -64,6 +64,9 @@ public:
 	UPROPERTY( BlueprintAssignable )
 	FEffectMessageRowDelegate EffectMessageRowDelegate;
 
+	UPROPERTY( BlueprintAssignable )
+	FSendSignalFromWCSignature ClearSpellGlobesDelegate;
+
 protected:
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "Tag message" )
 	TObjectPtr<UDataTable> EffectMessageTable;
@@ -74,6 +77,8 @@ protected:
 	void OnEffectWithTagsApplied( const FGameplayTagContainer& TagContainer ) const;
 	// Here we bind callbacks to be called whenever our attributes changes ( damage to Health etc. )
 	virtual void BindCallbacksToAttributeChanges() override;
+
+	void OnSpellEquipped();
 
 private:
 	template <typename T>

@@ -100,10 +100,10 @@ void AAuraPlayerController::AbilityInputTagPressed( FGameplayTag InputTag )
 }
 void AAuraPlayerController::AbilityInputTagReleased( FGameplayTag InputTag )
 {
-	// Move character if LBM was clicked and no actors under cursor
+	// Move character if LMB was clicked and no actors under cursor
 	bool bShootingMode = bTargeting || bShiftPressed;
 	bool bIsClick = FollowTime <= HoldButtonThreshold;
-	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LBM ) && !bShootingMode && bIsClick )
+	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LMB ) && !bShootingMode && bIsClick )
 	{
 		GeneratePathToPoint( LastCursorTraceImpactPoint );
 	}
@@ -119,9 +119,9 @@ void AAuraPlayerController::AbilityInputTagReleased( FGameplayTag InputTag )
 }
 void AAuraPlayerController::AbilityInputTagHeld( FGameplayTag InputTag )
 {
-	// Move character if LBM pressed and no actors under cursor
+	// Move character if LMB pressed and no actors under cursor
 	bool bShootingMode = bTargeting || bShiftPressed;
-	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LBM ) && !bShootingMode )
+	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LMB ) && !bShootingMode )
 	{
 		MoveWithCursor();
 	}

@@ -14,6 +14,10 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 {
 	GENERATED_BODY()
 
+public:
+	int32 GetDamageByDamageTag( const int32 AbilityLevel, const FGameplayTag DamageValueTag ) const;
+
+private:
 	UFUNCTION( BlueprintCallable )
 	void CauseDamage( AActor* TargetActor );
 

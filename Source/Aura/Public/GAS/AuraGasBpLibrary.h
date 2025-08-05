@@ -28,6 +28,9 @@ public:
 	UFUNCTION( BlueprintPure )
 	static UAuraCharacterClassInfoDA* GetCharacterClassInfoDA( const UObject* WorldContext );
 
+	UFUNCTION( BlueprintPure )
+	static UAuraAbilityInfo_DA* GetAbilityInfoDA( const UObject* WorldContext );
+
 	UFUNCTION( BlueprintPure, meta = ( DefaultToSelf = "WorldContext" ) )
 	static UAuraSpellsWindowWC* GetSpellsWindowWC( const UObject* WorldContext );
 
