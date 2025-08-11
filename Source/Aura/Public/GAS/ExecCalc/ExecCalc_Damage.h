@@ -37,4 +37,6 @@ private:
 	void ModifyDamageByBlockChance( float& OutDamage, const CalculationInfo& CalcInfo, bool& bOutBlockedHit ) const;
 	void ModifyDamageByArmor( float& OutDamage, const CalculationInfo& CalcInfo ) const;
 	void ModifyDamageByCriticalHit( float& OutDamage, const CalculationInfo& CalcInfo, bool& bOutCriticalHit ) const;
+	void ApplyDebuff( const FGameplayEffectSpec& Spec, FGameplayTag DamageTypeTag ) const;
+	bool CheckOdds( const float Chance, float Resistance ) const;
 };

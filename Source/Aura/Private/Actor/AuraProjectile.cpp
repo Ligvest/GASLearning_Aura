@@ -78,8 +78,11 @@ void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedC
 		return;
 	}
 
-	AActor* AttackerActor = ImpactEffectHandle.Data->GetEffectContext().GetEffectCauser();
-	bool bCauserSameAsTarget = ImpactEffectHandle.Data.IsValid() && AttackerActor == OtherActor;
+	// const FGameplayEffectContextHandle& EffectContextHandle = ImpactEffectHandle.Data->GetEffectContext();
+	// AActor* AttackerActor =.GetEffectCauser();
+	AActor* AttackerActor = ImpactEffectParams.SourceASC->GetAvatarActor();
+	const bool bCauserSameAsTarget = AttackerActor == OtherActor;
+	// bool bCauserSameAsTarget = ImpactEffectHandle.Data.IsValid() && AttackerActor == OtherActor;
 	if ( bCauserSameAsTarget )
 	{
 		return;
@@ -99,16 +102,33 @@ void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedC
 		PlayImpactEffects();
 
 		// Only server destroys the projectile
-		if ( HasAuthority() )
+		// if ( HasAuthority() )
+		// {
+
+		UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent( OtherActor );
+		if ( TargetASC )
 		{
-			UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent( OtherActor );
-			if ( TargetASC )
+			// Probably better solution would be to just pass location of the sphere or something like this
+			// and calculate all impulses there to not pass all these vectors
+			const FVector DeathImpulse = GetActorForwardVector() * ImpactEffectParams.DeathImpulseMagnitude;
+			ImpactEffectParams.DeathImpulse = DeathImpulse;
+			const bool bKnockbackSucceeded = FMath::RandRange( 1, 100 ) < ImpactEffectParams.KnockbackChance;
+			if ( bKnockbackSucceeded )
 			{
-				TargetASC->ApplyGameplayEffectSpecToSelf( *ImpactEffectHandle.Data );
+				FRotator Rotation = GetActorRotation();
+				Rotation.Pitch = 45.f;
+
+				const FVector KnockbackDirection = Rotation.Vector();
+				const FVector KnockbackImpulse = KnockbackDirection * ImpactEffectParams.KnockbackMagnitude;
+				ImpactEffectParams.KnockbackImpulse = KnockbackImpulse;
 			}
 
-			Destroy();
+			ImpactEffectParams.TargetASC = TargetASC;
+			UAuraGasBpLibrary::ApplyDamageEffect( ImpactEffectParams );
 		}
+
+		Destroy();
+		// }
 	}
 }
 

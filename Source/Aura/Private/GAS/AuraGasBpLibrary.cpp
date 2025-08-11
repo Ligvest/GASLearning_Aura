@@ -2,7 +2,9 @@
 
 #include "GAS/AuraGasBpLibrary.h"
 
+#include "AbilitySystemComponent.h"
 #include "AuraAbilityTypes.h"
+#include "AuraGameplayTags.h"
 #include "Game/AuraGameModeBase.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -64,7 +66,7 @@ UAuraAbilityInfo_DA* UAuraGasBpLibrary::GetAbilityInfoDA( const UObject* WorldCo
 	return AuraGM->GetAbilityInfoDA();
 }
 
-bool UAuraGasBpLibrary::IsBlockedHit( const FGameplayEffectContextHandle& EffectContextHandle )
+bool UAuraGasBpLibrary::GetIsBlockedHitFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
 {
 	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
 	{
@@ -73,7 +75,7 @@ bool UAuraGasBpLibrary::IsBlockedHit( const FGameplayEffectContextHandle& Effect
 	return false;
 }
 
-bool UAuraGasBpLibrary::IsCriticalHit( const FGameplayEffectContextHandle& EffectContextHandle )
+bool UAuraGasBpLibrary::GetIsCriticalHitFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
 {
 	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
 	{
@@ -82,7 +84,70 @@ bool UAuraGasBpLibrary::IsCriticalHit( const FGameplayEffectContextHandle& Effec
 	return false;
 }
 
-void UAuraGasBpLibrary::SetIsBlockedHit( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit )
+bool UAuraGasBpLibrary::GetIsDebuffSucceededFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->IsDebuffSucceeded();
+	}
+	return false;
+}
+
+float UAuraGasBpLibrary::GetDebuffDamageFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetDebuffDamage();
+	}
+	return false;
+}
+
+float UAuraGasBpLibrary::GetDebuffDurationFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetDebuffDuration();
+	}
+	return false;
+}
+
+float UAuraGasBpLibrary::GetDebuffFrequencyFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetDebuffFrequency();
+	}
+	return false;
+}
+
+FGameplayTag UAuraGasBpLibrary::GetDamageTypeTagFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetDamageTypeTag();
+	}
+	return FGameplayTag{};
+}
+
+FVector UAuraGasBpLibrary::GetDeathImpulseFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetDeathImpulse();
+	}
+	return FVector::ZeroVector;
+}
+
+FVector UAuraGasBpLibrary::GetKnockbackImpulseFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetKnockbackImpulse();
+	}
+	return FVector::ZeroVector;
+}
+
+void UAuraGasBpLibrary::SetIsBlockedHitFromEffectContext( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit )
 {
 	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
 	{
@@ -90,11 +155,67 @@ void UAuraGasBpLibrary::SetIsBlockedHit( FGameplayEffectContextHandle& EffectCon
 	}
 }
 
-void UAuraGasBpLibrary::SetIsCriticalHit( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit )
+void UAuraGasBpLibrary::SetIsCriticalHitInEffectContext( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsCriticalHit )
 {
 	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
 	{
 		AuraEffectContext->SetIsCriticalHit( bInIsCriticalHit );
+	}
+}
+
+void UAuraGasBpLibrary::SetIsDebuffSucceededInEffectContext( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsDebuffSucceeded )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetDebuffSucceeded( bInIsDebuffSucceeded );
+	}
+}
+
+void UAuraGasBpLibrary::SetDebuffDamageInEffectContext( FGameplayEffectContextHandle& EffectContextHandle, float InDebuffDamage )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetDebuffDamage( InDebuffDamage );
+	}
+}
+
+void UAuraGasBpLibrary::SetDebuffDurationInEffectContext( FGameplayEffectContextHandle& EffectContextHandle, float InDebuffDuration )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetDebuffDuration( InDebuffDuration );
+	}
+}
+
+void UAuraGasBpLibrary::SetDebuffFrequencyInEffectContext( FGameplayEffectContextHandle& EffectContextHandle, float InDebuffFrequency )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetDebuffFrequency( InDebuffFrequency );
+	}
+}
+
+void UAuraGasBpLibrary::SetDamageTypeTagInEffectContext( FGameplayEffectContextHandle& EffectContextHandle, FGameplayTag InDamageType )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetDamageTypeTag( InDamageType );
+	}
+}
+
+void UAuraGasBpLibrary::SetDeathImpulseInEffectContext( FGameplayEffectContextHandle& EffectContextHandle, FVector InDeathImpulse )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetDeathImpulse( InDeathImpulse );
+	}
+}
+
+void UAuraGasBpLibrary::SetKnockbackImpulseInEffectContext( FGameplayEffectContextHandle& EffectContextHandle, FVector InKnockbackImpulse )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetKnockbackImpulse( InKnockbackImpulse );
 	}
 }
 
@@ -200,6 +321,32 @@ int32 UAuraGasBpLibrary::GetXpRewardForClassAndLevel( const UObject* WorldContex
 	const float XpReward = ClassInfo.XpReward.GetValueAtLevel( Level );
 
 	return static_cast<int32>( XpReward );
+}
+
+FActiveGameplayEffectHandle UAuraGasBpLibrary::ApplyDamageEffect( const FDamageEffectParams& DamageEffectParams )
+{
+	UAbilitySystemComponent* SourceASC = DamageEffectParams.SourceASC;
+	UAbilitySystemComponent* TargetASC = DamageEffectParams.TargetASC;
+	AActor* SourceAvatar = SourceASC->GetAvatarActor();
+	const TSubclassOf<UGameplayEffect> EffectClass = DamageEffectParams.DamageGameplayEffectClass;
+	int32 AbilityLevel = DamageEffectParams.AbilityLevel;
+
+	FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+	EffectContextHandle.AddSourceObject( SourceAvatar );
+	SetDeathImpulseInEffectContext( EffectContextHandle, DamageEffectParams.DeathImpulse );
+	SetKnockbackImpulseInEffectContext( EffectContextHandle, DamageEffectParams.KnockbackImpulse );
+	const FGameplayEffectSpecHandle EffectSpecHandle = SourceASC->MakeOutgoingSpec( EffectClass, AbilityLevel, EffectContextHandle );
+
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	EffectSpecHandle.Data->SetSetByCallerMagnitude( GameplayTags.Debuff_Chance, DamageEffectParams.DebuffChance );
+	EffectSpecHandle.Data->SetSetByCallerMagnitude( GameplayTags.Debuff_Damage, DamageEffectParams.DebuffDamage );
+	EffectSpecHandle.Data->SetSetByCallerMagnitude( GameplayTags.Debuff_Duration, DamageEffectParams.DebuffDuration );
+	EffectSpecHandle.Data->SetSetByCallerMagnitude( GameplayTags.Debuff_Frequency, DamageEffectParams.DebuffFrequency );
+	EffectSpecHandle.Data->SetSetByCallerMagnitude( DamageEffectParams.DamageTypeTag, DamageEffectParams.BaseDamage );
+	EffectSpecHandle.Data->SetSetByCallerMagnitude( GameplayTags.Knockback_Chance, DamageEffectParams.KnockbackChance );
+	// EffectSpecHandle.Data->SetSetByCallerMagnitude( GameplayTags.Knockback_Impulse, DamageEffectParams.KnockbackImpulse );
+
+	return SourceASC->ApplyGameplayEffectSpecToTarget( *EffectSpecHandle.Data, TargetASC );
 }
 
 // I believe this function should be called after PlayerState replicated and is up to date

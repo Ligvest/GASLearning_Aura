@@ -88,7 +88,7 @@ protected:
 	virtual void InitDefaultAttributes( int InCharacterLevel ) const override;
 
 	// Death and Dissolve
-	virtual void Die() override;
+	virtual void Die( FVector DeathImpulse ) override;
 
 	bool IsRangedCharacter() const;
 

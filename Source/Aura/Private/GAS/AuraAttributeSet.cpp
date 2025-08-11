@@ -4,13 +4,15 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AuraAbilityTypes.h"
 #include "AuraGameplayTags.h"
 #include "GameplayEffectExtension.h"
 #include "GAS/AuraGasBpLibrary.h"
 #include "GameFramework/Character.h"
+#include "GameplayEffectComponents/AssetTagsGameplayEffectComponent.h"
+#include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/AuraPlayerController.h"
 
@@ -207,9 +209,15 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 	UAbilitySystemComponent* SourceASCPtr = ContextHandle.GetOriginalInstigatorAbilitySystemComponent();
 	UAbilitySystemComponent& TargetASCRef = Data.Target;
 	// Fill EffectSourceProps. Source = causer of the effect
-	FillEffectPropertiesWithASC( EffectSourceProperties, SourceASCPtr, ContextHandle );
+	FillEffectPropertiesWithASC( EffectSourceProperties, SourceASCPtr );
 	// Fill EffectTargetProps. Target = target of the effect (owner of this AS)
-	FillEffectPropertiesWithASC( EffectTargetProperties, &TargetASCRef, ContextHandle );
+	FillEffectPropertiesWithASC( EffectTargetProperties, &TargetASCRef );
+
+	// Return if the target is Dead
+	if ( EffectTargetProperties.Character->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead( EffectTargetProperties.Character ) )
+	{
+		return;
+	}
 
 	// Clamping sketch
 	// Clamping BaseValue of Health
@@ -222,6 +230,14 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 	if ( Data.EvaluatedData.Attribute == GetManaAttribute() )
 	{
 		SetMana( FMath::Clamp( GetMana(), 0.0f, GetMaxMana() ) );
+	}
+
+	// Calculate Debuff before ProcessIncomingDamage because in latter we process death.
+	// And on death we remove any debuffs. So we don't want to remove debuffs on death and then add new ones after
+	// Debuff
+	if ( UAuraGasBpLibrary::GetIsDebuffSucceededFromEffectContext( ContextHandle ) )
+	{
+		ProcessDebuff( ContextHandle );
 	}
 
 	// IncomingDamage Meta Attribute
@@ -267,13 +283,19 @@ void UAuraAttributeSet::ProcessIncomingDamage( const FGameplayEffectContextHandl
 	bool bFatal = NewHealth <= 0.f;
 	if ( bFatal )
 	{
-		ProcessDeath();
+		ProcessDeath( ContextHandle );
 	}
 	else
 	{
 		FGameplayTagContainer TagContainer;
 		TagContainer.AddTag( FAuraGameplayTags::Get().Effects_HitReact );
 		EffectTargetProperties.ASC->TryActivateAbilitiesByTag( TagContainer );
+
+		const FVector& KnockbackForce = UAuraGasBpLibrary::GetKnockbackImpulseFromEffectContext( ContextHandle );
+		if ( !KnockbackForce.IsNearlyZero( 1.f ) )
+		{
+			EffectTargetProperties.Character->LaunchCharacter( KnockbackForce, true, true );
+		}
 	}
 
 	ShowFloatingDamage( ContextHandle, ReceivedDamage );
@@ -314,14 +336,15 @@ void UAuraAttributeSet::ProcessIncomingXP( const FGameplayEffectContextHandle& C
 	}
 }
 
-void UAuraAttributeSet::ProcessDeath()
+void UAuraAttributeSet::ProcessDeath( const FGameplayEffectContextHandle& ContextHandle ) const
 {
 	// You are dead
 	AActor* TargetActor = EffectTargetProperties.AvatarActor;
 	ICombatInterface* CombatActor = Cast<ICombatInterface>( TargetActor );
 	if ( CombatActor )
 	{
-		CombatActor->Die();
+		FVector DeathImpulse = UAuraGasBpLibrary::GetDeathImpulseFromEffectContext( ContextHandle );
+		CombatActor->Die( DeathImpulse );
 
 		// Send Event With XP
 		ECharacterClass CharacterClass = ICombatInterface::Execute_GetCharacterClass( TargetActor );
@@ -335,6 +358,64 @@ void UAuraAttributeSet::ProcessDeath()
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor( EffectSourceProperties.Character, Tags.Attributes_Meta_IncomingXP, Payload );
 	}
 }
+
+void UAuraAttributeSet::ProcessDebuff( const FGameplayEffectContextHandle& ContextHandle ) const
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	FGameplayEffectContextHandle NewContextHandle = EffectSourceProperties.ASC->MakeEffectContext();
+	NewContextHandle.AddSourceObject( EffectSourceProperties.AvatarActor );
+
+	// This is one way to pass data from ExecCalc to AttributeSet PostGameplayEffectExecute
+	// But this is a stupid way as we still have access to GameplayEffectSpec from PostGameplayEffectExecute function
+	// And from this Spec we easily can access all SetByCallerMagnitude data which already has all this shit
+	// Also we can use SetByCallerMagnitude to pass a bool as a number.
+	// So for learning purposes this is nice to try to make your custom EffectContext but in this situation you mustn't use it
+	const FGameplayTag DamageTypeTag = UAuraGasBpLibrary::GetDamageTypeTagFromEffectContext( ContextHandle );
+	const float DebuffDamage = UAuraGasBpLibrary::GetDebuffDamageFromEffectContext( ContextHandle );
+	const float DebuffDuration = UAuraGasBpLibrary::GetDebuffDurationFromEffectContext( ContextHandle );
+	const float DebuffFrequency = UAuraGasBpLibrary::GetDebuffFrequencyFromEffectContext( ContextHandle );
+	check( DamageTypeTag.IsValid() );
+
+	FString DebuffName = FString::Printf( TEXT( "DynamicDebuff_%s" ), *DamageTypeTag.ToString() );
+
+	UGameplayEffect* Effect = NewObject<UGameplayEffect>( GetTransientPackage(), FName( DebuffName ) );
+	Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;
+	Effect->Period = DebuffFrequency;
+	Effect->DurationMagnitude = FScalableFloat( DebuffDuration );
+	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
+	Effect->StackLimitCount = 1;
+
+	// Add tag to be able to distinguish debuff effects and remove them on character death
+	UAssetTagsGameplayEffectComponent& AssetTagsComponent = Effect->FindOrAddComponent<UAssetTagsGameplayEffectComponent>();
+	FInheritedTagContainer InheritedAssetTagContainer;
+	InheritedAssetTagContainer.AddTag( GameplayTags.Debuff );
+	AssetTagsComponent.SetAndApplyAssetTagChanges( InheritedAssetTagContainer );
+
+	// Add tags to be granted on effect application
+	UTargetTagsGameplayEffectComponent& TargetTagsComponent = Effect->FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
+	FInheritedTagContainer InheritedTagContainer;
+	InheritedTagContainer.AddTag( GameplayTags.DamageTypeToDebuff[DamageTypeTag] );
+	TargetTagsComponent.SetAndApplyTargetTagChanges( InheritedTagContainer );
+
+	// Add modifiers to modify IncomingDamage which will cause damage to target
+	// More effective way as it lets to avoid redundant copying
+	const int32 Index = Effect->Modifiers.Num();
+	Effect->Modifiers.Add( FGameplayModifierInfo() );
+	FGameplayModifierInfo& ModifierInfo = Effect->Modifiers[Index];
+	ModifierInfo.ModifierMagnitude = FScalableFloat( DebuffDamage );
+	ModifierInfo.ModifierOp = EGameplayModOp::Additive;
+	ModifierInfo.Attribute = GetIncomingDamageAttribute();
+
+	// Make a GameplayEffectSpec
+	FGameplayEffectSpec GameplayEffectSpec( Effect, NewContextHandle, 1.f );
+
+	// Let IncomingDamage know of which damage type it is
+	FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>( GameplayEffectSpec.GetContext().Get() );
+	AuraContext->SetDamageTypeTag( DamageTypeTag );
+
+	EffectTargetProperties.ASC->ApplyGameplayEffectSpecToSelf( GameplayEffectSpec );
+}
+
 void UAuraAttributeSet::ShowFloatingDamage( const FGameplayEffectContextHandle& ContextHandle, const int ReceivedDamage ) const
 {
 	// AuraAttributeSet is just a UObject which doesn't know about world so using TargetActor for world context object
@@ -357,12 +438,14 @@ void UAuraAttributeSet::ShowFloatingDamage( const FGameplayEffectContextHandle& 
 
 	if ( EffectSourceProperties.Character != EffectTargetProperties.Character )
 	{
-		bool bIsBlockedHit = UAuraGasBpLibrary::IsBlockedHit( ContextHandle );
-		bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
+		bool bIsBlockedHit = UAuraGasBpLibrary::GetIsBlockedHitFromEffectContext( ContextHandle );
+		bool bIsCriticalHit = UAuraGasBpLibrary::GetIsCriticalHitFromEffectContext( ContextHandle );
+
 		AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
 	}
 
 	/*
+	// To show damage number when a player is being attacked
 	AuraPC = EffectTargetProperties.Character->GetController<AAuraPlayerController>();
 	if ( AuraPC && ( EffectSourceProperties.Character != EffectTargetProperties.Character ) )
 	{
@@ -370,10 +453,10 @@ void UAuraAttributeSet::ShowFloatingDamage( const FGameplayEffectContextHandle& 
 	    bool bIsCriticalHit = UAuraGasBpLibrary::IsCriticalHit( ContextHandle );
 	    AuraPC->ShowDamageNumber( ReceivedDamage, EffectTargetProperties.Character, bIsBlockedHit, bIsCriticalHit );
 	}
-*/
+	*/
 }
 
-void UAuraAttributeSet::FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC, const FGameplayEffectContextHandle ContextHandle )
+void UAuraAttributeSet::FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC )
 {
 	// Set ASC. Ability System Component
 	Properties.ASC = ASC;

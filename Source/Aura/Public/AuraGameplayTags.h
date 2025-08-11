@@ -60,8 +60,6 @@ public:
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Physical;
 
-	TMap<FGameplayTag, FGameplayTag> DamageTypeToDamageRes;
-
 	// Ability Tags
 	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;
@@ -86,6 +84,23 @@ public:
 	// Status Effects Tags
 	FGameplayTag Effects_HitReact;
 
+	// Debuffs Tags
+	FGameplayTag Debuff;
+	FGameplayTag Debuff_Burn;
+	FGameplayTag Debuff_Stun;
+	FGameplayTag Debuff_Arcane;
+	FGameplayTag Debuff_Physical;
+
+	// Debuffs Info to Pass it using SetByCallerMagnitude
+	FGameplayTag Debuff_Chance;
+	FGameplayTag Debuff_Damage;
+	FGameplayTag Debuff_Duration;
+	FGameplayTag Debuff_Frequency;
+
+	// Knockback info
+	FGameplayTag Knockback_Chance;
+	FGameplayTag Knockback_Impulse;
+
 	// Montage events
 	FGameplayTag Montage_Attack_1;
 	FGameplayTag Montage_Attack_2;
@@ -101,8 +116,10 @@ public:
 	// Meta Attribute Tags
 	FGameplayTag Attributes_Meta_IncomingXP;
 
-private:
-	static FAuraGameplayTags GameplayTags;
+	TMap<FGameplayTag, FGameplayTag> DamageTypeToDamageRes;
+	TMap<FGameplayTag, FGameplayTag> DamageTypeToDebuff;
+
+public:
 	const FString SecondaryAttributesPrefix{ "Attributes.Secondary." };
 	const FString ResistanceAttributesPrefix{ "Attributes.Resistance." };
 	const FString MetaAttributesPrefix{ "Attributes.Meta." };
@@ -120,4 +137,9 @@ private:
 	const FString AbilitiesLightningPrefix{ "Abilities.Lightning." };
 	const FString StatusPrefix{ "Status." };
 	const FString TypePrefix{ "Type." };
+	const FString DebuffPrefix{ "Debuff." };
+	const FString KnockbackPrefix{ "Knockback." };
+
+private:
+	static FAuraGameplayTags GameplayTags;
 };

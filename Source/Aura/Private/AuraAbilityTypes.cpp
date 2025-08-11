@@ -8,6 +8,7 @@ bool FAuraGameplayEffectContext::NetSerialize( FArchive& Ar, class UPackageMap* 
 	//!!!!!!!!!!!!!!!! Warning !!!!!!!!!!!!!!!
 
 	uint16 RepBits = 0;
+	// If we are saving then mark all bits which should be saved
 	if ( Ar.IsSaving() )
 	{
 		if ( bReplicateInstigator && Instigator.IsValid() )
@@ -46,10 +47,41 @@ bool FAuraGameplayEffectContext::NetSerialize( FArchive& Ar, class UPackageMap* 
 		{
 			RepBits |= 1 << 8;
 		}
+		if ( bDebuffSucceeded )
+		{
+			RepBits |= 1 << 9;
+		}
+		if ( DebuffDamage > 0.f )
+		{
+			RepBits |= 1 << 10;
+		}
+		if ( DebuffDuration > 0.f )
+		{
+			RepBits |= 1 << 11;
+		}
+		if ( DebuffFrequency > 0.f )
+		{
+			RepBits |= 1 << 12;
+		}
+		if ( DamageTypeTag.IsValid() )
+		{
+			RepBits |= 1 << 13;
+		}
+		if ( !DeathImpulse.IsNearlyZero() )
+		{
+			RepBits |= 1 << 14;
+		}
+		if ( !KnockbackImpulse.IsNearlyZero() )
+		{
+			RepBits |= 1 << 15;
+		}
 	}
 
-	Ar.SerializeBits( &RepBits, 9 );
+	// If we are loading then RepBits will be here still 0
+	// But in this methods RepBits will be filled on Loading
+	Ar.SerializeBits( &RepBits, 16 );
 
+	// Now we are saving/loading info to/out of archive
 	if ( RepBits & ( 1 << 0 ) )
 	{
 		Ar << Instigator;
@@ -72,13 +104,22 @@ bool FAuraGameplayEffectContext::NetSerialize( FArchive& Ar, class UPackageMap* 
 	}
 	if ( RepBits & ( 1 << 5 ) )
 	{
+		// This is code of Epic but i'll explain it.
+		// If we are loading
 		if ( Ar.IsLoading() )
 		{
+			// Then we check if HitResult exists
 			if ( !HitResult.IsValid() )
 			{
+				// If not then create one
 				HitResult = TSharedPtr<FHitResult>( new FHitResult() );
 			}
 		}
+		// And fill it
+		// Also here we could use typical Ar << *HitResult but it would call Serialize method
+		// Serialize would just serialize everything from HitResult byte to byte
+		// But instead we can create our own function NetSerialize and optimize it to minimize the amount
+		// of data transfered through the net
 		HitResult->NetSerialize( Ar, Map, bOutSuccess );
 	}
 	if ( RepBits & ( 1 << 6 ) )
@@ -97,6 +138,34 @@ bool FAuraGameplayEffectContext::NetSerialize( FArchive& Ar, class UPackageMap* 
 	if ( RepBits & ( 1 << 8 ) )
 	{
 		Ar << bIsCriticalHit;
+	}
+	if ( RepBits & ( 1 << 9 ) )
+	{
+		Ar << bDebuffSucceeded;
+	}
+	if ( RepBits & ( 1 << 10 ) )
+	{
+		Ar << DebuffDamage;
+	}
+	if ( RepBits & ( 1 << 11 ) )
+	{
+		Ar << DebuffDuration;
+	}
+	if ( RepBits & ( 1 << 12 ) )
+	{
+		Ar << DebuffFrequency;
+	}
+	if ( RepBits & ( 1 << 13 ) )
+	{
+		Ar << DamageTypeTag;
+	}
+	if ( RepBits & ( 1 << 14 ) )
+	{
+		DeathImpulse.NetSerialize( Ar, Map, bOutSuccess );
+	}
+	if ( RepBits & ( 1 << 15 ) )
+	{
+		KnockbackImpulse.NetSerialize( Ar, Map, bOutSuccess );
 	}
 
 	if ( Ar.IsLoading() )

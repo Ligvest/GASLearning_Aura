@@ -14,9 +14,9 @@ class UGameplayEffect;
 // Forward declarations
 class UAttributeSet;
 class UAbilitySystemComponent;
+class UDebuffNiagaraComponent;
 
-UCLASS()
-class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
+UCLASS() class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -36,7 +36,7 @@ public:
 	virtual int GetCharacterLevel() const override;
 	virtual FVector GetCombatSocketLocation_Implementation( FGameplayTag MontageAttackTag ) const override;
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
-	virtual void Die() override;
+	virtual void Die( FVector DeathImpulse ) override;
 	virtual bool IsDead_Implementation() override;
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual FTaggedMontage GetRandAttackMontage_Implementation() override;
@@ -47,11 +47,12 @@ public:
 	virtual void AddMinionsCount_Implementation( int Value ) override;
 	virtual void SetMasterActor_Implementation( AActor* InMasterActor ) override;
 	virtual ECharacterClass GetCharacterClass_Implementation() const override;
+	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
 	//~ End of ICombatInterface
 
 	// Death and dissolve
 	UFUNCTION( NetMulticast, Reliable )
-	virtual void MulticastHandleDeath();
+	virtual void MulticastHandleDeath( FVector DeathImpulse );
 
 	void DissolveCorpse();
 
@@ -71,6 +72,9 @@ public:
 	void GrantDefaultAbilities() const;
 
 protected:
+	// Delegates
+	FOnASCRegistered OnAscRegisteredDelegate;
+
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
@@ -94,6 +98,9 @@ protected:
 
 	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
 	TObjectPtr<USoundBase> HurtSound;
+
+	UPROPERTY( VisibleAnywhere )
+	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffNSComponent;
 
 	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
 	ECharacterClass CharacterClass;

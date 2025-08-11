@@ -8,6 +8,7 @@
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
 #include "GAS/Data/AuraCharacterClassInfoDA.h"
+#include "GAS/Debuff/DebuffNiagaraComponent.h"
 #include "Game/AuraGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -15,6 +16,12 @@
 
 AAuraCharacterBase::AAuraCharacterBase() : CharacterClass( ECharacterClass::Empty )
 {
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+
+	BurnDebuffNSComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>( "BurnDebuffComponent" );
+	BurnDebuffNSComponent->SetupAttachment( GetRootComponent() );
+	BurnDebuffNSComponent->DebuffTag = GameplayTags.Debuff_Burn;
+
 	PrimaryActorTick.bCanEverTick = false;
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>( "WeaponMeshComponent" );
 	WeaponMeshComponent->SetupAttachment( GetMesh(), SocketNameHandWeapon );
@@ -83,9 +90,9 @@ UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
 	return HitReactMontage;
 }
 
-void AAuraCharacterBase::Die()
+void AAuraCharacterBase::Die( const FVector DeathImpulse )
 {
-	MulticastHandleDeath();
+	MulticastHandleDeath( DeathImpulse );
 }
 bool AAuraCharacterBase::IsDead_Implementation()
 {
@@ -134,6 +141,11 @@ ECharacterClass AAuraCharacterBase::GetCharacterClass_Implementation() const
 	return CharacterClass;
 }
 
+FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
+{
+	return OnAscRegisteredDelegate;
+}
+
 FTaggedMontage AAuraCharacterBase::FindAttackMontageByTag_Implementation( FGameplayTag InMontageTag )
 {
 	for ( const FTaggedMontage& Montage : AttackMontages )
@@ -174,7 +186,7 @@ void AAuraCharacterBase::DissolveCorpse()
 	}
 }
 
-void AAuraCharacterBase::MulticastHandleDeath_Implementation()
+void AAuraCharacterBase::MulticastHandleDeath_Implementation( const FVector DeathImpulse )
 {
 	check( DeathSound );
 	UGameplayStatics::SpawnSoundAtLocation( this, DeathSound, GetActorLocation(), GetActorRotation() );
@@ -188,11 +200,20 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	CharacterMesh->SetSimulatePhysics( true );
 	CharacterMesh->SetEnableGravity( true );
 	CharacterMesh->SetCollisionEnabled( ECollisionEnabled::PhysicsOnly );
+	CharacterMesh->AddImpulse( DeathImpulse );
 
 	GetCapsuleComponent()->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 
 	DissolveCorpse();
 	IsDead = true;
+
+	if ( AbilitySystemComponent )
+	{
+		// Remove all Debuffs
+		FGameplayTagContainer TagContainer;
+		TagContainer.AddTag( FAuraGameplayTags::Get().Debuff );
+		AbilitySystemComponent->RemoveActiveEffectsWithTags( TagContainer );
+	}
 
 	if ( IsValid( MasterActor ) )
 	{

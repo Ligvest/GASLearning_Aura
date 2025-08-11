@@ -8,11 +8,13 @@
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
+class UAbilitySystemComponent;
 class AAuraCharacterBase;
 class UNiagaraSystem;
 
-USTRUCT( BlueprintType )
-struct FTaggedMontage
+DECLARE_MULTICAST_DELEGATE_OneParam( FOnASCRegistered, UAbilitySystemComponent* );
+
+USTRUCT( BlueprintType ) struct FTaggedMontage
 {
 	GENERATED_BODY()
 
@@ -61,7 +63,7 @@ public:
 	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
 	UAnimMontage* GetHitReactMontage();
 
-	virtual void Die() = 0;
+	virtual void Die( FVector DeathImpulse ) = 0;
 
 	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
 	bool IsDead();
@@ -94,4 +96,6 @@ public:
 
 	UFUNCTION( BlueprintCallable, BlueprintNativeEvent )
 	ECharacterClass GetCharacterClass() const;
+
+	virtual FOnASCRegistered GetOnASCRegisteredDelegate() = 0;
 };

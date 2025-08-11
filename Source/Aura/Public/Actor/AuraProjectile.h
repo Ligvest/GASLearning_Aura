@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AuraAbilityTypes.h"
 #include "GameplayEffectTypes.h"
 #include "GameFramework/Actor.h"
 #include "NiagaraSystem.h"
@@ -19,7 +20,7 @@ class AURA_API AAuraProjectile : public AActor
 public:
 	AAuraProjectile();
 
-	void SetImpactEffectHandle( FGameplayEffectSpecHandle InImpactEffectHandle ) { ImpactEffectHandle = InImpactEffectHandle; }
+	void SetImpactEffectParams( FDamageEffectParams&& InImpactEffectParams ) { ImpactEffectParams = MoveTemp( InImpactEffectParams ); };
 
 protected:
 	virtual void BeginPlay() override;
@@ -51,5 +52,5 @@ protected:
 	UPROPERTY( EditDefaultsOnly, Category = "Impact" )
 	TObjectPtr<USoundBase> ImpactSound;
 
-	FGameplayEffectSpecHandle ImpactEffectHandle;
+	FDamageEffectParams ImpactEffectParams;
 };

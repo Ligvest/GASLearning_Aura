@@ -56,12 +56,6 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	// Values
 	Values_XP = AddGameplayTag( ValuesPrefix, "XP", "ValueTag: XP" );
 
-	// Associate Damage with Resistance
-	DamageTypeToDamageRes.Add( Values_Damage_Arcane, Attributes_Resistance_Arcane );
-	DamageTypeToDamageRes.Add( Values_Damage_Fire, Attributes_Resistance_Fire );
-	DamageTypeToDamageRes.Add( Values_Damage_Lightning, Attributes_Resistance_Lightning );
-	DamageTypeToDamageRes.Add( Values_Damage_Physical, Attributes_Resistance_Physical );
-
 	// Ability Tags
 	Abilities_None = AddGameplayTag( AbilitiesPrefix, "None", "No Ability Tag" );
 	Abilities_Attack = AddGameplayTag( AbilitiesPrefix, "Attack", "Attack Ability Tag" );
@@ -69,7 +63,24 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Abilities_Fire_FireBolt = AddGameplayTag( AbilitiesFirePrefix, "FireBolt", "Firebolt Ability Tag" );
 	Abilities_Lightning_Electrocute = AddGameplayTag( AbilitiesLightningPrefix, "Electrocute", "Electrocute Ability Tag" );
 
+	// Status Tag
 	Abilities_HitReact = AddGameplayTag( AbilitiesPrefix, "HitReact", "HitReact Ability Tag" );
+
+	// Debuffs Tags
+	Debuff = AddGameplayTag( FString{}, "Debuff", "Debuff root category" );
+	Debuff_Burn = AddGameplayTag( DebuffPrefix, "Burn", "Burn debuff" );
+	Debuff_Stun = AddGameplayTag( DebuffPrefix, "Stun", "Stun debuff" );
+	Debuff_Arcane = AddGameplayTag( DebuffPrefix, "Arcane", "Arcane debuff" );
+	Debuff_Physical = AddGameplayTag( DebuffPrefix, "Physical", "Physical debuff" );
+
+	Knockback_Chance = AddGameplayTag( KnockbackPrefix, "Chance", "Knockback chance" );
+	Knockback_Impulse = AddGameplayTag( KnockbackPrefix, "Impulse", "Knockback impulse = direction * magnitude" );
+
+	// Debuffs Info to Pass it using SetByCallerMagnitude
+	Debuff_Chance = AddGameplayTag( DebuffPrefix, "Chance", "Chance to apply a debuff" );
+	Debuff_Damage = AddGameplayTag( DebuffPrefix, "Damage", "Damage to get on a tick of a debuff" );
+	Debuff_Duration = AddGameplayTag( DebuffPrefix, "Duration", "Duration of a debuff" );
+	Debuff_Frequency = AddGameplayTag( DebuffPrefix, "Frequency", "How often tick of a debuff is fired" );
 
 	// Ability Statuses
 	Abilities_Status_Locked = AddGameplayTag( AbilitiesPrefix + StatusPrefix, "Locked", "Locked status Tag" );
@@ -99,9 +110,22 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	// Meta Attributes Tags
 	Attributes_Meta_IncomingXP = AddGameplayTag( MetaAttributesPrefix, "IncomingXP", "IncomingXP meta attribute tag" );
+
+	// Associations:
+	// Associate Damage with Resistance
+	DamageTypeToDamageRes.Add( Values_Damage_Arcane, Attributes_Resistance_Arcane );
+	DamageTypeToDamageRes.Add( Values_Damage_Fire, Attributes_Resistance_Fire );
+	DamageTypeToDamageRes.Add( Values_Damage_Lightning, Attributes_Resistance_Lightning );
+	DamageTypeToDamageRes.Add( Values_Damage_Physical, Attributes_Resistance_Physical );
+
+	// Associate Damage with Resistance
+	DamageTypeToDebuff.Add( Values_Damage_Arcane, Debuff_Arcane );
+	DamageTypeToDebuff.Add( Values_Damage_Fire, Debuff_Burn );
+	DamageTypeToDebuff.Add( Values_Damage_Lightning, Debuff_Stun );
+	DamageTypeToDebuff.Add( Values_Damage_Physical, Debuff_Physical );
 }
 FGameplayTag FAuraGameplayTags::AddGameplayTag( const FString& AttributeNamePrefix, const FString& AttributeName, const FString& AttributeHint )
 {
-	FName AttributeFullName( AttributeNamePrefix + AttributeName );
+	FName AttributeFullName{ AttributeNamePrefix + AttributeName };
 	return UGameplayTagsManager::Get().AddNativeGameplayTag( AttributeFullName, AttributeHint );
 }

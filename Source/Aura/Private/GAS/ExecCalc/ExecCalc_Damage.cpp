@@ -123,29 +123,46 @@ void UExecCalc_Damage::Execute_Implementation( const FGameplayEffectCustomExecut
 	{
 		// Read each type of damage passed to SetByCaller function
 		// If no such type the function returns 0
-		constexpr bool bWarnIfNotFound = false;
-		float DamageValue = Spec.GetSetByCallerMagnitude( DamageTypeTag, bWarnIfNotFound );
-		if ( !DamageValue )
+		float DamageValue = Spec.GetSetByCallerMagnitude( DamageTypeTag, false, -1.f );
+		if ( DamageValue < 0.f )
 		{
 			continue;
 		}
 
 		// Get resistance value from captured attributes for the DamageTypeTag
-		float ResistanceValue = 0.f;
+		float TargetDamageTypeResistance = 0.f;
 		const FGameplayEffectAttributeCaptureDefinition* const* ResistanceAttributeCapturePtr = TagToAttributeCapture.Find( ResTypeTag );
 		check( ResistanceAttributeCapturePtr );
 		const FGameplayEffectAttributeCaptureDefinition& ResistanceAttributeDef = **ResistanceAttributeCapturePtr;
-		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude( ResistanceAttributeDef, EvaluationParams, ResistanceValue );
-		ResistanceValue = std::clamp( ResistanceValue, 0.f, 100.f );
+		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude( ResistanceAttributeDef, EvaluationParams, TargetDamageTypeResistance );
 
-		// 100.f - ResistanceValue = Percent of damage not ignored
-		CombinedDamage += DamageValue * ( 100.f - ResistanceValue ) / 100.f;
+		const float SourceDebuffChance = Spec.GetSetByCallerMagnitude( GameplayTags.Debuff_Chance, false, -1.f );
+		bool bDebuffSucceeded = CheckOdds( SourceDebuffChance, TargetDamageTypeResistance );
+		if ( bDebuffSucceeded )
+		{
+			ApplyDebuff( Spec, DamageTypeTag );
+		}
+
+		TargetDamageTypeResistance = std::clamp( TargetDamageTypeResistance, 0.f, 100.f );
+
+		// "100.f - ResistanceValue" = Percent of damage not ignored
+		CombinedDamage += DamageValue * ( 100.f - TargetDamageTypeResistance ) / 100.f;
+	}
+
+	if ( CombinedDamage > 0.f )
+	{
+		float KnockbackChance = Spec.GetSetByCallerMagnitude( GameplayTags.Knockback_Chance, false, -1.f );
+		bool bKnockbackSucceeded = CheckOdds( KnockbackChance, 0.f );
+		if ( bKnockbackSucceeded )
+		{
+			// Do Knockback
+		}
 	}
 
 	// Calculate Block affection
 	bool bIsBlockedHit = false;
 	ModifyDamageByBlockChance( CombinedDamage, CalcInfo, bIsBlockedHit );
-	UAuraGasBpLibrary::SetIsBlockedHit( EffectContextHandle, bIsBlockedHit );
+	UAuraGasBpLibrary::SetIsBlockedHitFromEffectContext( EffectContextHandle, bIsBlockedHit );
 
 	// Calculate Armor affection
 	ModifyDamageByArmor( CombinedDamage, CalcInfo );
@@ -153,7 +170,7 @@ void UExecCalc_Damage::Execute_Implementation( const FGameplayEffectCustomExecut
 	// Calculate CriticalHit affection
 	bool bIsCriticalHit = false;
 	ModifyDamageByCriticalHit( CombinedDamage, CalcInfo, bIsCriticalHit );
-	UAuraGasBpLibrary::SetIsCriticalHit( EffectContextHandle, bIsCriticalHit );
+	UAuraGasBpLibrary::SetIsCriticalHitInEffectContext( EffectContextHandle, bIsCriticalHit );
 
 	// Add Damage to IncomingDamage attribute. IncomingDamage is used further to subtract Health in PostGameplayEffectExecute
 	const FGameplayModifierEvaluatedData EvaluatedDataDamage( UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, CombinedDamage );
@@ -166,10 +183,7 @@ void UExecCalc_Damage::ModifyDamageByBlockChance( float& OutDamage, const Calcul
 	// Captured BlockChance from Target ASC
 	float TargetBlockChance = 0.f;
 	CalcInfo.ExecutionParams->AttemptCalculateCapturedAttributeMagnitude( DamageStatics().BlockChanceDef, *CalcInfo.EvaluationParams, TargetBlockChance );
-	float Odds = FMath::RandRange( 1.f, 100.f );
-
-	// Captured Damage with Values_Damage tag from SetByCaller
-	bOutBlockedHit = TargetBlockChance >= Odds;
+	bOutBlockedHit = CheckOdds( TargetBlockChance, 0.f );
 	if ( bOutBlockedHit )
 	{
 		// Halve the damage if it was blocked
@@ -234,4 +248,32 @@ void UExecCalc_Damage::ModifyDamageByCriticalHit( float& OutDamage, const Calcul
 	{
 		OutDamage = OutDamage * 2 + SourceCriticalHitDamage;
 	}
+}
+
+void UExecCalc_Damage::ApplyDebuff( const FGameplayEffectSpec& Spec, FGameplayTag DamageTypeTag ) const
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
+
+	const float DebuffDamage = Spec.GetSetByCallerMagnitude( GameplayTags.Debuff_Damage, false, -1.f );
+	const float DebuffDuration = Spec.GetSetByCallerMagnitude( GameplayTags.Debuff_Duration, false, -1.f );
+	const float DebuffFrequency = Spec.GetSetByCallerMagnitude( GameplayTags.Debuff_Frequency, false, -1.f );
+
+	// This is one way to pass data from ExecCalc to AttributeSet PostGameplayEffectExecute
+	// But this is a stupid way as we still have access to GameplayEffectSpec from PostGameplayEffectExecute function
+	// And from this Spec we easily can access all SetByCallerMagnitude data which already has all this shit
+	// Also we can use SetByCallerMagnitude to pass a bool as a number.
+	// So for learning purposes this is nice to try to make your custom EffectContext but in this situation you mustn't use it
+	UAuraGasBpLibrary::SetIsDebuffSucceededInEffectContext( ContextHandle, true );
+	UAuraGasBpLibrary::SetDamageTypeTagInEffectContext( ContextHandle, DamageTypeTag );
+	UAuraGasBpLibrary::SetDebuffDamageInEffectContext( ContextHandle, DebuffDamage );
+	UAuraGasBpLibrary::SetDebuffDurationInEffectContext( ContextHandle, DebuffDuration );
+	UAuraGasBpLibrary::SetDebuffFrequencyInEffectContext( ContextHandle, DebuffFrequency );
+}
+
+bool UExecCalc_Damage::CheckOdds( const float Chance, float Resistance ) const
+{
+	Resistance = FMath::Max<float>( Resistance, 0.f );
+	const float EffectiveDebuffChance = Chance * ( 100 - Resistance ) / 100.f;
+	return EffectiveDebuffChance >= FMath::RandRange( 1, 100 );
 }

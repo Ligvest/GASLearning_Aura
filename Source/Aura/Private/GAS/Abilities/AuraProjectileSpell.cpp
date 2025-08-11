@@ -3,9 +3,10 @@
 #include "GAS/Abilities/AuraProjectileSpell.h"
 
 #include "AbilitySystemComponent.h"
-#include "AuraGameplayTags.h"
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
+#include "AuraAbilityTypes.h"
+#include "GAS/AuraGasBpLibrary.h"
 
 void UAuraProjectileSpell::ActivateAbility( const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                             const FGameplayEventData* TriggerEventData )
@@ -15,6 +16,7 @@ void UAuraProjectileSpell::ActivateAbility( const FGameplayAbilitySpecHandle Han
 void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation, const FGameplayTag SpawnCombatSocketTag )
 {
 	// Activate only if this is a server
+	// So return if this is a client
 	if ( !GetAvatarActorFromActorInfo()->HasAuthority() )
 	{
 		return;
@@ -36,37 +38,7 @@ void UAuraProjectileSpell::SpawnProjectile( FVector TargetLocation, const FGamep
 
 	AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>( ProjectileClass, SpawnTransform, Owner, Instigator, ESpawnActorCollisionHandlingMethod::AlwaysSpawn );
 
-	UAbilitySystemComponent* SourceASC = GetAbilitySystemComponentFromActorInfo();
-	check( SourceASC );
-	float AbilityLevel = GetAbilityLevel();
-
-	// Example of things we can add to EffectContextHandle to get them later.
-	// E.g. in AttributeSet functions such as PostGameplayEffectExecute or PreAttributeChange
-	FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
-	EffectContextHandle.SetAbility( this );
-	EffectContextHandle.AddSourceObject( SpawnedProjectile );
-	TArray<TWeakObjectPtr<AActor>> Actors;
-	Actors.Add( SpawnedProjectile );
-	EffectContextHandle.AddActors( Actors );
-	FHitResult HitResult;
-	HitResult.Location = TargetLocation;
-	EffectContextHandle.AddHitResult( HitResult );
-
-	FGameplayEffectSpecHandle ImpactEffectSpecHandle = SourceASC->MakeOutgoingSpec( DamageEffectClass, AbilityLevel, EffectContextHandle );
-
-	float DamageValue = 0.f;
-	for ( const auto& [DamageTypeTag, DamageScalableFloat] : DamageTypeTagToScalableFloat )
-	{
-		DamageValue = DamageScalableFloat.GetValueAtLevel( AbilityLevel );
-		// Pass DamageValue to PostGameplayEffectExecute and label it with DamageTypeTag
-		ImpactEffectSpecHandle.Data->SetSetByCallerMagnitude( DamageTypeTag, DamageValue );
-	}
-
-	if ( ImpactEffectSpecHandle.Data == nullptr )
-	{
-		int i = 0;
-		i++;
-	}
-	SpawnedProjectile->SetImpactEffectHandle( std::move( ImpactEffectSpecHandle ) );
+	FDamageEffectParams TempEffectParams = MakeDamageEffectParamsFromClassDefaults();
+	SpawnedProjectile->SetImpactEffectParams( MoveTemp( TempEffectParams ) );
 	SpawnedProjectile->FinishSpawning( SpawnTransform );
 }

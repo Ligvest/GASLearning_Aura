@@ -67,6 +67,9 @@ void AAuraEnemyCharacter::BeginPlay()
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	check( AuraASC );
 	AuraASC->Init();
+
+	OnAscRegisteredDelegate.Broadcast( AbilitySystemComponent );
+
 	InitDefaultAttributes( GetCharacterLevel() );
 	check( AttributeSet );
 	GetCharacterMovement()->MaxWalkSpeed = BaseMaxWalkSpeed;
@@ -162,10 +165,10 @@ void AAuraEnemyCharacter::ReactOnBeingHit( const FGameplayTag HitTag, const int 
 	}
 }
 
-void AAuraEnemyCharacter::Die()
+void AAuraEnemyCharacter::Die( const FVector DeathImpulse )
 {
 	SetLifeSpan( CorpseLifeSpan );
-	Super::Die();
+	Super::Die( DeathImpulse );
 	// IsDead is Set in Super::Die()
 	AuraAIController->GetBlackboardComponent()->SetValueAsBool( BBValueName_Dead, IsDead );
 }

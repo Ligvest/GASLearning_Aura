@@ -20,7 +20,9 @@ struct FEffectProperties
 	GENERATED_BODY()
 
 	// Here are only functions and TObjectPtr in the Handle. So we can just copy it
+	/*
 	FGameplayEffectContextHandle EffectContextHandle;
+	*/
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> ASC;
 	UPROPERTY()
@@ -258,8 +260,9 @@ protected:
 
 	void ProcessIncomingDamage( const FGameplayEffectContextHandle& ContextHandle );
 	void ProcessIncomingXP( const FGameplayEffectContextHandle& ContextHandle );
-	void ProcessDeath();
+	void ProcessDeath( const FGameplayEffectContextHandle& ContextHandle ) const;
+	void ProcessDebuff( const FGameplayEffectContextHandle& ContextHandle ) const;
 	void ShowFloatingDamage( const FGameplayEffectContextHandle& ContextHandle, const int ReceivedDamage ) const;
 
-	void FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC, const FGameplayEffectContextHandle ContextHandle );
+	void FillEffectPropertiesWithASC( FEffectProperties& Properties, UAbilitySystemComponent* ASC );
 };

@@ -161,6 +161,7 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 
 	// For initializing AbilityComponent we use OnRep_PlayerState instead of AknowledgePossession on a client
 	// because we need to be sure that PlayerState is replicated and has all valid data so we can use it
+	// Also this ASC is stored in PlayerState so without correct ASC we can't initialize the rest of GAS
 	// Init ability actor info for Client
 	InitGASInfoAndHUD();
 }
@@ -174,6 +175,7 @@ void AAuraPlayerCharacter::InitGASInfo()
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	check( AuraASC );
 	AuraASC->Init();
+	OnAscRegisteredDelegate.Broadcast( AbilitySystemComponent );
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 	// It can be called only on the server as attributes will be replicated regardless
 	InitDefaultAttributes( GetCharacterLevel() );
