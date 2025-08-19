@@ -50,9 +50,6 @@ protected:
 
 	bool bHitReacting = false;
 
-	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Movement" )
-	float BaseMaxWalkSpeed = 250.f;
-
 	// Death and Dissolve
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Death" )
 	float CorpseLifeSpan = 5.f;
@@ -86,6 +83,8 @@ protected:
 	void ReactOnBeingHit( const FGameplayTag HitTag, const int NewTagCount );
 
 	virtual void InitDefaultAttributes( int InCharacterLevel ) const override;
+
+	virtual void StunTagChanged( const FGameplayTag CallbackTag, int32 NewCount ) override;
 
 	// Death and Dissolve
 	virtual void Die( FVector DeathImpulse ) override;

@@ -22,10 +22,7 @@ class AURA_API UAuraProjectileSpell : public UAuraDamageGameplayAbility
 	UFUNCTION( BlueprintCallable, Category = "Projectile" )
 	void SpawnProjectile( FVector TargetLocation, FGameplayTag SpawnCombatSocketTag );
 
+protected:
 	UPROPERTY( EditDefaultsOnly, Category = "Projectile" )
 	TSubclassOf<AAuraProjectile> ProjectileClass;
-
-protected:
-	UPROPERTY( EditDefaultsOnly )
-	int32 NumProjectiles = 5;
 };

@@ -107,8 +107,10 @@ public:
 	static void GetLivePlayersInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin );
 
 	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|Interaction" )
-	static void GetLiveOpponentsInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin,
-	                                     const AActor* MyActor );
+	static void GetLiveOpponentsInRadus( const AActor* MyActor, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin );
+
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayMechanics" )
+	static void GetClosestTargets( int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin );
 
 	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|Interaction" )
 	static AActor* GetClosestPlayerInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
@@ -135,6 +137,12 @@ public:
 
 	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|DamageEffect" )
 	static FActiveGameplayEffectHandle ApplyDamageEffect( const FDamageEffectParams& DamageEffectParams );
+
+	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|GameplayMechanics" )
+	static TArray<FRotator> EvenlySpacedRotators( const FVector& Forward, const FVector& Axis, float Spread, int32 NumRotators );
+
+	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|GameplayMechanics" )
+	static TArray<FVector> EvenlyRotatedVectors( const FVector& Forward, const FVector& Axis, float Spread, int32 NumVectors );
 
 private:
 	static FWidgetControllerParams GetWidgetControllerParams( const UObject* WorldContext );

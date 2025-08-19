@@ -10,6 +10,7 @@
 #include "GAS/Data/AuraCharacterClassInfoDA.h"
 #include "GAS/Debuff/DebuffNiagaraComponent.h"
 #include "Game/AuraGameModeBase.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/AuraPlayerState.h"
@@ -21,6 +22,10 @@ AAuraCharacterBase::AAuraCharacterBase() : CharacterClass( ECharacterClass::Empt
 	BurnDebuffNSComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>( "BurnDebuffComponent" );
 	BurnDebuffNSComponent->SetupAttachment( GetRootComponent() );
 	BurnDebuffNSComponent->DebuffTag = GameplayTags.Debuff_Burn;
+
+	StunDebuffNSComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>( "StunDebuffComponent" );
+	StunDebuffNSComponent->SetupAttachment( GetRootComponent() );
+	StunDebuffNSComponent->DebuffTag = GameplayTags.Debuff_Stun;
 
 	PrimaryActorTick.bCanEverTick = false;
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>( "WeaponMeshComponent" );
@@ -122,6 +127,11 @@ USoundBase* AAuraCharacterBase::GetHurtSound_Implementation()
 	return HurtSound;
 }
 
+FOnDeathSignature& AAuraCharacterBase::GetOnDeathDelegate()
+{
+	return OnDeathDelegate;
+}
+
 int AAuraCharacterBase::GetMinionsCount_Implementation()
 {
 	return MinionsCount;
@@ -141,9 +151,24 @@ ECharacterClass AAuraCharacterBase::GetCharacterClass_Implementation() const
 	return CharacterClass;
 }
 
-FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
+FOnASCRegistered& AAuraCharacterBase::GetOnASCRegisteredDelegate()
 {
 	return OnAscRegisteredDelegate;
+}
+
+USkeletalMeshComponent* AAuraCharacterBase::GetWeapon_Implementation()
+{
+	return WeaponMeshComponent;
+}
+
+void AAuraCharacterBase::SetIsBeingShocked_Implementation( bool bInShock )
+{
+	bIsBeingShocked = bInShock;
+}
+
+bool AAuraCharacterBase::IsBeingShocked_Implementation() const
+{
+	return bIsBeingShocked;
 }
 
 FTaggedMontage AAuraCharacterBase::FindAttackMontageByTag_Implementation( FGameplayTag InMontageTag )
@@ -220,6 +245,8 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation( const FVector Deat
 		// As this character dies it should decrement minions counter if it has a MasterActor which spawned it
 		--MasterActor->MinionsCount;
 	}
+
+	OnDeathDelegate.Broadcast( this );
 }
 
 void AAuraCharacterBase::InitDefaultAttributes( int InCharacterLevel ) const
@@ -259,10 +286,31 @@ void AAuraCharacterBase::GrantDefaultAbilities() const
 
 	ASC->GrantPassiveAbilities( DefaultPassiveAbilityClasses, DefaultAbilityLevel );
 }
+
+void AAuraCharacterBase::StunTagChanged( const FGameplayTag CallbackTag, int32 NewCount )
+{
+	bIsStunned = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseMaxWalkSpeed;
+}
+
+void AAuraCharacterBase::GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
+
+	DOREPLIFETIME( AAuraCharacterBase, bIsStunned );
+	DOREPLIFETIME( AAuraCharacterBase, bIsBurned );
+	DOREPLIFETIME( AAuraCharacterBase, bIsBeingShocked );
+}
+
+void AAuraCharacterBase::OnRep_Stunned()
+{
+}
+
+void AAuraCharacterBase::OnRep_Burned()
+{
+}
+
 void AAuraCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-}
-void AAuraCharacterBase::Rep_CharacterLevel( int OldCharacterLevel )
-{
 }

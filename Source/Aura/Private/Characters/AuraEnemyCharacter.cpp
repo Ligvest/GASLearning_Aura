@@ -57,6 +57,8 @@ AAuraEnemyCharacter::AAuraEnemyCharacter()
 	bUseControllerRotationRoll = false;
 	// Enable rotation logic in MovementComponent where it could be smooth
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+
+	BaseMaxWalkSpeed = 250.f;
 }
 
 void AAuraEnemyCharacter::BeginPlay()
@@ -120,6 +122,7 @@ void AAuraEnemyCharacter::PossessedBy( AController* NewController )
 	BlackboardComponent->SetValueAsBool( BBValueName_UnderHitReaction, bHitReacting );
 	BlackboardComponent->SetValueAsFloat( BBValueName_DistanceToSeePlayer, DistanceToSeePlayer );
 	AuraAIController->RunBehaviorTree( BehaviorTree );
+	AbilitySystemComponent->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved ).AddUObject( this, &AAuraEnemyCharacter::StunTagChanged );
 }
 
 void AAuraEnemyCharacter::InitFloatingWC()
@@ -196,4 +199,14 @@ void AAuraEnemyCharacter::InitDefaultAttributes( int InCharacterLevel ) const
 	ApplyEffectToSelf( InitPrimaryAttribsEffectClass, InCharacterLevel );
 	ApplyEffectToSelf( InitSecondaryAttribsEffectClass, InCharacterLevel );
 	ApplyEffectToSelf( InitVitalAttribsEffectClass, InCharacterLevel );
+}
+
+void AAuraEnemyCharacter::StunTagChanged( const FGameplayTag CallbackTag, int32 NewCount )
+{
+	Super::StunTagChanged( CallbackTag, NewCount );
+
+	if ( AuraAIController && AuraAIController->GetBlackboardComponent() )
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool( FName( "Stunned" ), bIsStunned );
+	}
 }

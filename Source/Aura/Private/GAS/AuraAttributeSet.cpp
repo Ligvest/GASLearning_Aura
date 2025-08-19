@@ -287,9 +287,12 @@ void UAuraAttributeSet::ProcessIncomingDamage( const FGameplayEffectContextHandl
 	}
 	else
 	{
-		FGameplayTagContainer TagContainer;
-		TagContainer.AddTag( FAuraGameplayTags::Get().Effects_HitReact );
-		EffectTargetProperties.ASC->TryActivateAbilitiesByTag( TagContainer );
+		if ( EffectTargetProperties.AvatarActor->Implements<UCombatInterface>() && !ICombatInterface::Execute_IsBeingShocked( EffectTargetProperties.AvatarActor ) )
+		{
+			FGameplayTagContainer TagContainer;
+			TagContainer.AddTag( FAuraGameplayTags::Get().Effects_HitReact );
+			EffectTargetProperties.ASC->TryActivateAbilitiesByTag( TagContainer );
+		}
 
 		const FVector& KnockbackForce = UAuraGasBpLibrary::GetKnockbackImpulseFromEffectContext( ContextHandle );
 		if ( !KnockbackForce.IsNearlyZero( 1.f ) )
@@ -394,7 +397,16 @@ void UAuraAttributeSet::ProcessDebuff( const FGameplayEffectContextHandle& Conte
 	// Add tags to be granted on effect application
 	UTargetTagsGameplayEffectComponent& TargetTagsComponent = Effect->FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
 	FInheritedTagContainer InheritedTagContainer;
-	InheritedTagContainer.AddTag( GameplayTags.DamageTypeToDebuff[DamageTypeTag] );
+	const FGameplayTag DebuffTag = GameplayTags.DamageTypeToDebuff[DamageTypeTag];
+	InheritedTagContainer.AddTag( DebuffTag );
+	if ( DebuffTag.MatchesTagExact( GameplayTags.Debuff_Stun ) )
+	{
+		InheritedTagContainer.AddTag( GameplayTags.Player_Block_CursorTrace );
+		InheritedTagContainer.AddTag( GameplayTags.Player_Block_InputHeld );
+		InheritedTagContainer.AddTag( GameplayTags.Player_Block_InputPressed );
+		InheritedTagContainer.AddTag( GameplayTags.Player_Block_InputReleased );
+	}
+
 	TargetTagsComponent.SetAndApplyTargetTagChanges( InheritedTagContainer );
 
 	// Add modifiers to modify IncomingDamage which will cause damage to target
@@ -413,6 +425,12 @@ void UAuraAttributeSet::ProcessDebuff( const FGameplayEffectContextHandle& Conte
 	FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>( GameplayEffectSpec.GetContext().Get() );
 	AuraContext->SetDamageTypeTag( DamageTypeTag );
 
+	// Sooo. You can apply this effect, which is created dynamically right in the function and not as a separate asset.
+	// But we have a problem here. If this asset is created dynamically here ( on server ) then client knows nothing about this GE.
+	// So when we apply it from server to client, client won't know what tags to apply or anything else.
+	// The correct way is to create an asset in Editor, and then you can fill it here and then send it to the client
+	// If you will send Dynamically created GE then be ready to get many problems and to replicate all the tags and other things manually
+	// In short: don't create GE dynamically if you want to replicate it and it's tags
 	EffectTargetProperties.ASC->ApplyGameplayEffectSpecToSelf( GameplayEffectSpec );
 }
 

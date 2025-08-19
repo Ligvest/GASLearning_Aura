@@ -38,7 +38,11 @@ public:
 	AAuraPlayerCharacter();
 	virtual void BeginPlay() override;
 	virtual void PossessedBy( AController* NewController ) override;
+
+	// Replication
 	virtual void OnRep_PlayerState() override;
+	virtual void OnRep_Stunned() override;
+	virtual void OnRep_Burned() override;
 
 protected:
 	AAuraPlayerState* AuraPS;

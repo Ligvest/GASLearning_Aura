@@ -252,13 +252,12 @@ void UAuraGasBpLibrary::GetLivePlayersInRadus( const UObject* WorldContextObject
 	}
 }
 
-void UAuraGasBpLibrary::GetLiveOpponentsInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
-                                                 const FVector& SphereOrigin, const AActor* MyActor )
+void UAuraGasBpLibrary::GetLiveOpponentsInRadus( const AActor* MyActor, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin )
 {
 	// This code is just a low level versions of SphereOverlapActors and other methods of the same kind.
 	// E.g UKismetSystemLibrary::SphereOverlapComponents
 	// We use it to avoid unnecessary calculations
-	const UWorld* World = GEngine->GetWorldFromContextObject( WorldContextObject, EGetWorldErrorMode::LogAndReturnNull );
+	const UWorld* World = GEngine->GetWorldFromContextObject( MyActor, EGetWorldErrorMode::LogAndReturnNull );
 	if ( World )
 	{
 		const FName OpponentTag = GetOpponentActorTag( MyActor );
@@ -283,6 +282,37 @@ void UAuraGasBpLibrary::GetLiveOpponentsInRadus( const UObject* WorldContextObje
 				OutOverlappingActors.AddUnique( ICombatInterface::Execute_GetAvatar( OverlappedActor ) );
 			}
 		}
+	}
+}
+
+void UAuraGasBpLibrary::GetClosestTargets( int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin )
+{
+	if ( Actors.Num() <= MaxTargets )
+	{
+		OutClosestTargets = Actors;
+		return;
+	}
+
+	TArray<AActor*> ActorsToCheck = Actors;
+	int32 NumTargetsFound = 0;
+
+	while ( NumTargetsFound < MaxTargets )
+	{
+		if ( ActorsToCheck.Num() == 0 ) break;
+		double ClosestDistance = TNumericLimits<double>::Max();
+		AActor* ClosestActor;
+		for ( AActor* PotentialTarget : ActorsToCheck )
+		{
+			const double Distance = ( PotentialTarget->GetActorLocation() - Origin ).Length();
+			if ( Distance < ClosestDistance )
+			{
+				ClosestDistance = Distance;
+				ClosestActor = PotentialTarget;
+			}
+		}
+		ActorsToCheck.Remove( ClosestActor );
+		OutClosestTargets.AddUnique( ClosestActor );
+		++NumTargetsFound;
 	}
 }
 
@@ -347,6 +377,48 @@ FActiveGameplayEffectHandle UAuraGasBpLibrary::ApplyDamageEffect( const FDamageE
 	// EffectSpecHandle.Data->SetSetByCallerMagnitude( GameplayTags.Knockback_Impulse, DamageEffectParams.KnockbackImpulse );
 
 	return SourceASC->ApplyGameplayEffectSpecToTarget( *EffectSpecHandle.Data, TargetASC );
+}
+
+TArray<FRotator> UAuraGasBpLibrary::EvenlySpacedRotators( const FVector& Forward, const FVector& Axis, float Spread, int32 NumRotators )
+{
+	TArray<FRotator> Rotators;
+
+	const FVector LeftOfSpread = Forward.RotateAngleAxis( -Spread / 2.f, Axis );
+	if ( NumRotators > 1 )
+	{
+		const float DeltaSpread = Spread / ( NumRotators - 1 );
+		for ( int32 i = 0; i < NumRotators; i++ )
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis( DeltaSpread * i, FVector::UpVector );
+			Rotators.Add( Direction.Rotation() );
+		}
+	}
+	else
+	{
+		Rotators.Add( Forward.Rotation() );
+	}
+	return Rotators;
+}
+
+TArray<FVector> UAuraGasBpLibrary::EvenlyRotatedVectors( const FVector& Forward, const FVector& Axis, float Spread, int32 NumVectors )
+{
+	TArray<FVector> Vectors;
+
+	const FVector LeftOfSpread = Forward.RotateAngleAxis( -Spread / 2.f, Axis );
+	if ( NumVectors > 1 )
+	{
+		const float DeltaSpread = Spread / ( NumVectors - 1 );
+		for ( int32 i = 0; i < NumVectors; i++ )
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis( DeltaSpread * i, FVector::UpVector );
+			Vectors.Add( Direction );
+		}
+	}
+	else
+	{
+		Vectors.Add( Forward );
+	}
+	return Vectors;
 }
 
 // I believe this function should be called after PlayerState replicated and is up to date

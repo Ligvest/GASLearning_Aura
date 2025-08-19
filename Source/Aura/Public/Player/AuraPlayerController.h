@@ -8,12 +8,12 @@
 
 class UDamageTextComponent;
 class USplineComponent;
-// Forward declaration
 class IHighlightActorInterface;
 class UInputMappingContext;
 class UInputAction;
 class UAuraInputConfig;
 class UAuraAbilitySystemComponent;
+class UNiagaraSystem;
 struct FGameplayTag;
 struct FInputActionValue;
 
@@ -88,6 +88,9 @@ private:
 
 	UPROPERTY( EditDefaultsOnly, Category = "UI" )
 	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Input" )
+	TObjectPtr<UNiagaraSystem> ClickNS;
 
 	// Debug
 public:

@@ -25,9 +25,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION()
-	void Rep_CharacterLevel( int OldCharacterLevel );
-
 	//~ Begin of IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; };
 	//~ End of IAbilitySystemInterface
@@ -43,24 +40,21 @@ public:
 	virtual FTaggedMontage FindAttackMontageByTag_Implementation( FGameplayTag InMontageTag ) override;
 	virtual UNiagaraSystem* GetHurtNSEffect_Implementation() override;
 	virtual USoundBase* GetHurtSound_Implementation() override;
+	virtual FOnDeathSignature& GetOnDeathDelegate() override;
 	virtual int GetMinionsCount_Implementation() override;
 	virtual void AddMinionsCount_Implementation( int Value ) override;
 	virtual void SetMasterActor_Implementation( AActor* InMasterActor ) override;
 	virtual ECharacterClass GetCharacterClass_Implementation() const override;
-	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
+	virtual void SetIsBeingShocked_Implementation( bool bInShock ) override;
+	virtual bool IsBeingShocked_Implementation() const override;
 	//~ End of ICombatInterface
-
-	// Death and dissolve
-	UFUNCTION( NetMulticast, Reliable )
-	virtual void MulticastHandleDeath( FVector DeathImpulse );
 
 	void DissolveCorpse();
 
 	UFUNCTION( BlueprintImplementableEvent, Category = "Death" )
 	void StartDissolving( const TArray<UMaterialInstanceDynamic*>& DynamicMatInstances );
-
-	UFUNCTION( BlueprintCallable )
-	USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMeshComponent; }
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
@@ -71,9 +65,25 @@ public:
 
 	void GrantDefaultAbilities() const;
 
+	virtual void StunTagChanged( const FGameplayTag CallbackTag, int32 NewCount );
+
+	// Replication
+	virtual void GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps ) const;
+
+	UFUNCTION()
+	virtual void OnRep_Stunned();
+
+	UFUNCTION()
+	virtual void OnRep_Burned();
+
+	// Death and dissolve
+	UFUNCTION( NetMulticast, Reliable )
+	virtual void MulticastHandleDeath( FVector DeathImpulse );
+
 protected:
 	// Delegates
 	FOnASCRegistered OnAscRegisteredDelegate;
+	FOnDeathSignature OnDeathDelegate;
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -91,16 +101,19 @@ protected:
 	TSubclassOf<UGameplayEffect> InitVitalAttributesEffectClass;
 
 	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
-	TObjectPtr<UNiagaraSystem> HurtNSEffect;
-
-	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
 	TObjectPtr<USoundBase> DeathSound;
 
 	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
 	TObjectPtr<USoundBase> HurtSound;
 
-	UPROPERTY( VisibleAnywhere )
+	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
+	TObjectPtr<UNiagaraSystem> HurtNSEffect;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
 	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffNSComponent;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
+	TObjectPtr<UDebuffNiagaraComponent> StunDebuffNSComponent;
 
 	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
 	ECharacterClass CharacterClass;
@@ -151,4 +164,16 @@ protected:
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
 
 	bool IsDead = false;
+
+	UPROPERTY( EditAnywhere, BlueprintReadOnly, Category = "Combat" )
+	float BaseMaxWalkSpeed = 600.f;
+
+	UPROPERTY( ReplicatedUsing = OnRep_Stunned, BlueprintReadOnly )
+	bool bIsStunned = false;
+
+	UPROPERTY( ReplicatedUsing = OnRep_Burned, BlueprintReadOnly )
+	bool bIsBurned = false;
+
+	UPROPERTY( Replicated, BlueprintReadOnly )
+	bool bIsBeingShocked = false;
 };

@@ -63,7 +63,52 @@ void UAuraAbilitySystemComponent::GrantPassiveAbilities( const TArray<TSubclassO
 
 void UAuraAbilitySystemComponent::AbilityInputTagPressed( const FGameplayTag& InputTag )
 {
-	// TODO: Implement Pressed if needed
+	if ( !InputTag.IsValid() ) return;
+
+	// Get abilities which are not blocked by tags or other conditions and can be activated
+	for ( FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
+	{
+		// check if any of these abilities has the same tag as our input tag
+		if ( AbilitySpec.DynamicAbilityTags.HasTagExact( InputTag ) )
+		{
+			// Activate the ability and set flag "Pressed"
+			AbilitySpecInputPressed( AbilitySpec );
+			if ( AbilitySpec.IsActive() )
+			{
+				// 	InvokeReplicatedEvent( EAbilityGenericReplicatedEvent::InputPressed, AbilitySpec.Handle, AbilitySpec.Ability->GetCurrentActivationInfo().GetActivationPredictionKey() );
+				// }
+				if ( UGameplayAbility* Instance = AbilitySpec.GetPrimaryInstance() )
+				{
+					const FPredictionKey& PredictionKey = Instance->GetCurrentActivationInfo().GetActivationPredictionKey();
+
+					InvokeReplicatedEvent( EAbilityGenericReplicatedEvent::InputPressed, AbilitySpec.Handle, PredictionKey );
+				}
+			}
+		}
+	}
+}
+
+void UAuraAbilitySystemComponent::AbilityInputTagReleased( const FGameplayTag& InputTag )
+{
+	if ( !InputTag.IsValid() ) return;
+
+	// Get abilities which are not blocked by tags or other conditions and can be activated
+	for ( FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
+	{
+		// check if any of these abilities has the same tag as our input tag
+		if ( AbilitySpec.DynamicAbilityTags.HasTagExact( InputTag ) )
+		{
+			// Set flag "Released"
+			AbilitySpecInputReleased( AbilitySpec );
+			// InvokeReplicatedEvent( EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, AbilitySpec.Ability->GetCurrentActivationInfo().GetActivationPredictionKey() );
+			if ( UGameplayAbility* Instance = AbilitySpec.GetPrimaryInstance() )
+			{
+				const FPredictionKey& PredictionKey = Instance->GetCurrentActivationInfo().GetActivationPredictionKey();
+
+				InvokeReplicatedEvent( EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, PredictionKey );
+			}
+		}
+	}
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagHeld( const FGameplayTag& InputTag )
@@ -351,21 +396,5 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 	{
 		bStartupAbilitiesGranted = true;
 		OnAbilitiesGrantedDelegate.Broadcast();
-	}
-}
-
-void UAuraAbilitySystemComponent::AbilityInputTagReleased( const FGameplayTag& InputTag )
-{
-	if ( !InputTag.IsValid() ) return;
-
-	// Get abilities which are not blocked by tags or other conditions and can be activated
-	for ( FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
-	{
-		// check if any of these abilities has the same tag as our input tag
-		if ( AbilitySpec.DynamicAbilityTags.HasTagExact( InputTag ) )
-		{
-			// Set flag "Released"
-			AbilitySpecInputReleased( AbilitySpec );
-		}
 	}
 }

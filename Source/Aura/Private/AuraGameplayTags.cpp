@@ -95,6 +95,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	// Cooldowns Tags
 	Cooldowns_Fire_FireBolt = AddGameplayTag( CooldownsPrefix, "Fire.FireBolt", "Firebolt Ability CooldownTag" );
+	Cooldowns_Lightning_Electrocute = AddGameplayTag( CooldownsPrefix, "Lightning.Electrocute", "Electrocute Ability CooldownTag" );
 
 	// Montage Attacks
 	Montage_Attack_1 = AddGameplayTag( MontageAttackPrefix, "1", "Montage Attack option 1" );
@@ -110,6 +111,12 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	// Meta Attributes Tags
 	Attributes_Meta_IncomingXP = AddGameplayTag( MetaAttributesPrefix, "IncomingXP", "IncomingXP meta attribute tag" );
+
+	// Player Block Tags
+	Player_Block_InputPressed = AddGameplayTag( PlayerBlockPrefix, "InputPressed", "Tag to block InputPressed" );
+	Player_Block_InputReleased = AddGameplayTag( PlayerBlockPrefix, "InputReleased", "Tag to block InputReleased" );
+	Player_Block_InputHeld = AddGameplayTag( PlayerBlockPrefix, "InputHeld", "Tag to block InputHeld" );
+	Player_Block_CursorTrace = AddGameplayTag( PlayerBlockPrefix, "CursorTrace", "Tag to block CursorTrace" );
 
 	// Associations:
 	// Associate Damage with Resistance

@@ -3,11 +3,13 @@
 #include "Characters/AuraPlayerCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
 #include "NiagaraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraGasBpLibrary.h"
 #include "GAS/Data/AuraLevelUpInfo_DA.h"
+#include "GAS/Debuff/DebuffNiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Player/AuraPlayerState.h"
@@ -134,6 +136,7 @@ AAuraPlayerCharacter::AAuraPlayerCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 }
+
 void AAuraPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -166,6 +169,46 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 	InitGASInfoAndHUD();
 }
 
+void AAuraPlayerCharacter::OnRep_Stunned()
+{
+	if ( UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent ) )
+	{
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+		FGameplayTagContainer BlockedTags;
+		BlockedTags.AddTag( GameplayTags.Player_Block_CursorTrace );
+		BlockedTags.AddTag( GameplayTags.Player_Block_InputHeld );
+		BlockedTags.AddTag( GameplayTags.Player_Block_InputPressed );
+		BlockedTags.AddTag( GameplayTags.Player_Block_InputReleased );
+		if ( bIsStunned )
+		{
+			// This is stupid hack to De\Activate here as we are creating dynamic GE in PostGameplayEffectExecute
+			// And due to this it doesn't replicate granted tags. For more info see the last comment in PostGameplayEffectExecute
+			AuraASC->AddLooseGameplayTags( BlockedTags );
+			StunDebuffNSComponent->Activate();
+		}
+		else
+		{
+			AuraASC->RemoveLooseGameplayTags( BlockedTags );
+			StunDebuffNSComponent->Deactivate();
+		}
+	}
+}
+
+void AAuraPlayerCharacter::OnRep_Burned()
+{
+	Super::OnRep_Burned();
+	// This is stupid hack to De\Activate here as we are creating dynamic GE in PostGameplayEffectExecute
+	// And due to this it doesn't replicate granted tags. For more info see the last comment in PostGameplayEffectExecute
+	if ( bIsBurned )
+	{
+		BurnDebuffNSComponent->Activate();
+	}
+	else
+	{
+		BurnDebuffNSComponent->Deactivate();
+	}
+}
+
 void AAuraPlayerCharacter::InitGASInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
@@ -175,7 +218,17 @@ void AAuraPlayerCharacter::InitGASInfo()
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	check( AuraASC );
 	AuraASC->Init();
+	bool bIsServer = HasAuthority();
+	if ( bIsServer )
+	{
+		GEngine->AddOnScreenDebugMessage( -1, 3.0f, FColor::Red, FString::Printf( TEXT( "Server: BroadCast On Registered" ) ) );
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage( -1, 3.0f, FColor::Red, FString::Printf( TEXT( "Client: BroadCast On Registered" ) ) );
+	}
 	OnAscRegisteredDelegate.Broadcast( AbilitySystemComponent );
+	AbilitySystemComponent->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved ).AddUObject( this, &AAuraPlayerCharacter::StunTagChanged );
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 	// It can be called only on the server as attributes will be replicated regardless
 	InitDefaultAttributes( GetCharacterLevel() );

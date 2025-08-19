@@ -24,6 +24,7 @@ void UDebuffNiagaraComponent::BeginPlay()
 	{
 		return;
 	}
+	bool bIsServer = ComponentOwner->HasAuthority();
 
 	// Here we check ASC just in case if for some reason it didn't have time to be initialized before getting debuff
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent( ComponentOwner );

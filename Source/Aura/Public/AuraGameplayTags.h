@@ -80,6 +80,7 @@ public:
 
 	// Cooldown Tags
 	FGameplayTag Cooldowns_Fire_FireBolt;
+	FGameplayTag Cooldowns_Lightning_Electrocute;
 
 	// Status Effects Tags
 	FGameplayTag Effects_HitReact;
@@ -116,6 +117,12 @@ public:
 	// Meta Attribute Tags
 	FGameplayTag Attributes_Meta_IncomingXP;
 
+	// Player Block Tags
+	FGameplayTag Player_Block_InputPressed;
+	FGameplayTag Player_Block_InputHeld;
+	FGameplayTag Player_Block_InputReleased;
+	FGameplayTag Player_Block_CursorTrace;
+
 	TMap<FGameplayTag, FGameplayTag> DamageTypeToDamageRes;
 	TMap<FGameplayTag, FGameplayTag> DamageTypeToDebuff;
 
@@ -139,6 +146,7 @@ public:
 	const FString TypePrefix{ "Type." };
 	const FString DebuffPrefix{ "Debuff." };
 	const FString KnockbackPrefix{ "Knockback." };
+	const FString PlayerBlockPrefix{ "Player.Block." };
 
 private:
 	static FAuraGameplayTags GameplayTags;

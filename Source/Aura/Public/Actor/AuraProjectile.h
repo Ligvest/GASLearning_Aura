@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "AuraAbilityTypes.h"
-#include "GameplayEffectTypes.h"
 #include "GameFramework/Actor.h"
 #include "NiagaraSystem.h"
 #include "AuraProjectile.generated.h"
@@ -34,9 +33,6 @@ protected:
 	UPROPERTY( VisibleAnywhere, Category = "Collision" )
 	TObjectPtr<USphereComponent> CollisionSphere;
 
-	UPROPERTY( VisibleAnywhere, Category = "Movement" )
-	TObjectPtr<UProjectileMovementComponent> MovementComponent;
-
 	UPROPERTY( EditDefaultsOnly, Category = "Fly" )
 	TObjectPtr<USoundBase> FlySound;
 
@@ -52,5 +48,9 @@ protected:
 	UPROPERTY( EditDefaultsOnly, Category = "Impact" )
 	TObjectPtr<USoundBase> ImpactSound;
 
+public:
 	FDamageEffectParams ImpactEffectParams;
+
+	UPROPERTY( VisibleAnywhere, Category = "Movement" )
+	TObjectPtr<UProjectileMovementComponent> MovementComponent;
 };

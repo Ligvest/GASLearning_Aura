@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Characters/AuraPlayerCharacter.h"
 #include "Components/SplineComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
@@ -92,24 +93,49 @@ void AAuraPlayerController::SetupInputComponent()
 }
 void AAuraPlayerController::AbilityInputTagPressed( FGameplayTag InputTag )
 {
-	return;
-	// if ( IsValid( GetASC() ) )
-	// {
-	// 	GetASC()->AbilityInputTagPressed( InputTag );
-	// }
+	// Don't call this shit each frame. If you need to add such check in tick function
+	// then subscribe to EGameplayTagEventType::NewOrRemoved and change bool field in the class
+	if ( GetASC() && GetASC()->HasMatchingGameplayTag( FAuraGameplayTags::Get().Player_Block_InputPressed ) )
+	{
+		return;
+	}
+
+	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LMB ) )
+	{
+		bAutoMove = false;
+	}
+
+	if ( IsValid( GetASC() ) )
+	{
+		GetASC()->AbilityInputTagPressed( InputTag );
+	}
 }
 void AAuraPlayerController::AbilityInputTagReleased( FGameplayTag InputTag )
 {
+	// Don't call this shit each frame. If you need to add such check in tick function
+	// then subscribe to EGameplayTagEventType::NewOrRemoved and change bool field in the class
+	if ( GetASC() && GetASC()->HasMatchingGameplayTag( FAuraGameplayTags::Get().Player_Block_InputReleased ) )
+	{
+		return;
+	}
+
 	// Move character if LMB was clicked and no actors under cursor
 	bool bShootingMode = bTargeting || bShiftPressed;
 	bool bIsClick = FollowTime <= HoldButtonThreshold;
 	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LMB ) && !bShootingMode && bIsClick )
 	{
 		GeneratePathToPoint( LastCursorTraceImpactPoint );
+		// Don't call this shit each frame. If you need to add such check in tick function
+		// then subscribe to EGameplayTagEventType::NewOrRemoved and change bool field in the class
+		if ( GetASC() && !GetASC()->HasMatchingGameplayTag( FAuraGameplayTags::Get().Player_Block_InputPressed ) )
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation( this, ClickNS, LastCursorTraceImpactPoint );
+		}
 	}
 	// Activate\Diactivate ability otherwise
 	else
 	{
+		bAutoMove = false;
 		if ( IsValid( GetASC() ) )
 		{
 			GetASC()->AbilityInputTagReleased( InputTag );
@@ -119,6 +145,13 @@ void AAuraPlayerController::AbilityInputTagReleased( FGameplayTag InputTag )
 }
 void AAuraPlayerController::AbilityInputTagHeld( FGameplayTag InputTag )
 {
+	// Don't call this shit each frame. If you need to add such check in tick function
+	// then subscribe to EGameplayTagEventType::NewOrRemoved and change bool field in the class
+	if ( GetASC() && GetASC()->HasMatchingGameplayTag( FAuraGameplayTags::Get().Player_Block_InputHeld ) )
+	{
+		return;
+	}
+
 	// Move character if LMB pressed and no actors under cursor
 	bool bShootingMode = bTargeting || bShiftPressed;
 	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LMB ) && !bShootingMode )
@@ -172,6 +205,8 @@ void AAuraPlayerController::ShowDamageNumber_Implementation( float Damage, AChar
 
 void AAuraPlayerController::MoveWithButtons( const FInputActionValue& InputActionValue )
 {
+	bAutoMove = false;
+
 	FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 	// Get controller rotation.
 	// In FPS it could be the camera angle
@@ -260,6 +295,18 @@ void AAuraPlayerController::AutoMoveAlongMovementSpline()
 
 void AAuraPlayerController::CursorTrace()
 {
+	// Don't call this shit each frame. If you need to add such check in tick function
+	// then subscribe to EGameplayTagEventType::NewOrRemoved and change bool field in the class
+	if ( GetPawn() && GetASC() && GetASC()->HasMatchingGameplayTag( FAuraGameplayTags::Get().Player_Block_CursorTrace ) )
+	{
+		if ( LastActorUnderCursorToHighlight ) LastActorUnderCursorToHighlight->UnHighlightActor();
+		if ( CurrentActorUnderCursorToHighlight ) CurrentActorUnderCursorToHighlight->UnHighlightActor();
+		LastActorUnderCursorToHighlight = nullptr;
+		CurrentActorUnderCursorToHighlight = nullptr;
+		bTargeting = false;
+		return;
+	}
+
 	FHitResult Hit;
 	GetHitResultUnderCursor( ECC_Visibility, false, Hit );
 	if ( !Hit.bBlockingHit )
