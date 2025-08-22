@@ -71,11 +71,24 @@ void UAuraHUDWidgetController::BindCallbacksToAttributeChanges()
 
 void UAuraHUDWidgetController::OnSpellEquipped()
 {
-	ClearSpellGlobesDelegate.Broadcast();
-	// This is an overkill and not performance efficient as we are broadcasting ability info for each ability.
-	// But as this is a course project and this is easy to implement, and we have very little amount of abilities
-	// we can use this clean and good-looking option even on each ability equip
-	BroadcastAbilityInfo();
+	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
+	bool bIsServer = AuraPS->HasAuthority();
+	if ( bIsServer )
+	{
+		ClearSpellGlobesDelegate.Broadcast();
+		// This is an overkill and not performance efficient as we are broadcasting ability info for each ability.
+		// But as this is a course project and this is easy to implement, and we have very little amount of abilities
+		// we can use this clean and good-looking option even on each ability equip
+		BroadcastAbilityInfo();
+	}
+	else
+	{
+		ClearSpellGlobesDelegate.Broadcast();
+		// This is an overkill and not performance efficient as we are broadcasting ability info for each ability.
+		// But as this is a course project and this is easy to implement, and we have very little amount of abilities
+		// we can use this clean and good-looking option even on each ability equip
+		BroadcastAbilityInfo();
+	}
 }
 
 void UAuraHUDWidgetController::OnXpChanged( int32 NewXP ) const

@@ -9,6 +9,7 @@
 #include "GAS/AuraAttributeSet.h"
 #include "GAS/Data/AuraCharacterClassInfoDA.h"
 #include "GAS/Debuff/DebuffNiagaraComponent.h"
+#include "GAS/NiagaraComponent/PassiveSpellNsComponent.h"
 #include "Game/AuraGameModeBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -41,6 +42,18 @@ AAuraCharacterBase::AAuraCharacterBase() : CharacterClass( ECharacterClass::Empt
 	GetMesh()->SetCollisionResponseToChannel( ECC_Camera, ECR_Ignore );
 	GetMesh()->SetCollisionResponseToChannel( ECC_Pawn, ECR_Ignore );
 	GetMesh()->SetGenerateOverlapEvents( false );
+
+	HaloOfProtectionNsComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>( "HaloOfProtectionComponent" );
+	HaloOfProtectionNsComponent->SetupAttachment( GetRootComponent() );
+	HaloOfProtectionNsComponent->SetUsingAbsoluteRotation( true );
+
+	LifeSiphonNsComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>( "LifeSiphonNsComponent" );
+	LifeSiphonNsComponent->SetupAttachment( GetRootComponent() );
+	LifeSiphonNsComponent->SetUsingAbsoluteRotation( true );
+
+	ManaSiphonNsComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>( "ManaSiphonNsComponent" );
+	ManaSiphonNsComponent->SetupAttachment( GetRootComponent() );
+	ManaSiphonNsComponent->SetUsingAbsoluteRotation( true );
 }
 
 int AAuraCharacterBase::GetCharacterLevel() const

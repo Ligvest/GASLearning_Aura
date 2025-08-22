@@ -15,6 +15,7 @@ class UGameplayEffect;
 class UAttributeSet;
 class UAbilitySystemComponent;
 class UDebuffNiagaraComponent;
+class UPassiveNiagaraComponent;
 
 UCLASS() class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
 {
@@ -114,6 +115,15 @@ protected:
 
 	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
 	TObjectPtr<UDebuffNiagaraComponent> StunDebuffNSComponent;
+
+	UPROPERTY( VisibleAnywhere )
+	TObjectPtr<UPassiveNiagaraComponent> HaloOfProtectionNsComponent;
+
+	UPROPERTY( VisibleAnywhere )
+	TObjectPtr<UPassiveNiagaraComponent> LifeSiphonNsComponent;
+
+	UPROPERTY( VisibleAnywhere )
+	TObjectPtr<UPassiveNiagaraComponent> ManaSiphonNsComponent;
 
 	UPROPERTY( EditDefaultsOnly, Category = "Combat" )
 	ECharacterClass CharacterClass;

@@ -39,6 +39,7 @@ public:
 	FGameplayTag Attributes_Secondary_MaxMana;
 
 	// Input
+	FGameplayTag AuraInput;
 	FGameplayTag AuraInput_LMB;
 	FGameplayTag AuraInput_RMB;
 	FGameplayTag AuraInput_1;
@@ -60,12 +61,17 @@ public:
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Physical;
 
-	// Ability Tags
+	// Offensive Ability Tags
 	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Lightning_Electrocute;
+
+	// Passive Ability Tags
+	FGameplayTag Abilities_Passive_HaloOfProtection;
+	FGameplayTag Abilities_Passive_LifeSiphon;
+	FGameplayTag Abilities_Passive_ManaSiphon;
 
 	FGameplayTag Abilities_HitReact;
 
@@ -142,6 +148,7 @@ public:
 	const FString AbilitiesPrefix{ "Abilities." };
 	const FString AbilitiesFirePrefix{ "Abilities.Fire." };
 	const FString AbilitiesLightningPrefix{ "Abilities.Lightning." };
+	const FString AbilitiesPassivePrefix{ "Abilities.Passive." };
 	const FString StatusPrefix{ "Status." };
 	const FString TypePrefix{ "Type." };
 	const FString DebuffPrefix{ "Debuff." };

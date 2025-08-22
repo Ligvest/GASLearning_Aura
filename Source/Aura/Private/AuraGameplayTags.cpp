@@ -11,6 +11,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	None = UGameplayTagsManager::Get().AddNativeGameplayTag( "None", "Tag alternative to nullptr" );
 
 	// Input
+	AuraInput = AddGameplayTag( FString{}, "AuraInput", "AuraInput category tag" );
 	AuraInput_LMB = AddGameplayTag( InputPrefix, "LMB", "Left Mouse Button" );
 	AuraInput_RMB = AddGameplayTag( InputPrefix, "RMB", "Right Mouse Button" );
 	AuraInput_1 = AddGameplayTag( InputPrefix, "1", "Key \"1\"" );
@@ -56,12 +57,17 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	// Values
 	Values_XP = AddGameplayTag( ValuesPrefix, "XP", "ValueTag: XP" );
 
-	// Ability Tags
+	// Offensive Ability Tags
 	Abilities_None = AddGameplayTag( AbilitiesPrefix, "None", "No Ability Tag" );
 	Abilities_Attack = AddGameplayTag( AbilitiesPrefix, "Attack", "Attack Ability Tag" );
 	Abilities_Summon = AddGameplayTag( AbilitiesPrefix, "Summon", "Summon Ability Tag" );
 	Abilities_Fire_FireBolt = AddGameplayTag( AbilitiesFirePrefix, "FireBolt", "Firebolt Ability Tag" );
 	Abilities_Lightning_Electrocute = AddGameplayTag( AbilitiesLightningPrefix, "Electrocute", "Electrocute Ability Tag" );
+
+	// Passive Ability Tags
+	Abilities_Passive_HaloOfProtection = AddGameplayTag( AbilitiesPassivePrefix, "HaloOfProtection", "HaloOfProtection Ability Tag" );
+	Abilities_Passive_LifeSiphon = AddGameplayTag( AbilitiesPassivePrefix, "LifeSiphon", "LifeSiphon Ability Tag" );
+	Abilities_Passive_ManaSiphon = AddGameplayTag( AbilitiesPassivePrefix, "ManaSiphon", "ManaSiphon Ability Tag" );
 
 	// Status Tag
 	Abilities_HitReact = AddGameplayTag( AbilitiesPrefix, "HitReact", "HitReact Ability Tag" );

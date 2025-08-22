@@ -57,6 +57,7 @@ void UAuraSpellsWindowWC::SpellGlobeSelected( const FGameplayTag AbilityTag )
 
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 	const int32 SpellPoints = GetAuraPS()->GetPlayerSpellPoints();
+
 	FGameplayTag AbilityStatus;
 
 	const bool bTagValid = AbilityTag.IsValid();
@@ -126,13 +127,13 @@ void UAuraSpellsWindowWC::AbilityEquipped()
 {
 	bWaitingForEquipSelection = false;
 	ClearEquipGlobesDelegate.Broadcast();
+	StopWaitForEquipDelegate.Broadcast( SelectedAbility.AbilityTypeTag );
+	AbilityEquippedDelegate.Broadcast();
+
 	// This is an overkill and not performance efficient as we are broadcasting ability info for each ability.
 	// But as this is a course project and this is easy to implement, and we have very little amount of abilities
 	// we can use this clean and good-looking option even on each ability equip
 	BroadcastAbilityInfo();
-	StopWaitForEquipDelegate.Broadcast( SelectedAbility.AbilityTypeTag );
-
-	AbilityEquippedDelegate.Broadcast();
 }
 
 void UAuraSpellsWindowWC::BroadcastInfoOnSpellGlobeSelected( const int32 SpellPoints )

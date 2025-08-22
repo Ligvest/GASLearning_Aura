@@ -16,7 +16,7 @@ class AURA_API UAuraGameplayAbility : public UGameplayAbility
 
 public:
 	UPROPERTY( EditDefaultsOnly )
-	FGameplayTag DefaultAbilityTag;
+	FGameplayTag DefaultAbilityInputTag;
 
 	virtual FString GetDescription( int32 Level ) const;
 	virtual FString GetNextLevelDescription( int32 Level ) const;

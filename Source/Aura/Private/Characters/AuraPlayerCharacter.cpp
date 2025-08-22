@@ -218,15 +218,6 @@ void AAuraPlayerCharacter::InitGASInfo()
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	check( AuraASC );
 	AuraASC->Init();
-	bool bIsServer = HasAuthority();
-	if ( bIsServer )
-	{
-		GEngine->AddOnScreenDebugMessage( -1, 3.0f, FColor::Red, FString::Printf( TEXT( "Server: BroadCast On Registered" ) ) );
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage( -1, 3.0f, FColor::Red, FString::Printf( TEXT( "Client: BroadCast On Registered" ) ) );
-	}
 	OnAscRegisteredDelegate.Broadcast( AbilitySystemComponent );
 	AbilitySystemComponent->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved ).AddUObject( this, &AAuraPlayerCharacter::StunTagChanged );
 	AttributeSet = AuraPlayerState->GetAttributeSet();

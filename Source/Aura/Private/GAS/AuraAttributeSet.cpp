@@ -313,7 +313,7 @@ void UAuraAttributeSet::ProcessIncomingXP( const FGameplayEffectContextHandle& C
 	{
 		float ReceivedXP = GetIncomingXP();
 		SetIncomingXP( 0.f );
-		UE_LOG( LogTemp, Warning, TEXT( "IncomingXP: %f" ), ReceivedXP );
+		// UE_LOG( LogTemp, Warning, TEXT( "IncomingXP: %f" ), ReceivedXP );
 
 		const int32 CurrentLevel = CombatInterface->GetCharacterLevel();
 		const int32 CurrentXP = IPlayerInterface::Execute_GetXP( TargetCharacter );
@@ -322,8 +322,14 @@ void UAuraAttributeSet::ProcessIncomingXP( const FGameplayEffectContextHandle& C
 		const int32 NumLevelUps = NewLevel - CurrentLevel;
 		if ( NumLevelUps > 0 )
 		{
-			const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward( TargetCharacter, CurrentLevel );
-			const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward( TargetCharacter, CurrentLevel );
+			int32 AttributePointsReward = 0;
+			int32 SpellPointsReward = 0;
+
+			for ( int32 i = 0; i < NumLevelUps; ++i )
+			{
+				SpellPointsReward += IPlayerInterface::Execute_GetSpellPointsReward( TargetCharacter, CurrentLevel + i );
+				AttributePointsReward += IPlayerInterface::Execute_GetAttributePointsReward( TargetCharacter, CurrentLevel + i );
+			}
 
 			IPlayerInterface::Execute_AddToPlayerLevel( TargetCharacter, NumLevelUps );
 			IPlayerInterface::Execute_AddToAttributePoints( TargetCharacter, AttributePointsReward );
