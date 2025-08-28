@@ -184,6 +184,18 @@ bool AAuraCharacterBase::IsBeingShocked_Implementation() const
 	return bIsBeingShocked;
 }
 
+FOnDamageSignature& AAuraCharacterBase::GetOnDamageSignature()
+{
+	return OnDamageDelegate;
+}
+
+float AAuraCharacterBase::TakeDamage( float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser )
+{
+	const float DamageTaken = Super::TakeDamage( DamageAmount, DamageEvent, EventInstigator, DamageCauser );
+	OnDamageDelegate.Broadcast( DamageTaken );
+	return DamageTaken;
+}
+
 FTaggedMontage AAuraCharacterBase::FindAttackMontageByTag_Implementation( FGameplayTag InMontageTag )
 {
 	for ( const FTaggedMontage& Montage : AttackMontages )

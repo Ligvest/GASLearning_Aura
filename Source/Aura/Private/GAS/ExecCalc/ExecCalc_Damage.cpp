@@ -7,6 +7,7 @@
 #include "AuraGameplayTags.h"
 #include "GAS/AuraGasBpLibrary.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 struct AuraDamageStatics
 {
@@ -78,8 +79,8 @@ void UExecCalc_Damage::Execute_Implementation( const FGameplayEffectCustomExecut
 {
 	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
 	const UAbilitySystemComponent* TargetASC = ExecutionParams.GetTargetAbilitySystemComponent();
-	const AActor* SourceAvatar = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
-	const AActor* TargetAvatar = TargetASC ? TargetASC->GetAvatarActor() : nullptr;
+	AActor* SourceAvatar = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
+	AActor* TargetAvatar = TargetASC ? TargetASC->GetAvatarActor() : nullptr;
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
 	FGameplayEffectContextHandle EffectContextHandle = Spec.GetEffectContext();
 	const FGameplayTagContainer* SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
@@ -159,6 +160,29 @@ void UExecCalc_Damage::Execute_Implementation( const FGameplayEffectCustomExecut
 		}
 	}
 
+	// Calculate Radial Damage by Distance
+	if ( UAuraGasBpLibrary::IsRadialDamage( EffectContextHandle ) )
+	{
+		// 1. override TakeDamage in AuraCharacterBase. *
+		// 2. create delegate OnDamageDelegate, broadcast damage received in TakeDamage *
+		// 3. Bind lambda to OnDamageDelegate on the Victim here. *
+		// 4. Call UGameplayStatics::ApplyRadialDamageWithFalloff to cause damage (this will result in TakeDamage being called
+		//		on the Victim, which will then broadcast OnDamageDelegate)
+		// 5. In Lambda, set DamageTypeValue to the damage received from the broadcast *
+
+		if ( ICombatInterface* CombatInterface = Cast<ICombatInterface>( TargetAvatar ) )
+		{
+			CombatInterface->GetOnDamageSignature().AddLambda( [&CombinedDamage]( float DamageAmount ) { CombinedDamage = DamageAmount; } );
+		}
+
+		// I don't know why he decided to use this function instead of just calculating this by ourselves.
+		// We are tracing for no reason where we could just calculate the distance and the damage, corresponding to the distance
+		// So this is a bad idea but for learning purposes okay
+		UGameplayStatics::ApplyRadialDamageWithFalloff( TargetAvatar, CombinedDamage, 0.f, UAuraGasBpLibrary::GetRadialDamageOrigin( EffectContextHandle ),
+		                                                UAuraGasBpLibrary::GetRadialDamageInnerRadius( EffectContextHandle ), UAuraGasBpLibrary::GetRadialDamageOuterRadius( EffectContextHandle ), 1.f,
+		                                                UDamageType::StaticClass(), TArray<AActor*>(), SourceAvatar, nullptr );
+	}
+
 	// Calculate Block affection
 	bool bIsBlockedHit = false;
 	ModifyDamageByBlockChance( CombinedDamage, CalcInfo, bIsBlockedHit );
@@ -190,6 +214,7 @@ void UExecCalc_Damage::ModifyDamageByBlockChance( float& OutDamage, const Calcul
 		OutDamage = OutDamage / 2;
 	}
 }
+
 void UExecCalc_Damage::ModifyDamageByArmor( float& OutDamage, const CalculationInfo& CalcInfo ) const
 {
 	const UCurveTable* CalcCoefsCT = CalcInfo.CharacterClassInfo->CalculationCoefficientsCT;

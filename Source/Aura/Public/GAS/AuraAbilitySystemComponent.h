@@ -60,7 +60,6 @@ public:
 	void SetInputTagToSpec( FGameplayTag AbilityTag, const FGameplayTag InputTag );
 	static FGameplayTag GetStatusTagFromSpec( const FGameplayAbilitySpec& AbilitySpec );
 	FGameplayAbilitySpec* GetSpecFromAbilityTag( const FGameplayTag& AbilityTag );
-	FGameplayTag GetSlotFromAbilityTag( const FGameplayTag& AbilityTag );
 	bool SlotIsEmpty( const FGameplayTag& Slot );
 	static bool AbilityHasSlot( const FGameplayAbilitySpec& Spec, const FGameplayTag& Slot );
 	static bool AbilityHasAnySlot( const FGameplayAbilitySpec& Spec );

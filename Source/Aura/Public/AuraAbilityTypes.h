@@ -12,53 +12,65 @@ struct FDamageEffectParams
 
 	FDamageEffectParams() {}
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	TObjectPtr<UObject> WorldContextObject = nullptr;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	TObjectPtr<UAbilitySystemComponent> SourceASC;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	TObjectPtr<UAbilitySystemComponent> TargetASC;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float AbilityLevel = 1.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float BaseDamage = 0.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	FGameplayTag DamageTypeTag = FGameplayTag();
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float DebuffChance = 0.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float DebuffDamage = 0.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float DebuffDuration = 0.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float DebuffFrequency = 0.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float DeathImpulseMagnitude = 0.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	FVector DeathImpulse = FVector::ZeroVector;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float KnockbackChance = 0.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	float KnockbackMagnitude = 0.f;
 
-	UPROPERTY()
+	UPROPERTY( BlueprintReadWrite )
 	FVector KnockbackImpulse = FVector::ZeroVector;
+
+	UPROPERTY( BlueprintReadWrite )
+	bool bIsRadialDamage = false;
+
+	UPROPERTY( BlueprintReadWrite )
+	float RadialDamageInnerRadius = 0.f;
+
+	UPROPERTY( BlueprintReadWrite )
+	float RadialDamageOuterRadius = 0.f;
+
+	UPROPERTY( BlueprintReadWrite )
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 };
 
 USTRUCT()
@@ -80,6 +92,10 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 	FGameplayTag GetDamageTypeTag() const { return DamageTypeTag; }
 	FVector GetDeathImpulse() const { return DeathImpulse; }
 	FVector GetKnockbackImpulse() const { return KnockbackImpulse; }
+	bool IsRadialDamage() const { return bIsRadialDamage; }
+	float GetRadialDamageInnerRadius() const { return RadialDamageInnerRadius; }
+	float GetRadialDamageOuterRadius() const { return RadialDamageOuterRadius; }
+	FVector GetRadialDamageOrigin() const { return RadialDamageOrigin; }
 
 	// Setters
 	void SetIsBlockedHit( bool bInIsBlockedHit ) { bIsBlockedHit = bInIsBlockedHit; }
@@ -91,6 +107,10 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 	void SetDamageTypeTag( const FGameplayTag InDamageTypeTag ) { DamageTypeTag = InDamageTypeTag; }
 	void SetDeathImpulse( const FVector InDeathImpulse ) { DeathImpulse = InDeathImpulse; }
 	void SetKnockbackImpulse( const FVector InKnockbackImpulse ) { KnockbackImpulse = InKnockbackImpulse; }
+	void SetIsRadialDamage( bool bInIsRadialDamage ) { bIsRadialDamage = bInIsRadialDamage; }
+	void SetRadialDamageInnerRadius( float InRadialDamageInnerRadius ) { RadialDamageInnerRadius = InRadialDamageInnerRadius; }
+	void SetRadialDamageOuterRadius( float InRadialDamageOuterRadius ) { RadialDamageOuterRadius = InRadialDamageOuterRadius; }
+	void SetRadialDamageOrigin( const FVector& InRadialDamageOrigin ) { RadialDamageOrigin = InRadialDamageOrigin; }
 
 	GENERATED_USTRUCT_BODY()
 public:
@@ -148,6 +168,18 @@ protected:
 
 	UPROPERTY()
 	FVector KnockbackImpulse = FVector::ZeroVector;
+
+	UPROPERTY()
+	bool bIsRadialDamage = false;
+
+	UPROPERTY()
+	float RadialDamageInnerRadius = 0.f;
+
+	UPROPERTY()
+	float RadialDamageOuterRadius = 0.f;
+
+	UPROPERTY()
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 };
 
 // Overrided to have the same parameters for copying and serializing as FGameplayEffectContext

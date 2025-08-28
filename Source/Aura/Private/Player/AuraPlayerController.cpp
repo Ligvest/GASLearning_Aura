@@ -8,6 +8,8 @@
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Actor/MagicCircle.h"
+#include "Aura/Aura.h"
 #include "Characters/AuraPlayerCharacter.h"
 #include "Components/SplineComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
@@ -69,6 +71,15 @@ inline void AAuraPlayerController::BeginPlayClientOnly()
 	InputModeData.SetHideCursorDuringCapture( false );
 	SetInputMode( InputModeData );
 }
+
+void AAuraPlayerController::UpdateMagicCircleLocation()
+{
+	if ( IsValid( MagicCircle ) )
+	{
+		MagicCircle->SetActorLocation( LastCursorTraceImpactPoint );
+	}
+}
+
 UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 {
 	if ( !IsValid( ASC ) )
@@ -165,6 +176,30 @@ void AAuraPlayerController::AbilityInputTagHeld( FGameplayTag InputTag )
 		{
 			GetASC()->AbilityInputTagHeld( InputTag );
 		}
+	}
+}
+
+void AAuraPlayerController::ShowMagicCircle( UMaterialInterface* DecalMaterial )
+{
+	if ( !IsValid( MagicCircle ) )
+	{
+		MagicCircle = GetWorld()->SpawnActor<AMagicCircle>( MagicCircleClass );
+
+		if ( IsValid( DecalMaterial ) )
+		{
+			MagicCircle->SetDecalMaterial( DecalMaterial );
+		}
+
+		SetShowMouseCursor( false );
+	}
+}
+
+void AAuraPlayerController::HideMagicCircle()
+{
+	if ( IsValid( MagicCircle ) )
+	{
+		MagicCircle->Destroy();
+		SetShowMouseCursor( true );
 	}
 }
 
@@ -308,7 +343,8 @@ void AAuraPlayerController::CursorTrace()
 	}
 
 	FHitResult Hit;
-	GetHitResultUnderCursor( ECC_Visibility, false, Hit );
+	ECollisionChannel TraceChannel = IsValid( MagicCircle ) ? ECC_NotCharacters : ECC_Visibility;
+	GetHitResultUnderCursor( TraceChannel, false, Hit );
 	if ( !Hit.bBlockingHit )
 	{
 		return;
@@ -365,4 +401,6 @@ void AAuraPlayerController::PlayerTick( float DeltaSeconds )
 	{
 		AutoMoveAlongMovementSpline();
 	}
+
+	UpdateMagicCircleLocation();
 }

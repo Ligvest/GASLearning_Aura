@@ -14,6 +14,7 @@ class UInputAction;
 class UAuraInputConfig;
 class UAuraAbilitySystemComponent;
 class UNiagaraSystem;
+class AMagicCircle;
 struct FGameplayTag;
 struct FInputActionValue;
 
@@ -29,6 +30,12 @@ public:
 
 	UFUNCTION( Client, Reliable )
 	void ShowDamageNumber( float Damage, ACharacter* TargetCharacter, bool bIsBlockedHit, bool bIsCriticalHit ) const;
+
+	UFUNCTION( BlueprintCallable )
+	void ShowMagicCircle( UMaterialInterface* DecalMaterial );
+
+	UFUNCTION( BlueprintCallable )
+	void HideMagicCircle();
 
 protected:
 	virtual void PlayerTick( float DeltaSeconds ) override;
@@ -50,6 +57,8 @@ protected:
 
 private:
 	void BeginPlayClientOnly();
+	void UpdateMagicCircleLocation();
+
 	UAuraAbilitySystemComponent* GetASC();
 
 	UPROPERTY( EditAnywhere, Category = "Input" )
@@ -91,6 +100,12 @@ private:
 
 	UPROPERTY( EditDefaultsOnly, Category = "Input" )
 	TObjectPtr<UNiagaraSystem> ClickNS;
+
+	UPROPERTY( EditDefaultsOnly )
+	TSubclassOf<AMagicCircle> MagicCircleClass;
+
+	UPROPERTY()
+	TObjectPtr<AMagicCircle> MagicCircle;
 
 	// Debug
 public:

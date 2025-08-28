@@ -62,7 +62,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Abilities_Attack = AddGameplayTag( AbilitiesPrefix, "Attack", "Attack Ability Tag" );
 	Abilities_Summon = AddGameplayTag( AbilitiesPrefix, "Summon", "Summon Ability Tag" );
 	Abilities_Fire_FireBolt = AddGameplayTag( AbilitiesFirePrefix, "FireBolt", "Firebolt Ability Tag" );
+	Abilities_Fire_FireBlast = AddGameplayTag( AbilitiesFirePrefix, "FireBlast", "Fireblast Ability Tag" );
 	Abilities_Lightning_Electrocute = AddGameplayTag( AbilitiesLightningPrefix, "Electrocute", "Electrocute Ability Tag" );
+	Abilities_Arcane_ArcaneShards = AddGameplayTag( AbilitiesArcanePrefix, "ArcaneShards", "ArcaneShards Ability Tag" );
 
 	// Passive Ability Tags
 	Abilities_Passive_HaloOfProtection = AddGameplayTag( AbilitiesPassivePrefix, "HaloOfProtection", "HaloOfProtection Ability Tag" );
@@ -100,8 +102,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Abilities_Type_None = AddGameplayTag( AbilitiesPrefix + TypePrefix, "None", "None status Tag" );
 
 	// Cooldowns Tags
-	Cooldowns_Fire_FireBolt = AddGameplayTag( CooldownsPrefix, "Fire.FireBolt", "Firebolt Ability CooldownTag" );
+	Cooldowns_Fire_FireBolt = AddGameplayTag( CooldownsPrefix, "Fire.FireBolt", "FireBolt Ability CooldownTag" );
 	Cooldowns_Lightning_Electrocute = AddGameplayTag( CooldownsPrefix, "Lightning.Electrocute", "Electrocute Ability CooldownTag" );
+	Cooldowns_Arcane_ArcaneShards = AddGameplayTag( CooldownsPrefix, "Arcane.ArcaneShards", "ArcaneShards Ability CooldownTag" );
 
 	// Montage Attacks
 	Montage_Attack_1 = AddGameplayTag( MontageAttackPrefix, "1", "Montage Attack option 1" );

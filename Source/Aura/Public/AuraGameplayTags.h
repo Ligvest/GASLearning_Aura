@@ -66,7 +66,9 @@ public:
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
 	FGameplayTag Abilities_Fire_FireBolt;
+	FGameplayTag Abilities_Fire_FireBlast;
 	FGameplayTag Abilities_Lightning_Electrocute;
+	FGameplayTag Abilities_Arcane_ArcaneShards;
 
 	// Passive Ability Tags
 	FGameplayTag Abilities_Passive_HaloOfProtection;
@@ -87,6 +89,7 @@ public:
 	// Cooldown Tags
 	FGameplayTag Cooldowns_Fire_FireBolt;
 	FGameplayTag Cooldowns_Lightning_Electrocute;
+	FGameplayTag Cooldowns_Arcane_ArcaneShards;
 
 	// Status Effects Tags
 	FGameplayTag Effects_HitReact;
@@ -148,6 +151,7 @@ public:
 	const FString AbilitiesPrefix{ "Abilities." };
 	const FString AbilitiesFirePrefix{ "Abilities.Fire." };
 	const FString AbilitiesLightningPrefix{ "Abilities.Lightning." };
+	const FString AbilitiesArcanePrefix{ "Abilities.Arcane." };
 	const FString AbilitiesPassivePrefix{ "Abilities.Passive." };
 	const FString StatusPrefix{ "Status." };
 	const FString TypePrefix{ "Type." };

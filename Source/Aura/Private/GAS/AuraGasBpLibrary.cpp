@@ -66,6 +66,8 @@ UAuraAbilityInfo_DA* UAuraGasBpLibrary::GetAbilityInfoDA( const UObject* WorldCo
 	return AuraGM->GetAbilityInfoDA();
 }
 
+// Begin of Effect Context Methods
+// Effect Context Getters
 bool UAuraGasBpLibrary::GetIsBlockedHitFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )
 {
 	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
@@ -147,6 +149,43 @@ FVector UAuraGasBpLibrary::GetKnockbackImpulseFromEffectContext( const FGameplay
 	return FVector::ZeroVector;
 }
 
+bool UAuraGasBpLibrary::IsRadialDamage( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->IsRadialDamage();
+	}
+	return false;
+}
+
+float UAuraGasBpLibrary::GetRadialDamageInnerRadius( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetRadialDamageInnerRadius();
+	}
+	return 0.f;
+}
+
+float UAuraGasBpLibrary::GetRadialDamageOuterRadius( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetRadialDamageOuterRadius();
+	}
+	return 0.f;
+}
+
+FVector UAuraGasBpLibrary::GetRadialDamageOrigin( const FGameplayEffectContextHandle& EffectContextHandle )
+{
+	if ( const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		return AuraEffectContext->GetRadialDamageOrigin();
+	}
+	return FVector::ZeroVector;
+}
+
+// Effect Context Setters
 void UAuraGasBpLibrary::SetIsBlockedHitFromEffectContext( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsBlockedHit )
 {
 	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
@@ -219,6 +258,40 @@ void UAuraGasBpLibrary::SetKnockbackImpulseInEffectContext( FGameplayEffectConte
 	}
 }
 
+void UAuraGasBpLibrary::SetIsRadialDamage( FGameplayEffectContextHandle& EffectContextHandle, bool bInIsRadialDamage )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetIsRadialDamage( bInIsRadialDamage );
+	}
+}
+
+void UAuraGasBpLibrary::SetRadialDamageInnerRadius( FGameplayEffectContextHandle& EffectContextHandle, float InInnerRadius )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetRadialDamageInnerRadius( InInnerRadius );
+	}
+}
+
+void UAuraGasBpLibrary::SetRadialDamageOuterRadius( FGameplayEffectContextHandle& EffectContextHandle, float InOuterRadius )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetRadialDamageOuterRadius( InOuterRadius );
+	}
+}
+
+void UAuraGasBpLibrary::SetRadialDamageOrigin( FGameplayEffectContextHandle& EffectContextHandle, const FVector& InOrigin )
+{
+	if ( FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>( EffectContextHandle.Get() ) )
+	{
+		AuraEffectContext->SetRadialDamageOrigin( InOrigin );
+	}
+}
+
+// End of Effect Context Methods
+
 void UAuraGasBpLibrary::GetLivePlayersInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
                                                const FVector& SphereOrigin )
 {
@@ -245,6 +318,32 @@ void UAuraGasBpLibrary::GetLivePlayersInRadus( const UObject* WorldContextObject
 
 			bool IsCombatInterface = Overlap.GetActor()->Implements<UCombatInterface>();
 			if ( IsCombatInterface && !ICombatInterface::Execute_IsDead( OverlappedActor ) )
+			{
+				OutOverlappingActors.AddUnique( ICombatInterface::Execute_GetAvatar( OverlappedActor ) );
+			}
+		}
+	}
+}
+
+void UAuraGasBpLibrary::GetCharactersInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
+                                              const FVector& SphereOrigin )
+{
+	// This code is just a low level versions of SphereOverlapActors and other methods of the same kind.
+	// E.g UKismetSystemLibrary::SphereOverlapComponents
+	// We use it to avoid unnecessary calculations
+	const UWorld* World = GEngine->GetWorldFromContextObject( WorldContextObject, EGetWorldErrorMode::LogAndReturnNull );
+	if ( World )
+	{
+		TArray<FOverlapResult> Overlaps;
+		FCollisionQueryParams SphereParams;
+		SphereParams.AddIgnoredActors( ActorsToIgnore );
+		FCollisionObjectQueryParams CollisionObjectQueryParams = ( FCollisionObjectQueryParams::InitType::AllDynamicObjects );
+
+		World->OverlapMultiByObjectType( Overlaps, SphereOrigin, FQuat::Identity, CollisionObjectQueryParams, FCollisionShape::MakeSphere( Radius ), SphereParams );
+		for ( FOverlapResult& Overlap : Overlaps )
+		{
+			AActor* OverlappedActor = Overlap.GetActor();
+			if ( Overlap.GetActor()->Implements<UCombatInterface>() )
 			{
 				OutOverlappingActors.AddUnique( ICombatInterface::Execute_GetAvatar( OverlappedActor ) );
 			}
@@ -365,6 +464,12 @@ FActiveGameplayEffectHandle UAuraGasBpLibrary::ApplyDamageEffect( const FDamageE
 	EffectContextHandle.AddSourceObject( SourceAvatar );
 	SetDeathImpulseInEffectContext( EffectContextHandle, DamageEffectParams.DeathImpulse );
 	SetKnockbackImpulseInEffectContext( EffectContextHandle, DamageEffectParams.KnockbackImpulse );
+
+	SetIsRadialDamage( EffectContextHandle, DamageEffectParams.bIsRadialDamage );
+	SetRadialDamageInnerRadius( EffectContextHandle, DamageEffectParams.RadialDamageInnerRadius );
+	SetRadialDamageOuterRadius( EffectContextHandle, DamageEffectParams.RadialDamageOuterRadius );
+	SetRadialDamageOrigin( EffectContextHandle, DamageEffectParams.RadialDamageOrigin );
+
 	const FGameplayEffectSpecHandle EffectSpecHandle = SourceASC->MakeOutgoingSpec( EffectClass, AbilityLevel, EffectContextHandle );
 
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();

@@ -53,6 +53,12 @@ public:
 	UFUNCTION( BlueprintNativeEvent )
 	int32 GetSpellPointsReward( int32 Level ) const;
 
+	UFUNCTION( BlueprintNativeEvent, BlueprintCallable )
+	void ShowMagicCircle( UMaterialInterface* DecalMaterial );
+
+	UFUNCTION( BlueprintNativeEvent, BlueprintCallable )
+	void HideMagicCircle();
+
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 };

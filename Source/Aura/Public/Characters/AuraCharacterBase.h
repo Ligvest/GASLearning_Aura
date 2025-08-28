@@ -50,7 +50,12 @@ public:
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
 	virtual void SetIsBeingShocked_Implementation( bool bInShock ) override;
 	virtual bool IsBeingShocked_Implementation() const override;
+	virtual FOnDamageSignature& GetOnDamageSignature() override;
 	//~ End of ICombatInterface
+
+	//~ Begin of APawn
+	virtual float TakeDamage( float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser ) override;
+	//~ End of APawn
 
 	void DissolveCorpse();
 
@@ -85,6 +90,7 @@ protected:
 	// Delegates
 	FOnASCRegistered OnAscRegisteredDelegate;
 	FOnDeathSignature OnDeathDelegate;
+	FOnDamageSignature OnDamageDelegate;
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;

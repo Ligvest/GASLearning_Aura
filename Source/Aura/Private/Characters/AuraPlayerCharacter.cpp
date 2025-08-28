@@ -12,6 +12,7 @@
 #include "GAS/Debuff/DebuffNiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Player/AuraPlayerController.h"
 #include "Player/AuraPlayerState.h"
 #include "UI/HUD/AuraHUD.h"
 
@@ -96,6 +97,22 @@ int32 AAuraPlayerCharacter::GetSpellPointsReward_Implementation( int32 Level ) c
 	check( AuraPS );
 	FAuraLevelUpInfo LevelUpInfo = AuraPS->LevelUpInfo_DA->FindLevelUpInfoForLevel( Level );
 	return LevelUpInfo.SpellPointsReward;
+}
+
+void AAuraPlayerCharacter::ShowMagicCircle_Implementation( UMaterialInterface* DecalMaterial )
+{
+	if ( AAuraPlayerController* PC = GetController<AAuraPlayerController>() )
+	{
+		PC->ShowMagicCircle( DecalMaterial );
+	}
+}
+
+void AAuraPlayerCharacter::HideMagicCircle_Implementation()
+{
+	if ( AAuraPlayerController* PC = GetController<AAuraPlayerController>() )
+	{
+		PC->HideMagicCircle();
+	}
 }
 
 AAuraPlayerCharacter::AAuraPlayerCharacter()

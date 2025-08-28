@@ -75,11 +75,28 @@ bool FAuraGameplayEffectContext::NetSerialize( FArchive& Ar, class UPackageMap* 
 		{
 			RepBits |= 1 << 15;
 		}
+		if ( bIsRadialDamage )
+		{
+			RepBits |= 1 << 16;
+
+			if ( RadialDamageInnerRadius > 0.f )
+			{
+				RepBits |= 1 << 17;
+			}
+			if ( RadialDamageOuterRadius > 0.f )
+			{
+				RepBits |= 1 << 18;
+			}
+			if ( !RadialDamageOrigin.IsZero() )
+			{
+				RepBits |= 1 << 19;
+			}
+		}
 	}
 
 	// If we are loading then RepBits will be here still 0
 	// But in this methods RepBits will be filled on Loading
-	Ar.SerializeBits( &RepBits, 16 );
+	Ar.SerializeBits( &RepBits, 20 );
 
 	// Now we are saving/loading info to/out of archive
 	if ( RepBits & ( 1 << 0 ) )
@@ -166,6 +183,23 @@ bool FAuraGameplayEffectContext::NetSerialize( FArchive& Ar, class UPackageMap* 
 	if ( RepBits & ( 1 << 15 ) )
 	{
 		KnockbackImpulse.NetSerialize( Ar, Map, bOutSuccess );
+	}
+	if ( RepBits & ( 1 << 16 ) )
+	{
+		Ar << bIsRadialDamage;
+
+		if ( RepBits & ( 1 << 17 ) )
+		{
+			Ar << RadialDamageInnerRadius;
+		}
+		if ( RepBits & ( 1 << 18 ) )
+		{
+			Ar << RadialDamageOuterRadius;
+		}
+		if ( RepBits & ( 1 << 19 ) )
+		{
+			RadialDamageOrigin.NetSerialize( Ar, Map, bOutSuccess );
+		}
 	}
 
 	if ( Ar.IsLoading() )
