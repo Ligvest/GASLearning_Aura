@@ -61,6 +61,9 @@ public:
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Physical;
 
+	// GameplayCues
+	FGameplayTag GameplayCue_FireBlast;
+
 	// Offensive Ability Tags
 	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;

@@ -119,16 +119,29 @@ public:
 
 	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayEffects" )
 	static void SetRadialDamageOrigin( UPARAM( ref ) FGameplayEffectContextHandle& EffectContextHandle, const FVector& InOrigin );
-
 	// ~ End of EffectContext variables
 
-	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|Interaction" )
+	// ~ Begin of Damage Effect Params
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|DamageEffect" )
+	static void SetIsRadialDamageEffectParam( UPARAM( ref ) FDamageEffectParams& DamageEffectParams, bool bIsRadial, float InnerRadius, float OuterRadius, FVector Origin );
+
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|DamageEffect" )
+	static void SetKnockbackDirection( UPARAM( ref ) FDamageEffectParams& DamageEffectParams, FVector KnockbackDirection, float Magnitude = 0.f );
+
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|DamageEffect" )
+	static void SetDeathImpulseDirection( UPARAM( ref ) FDamageEffectParams& DamageEffectParams, FVector ImpulseDirection, float Magnitude = 0.f );
+
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|DamageEffect" )
+	static void SetTargetEffectParamsASC( UPARAM( ref ) FDamageEffectParams& DamageEffectParams, UAbilitySystemComponent* InASC );
+	// ~ End of Damage Effect Params
+
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|Interaction" )
 	static void GetLivePlayersInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin );
 
-	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|Interaction" )
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|Interaction" )
 	static void GetCharactersInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin );
 
-	UFUNCTION( BlueprintPure, Category = "AuraAbilitySystemLibrary|Interaction" )
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|Interaction" )
 	static void GetLiveOpponentsInRadus( const AActor* MyActor, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius, const FVector& SphereOrigin );
 
 	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|GameplayMechanics" )

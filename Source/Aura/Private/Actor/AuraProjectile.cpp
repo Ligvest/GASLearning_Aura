@@ -69,6 +69,25 @@ void AAuraProjectile::PlayImpactEffects() const
 		FlySoundComponent->DestroyComponent();
 	}
 }
+bool AAuraProjectile::IsValidOverlap( AActor* OtherActor )
+{
+	// We use GetOwner instad of SourceASC as SourceASC isn't replicated but owner does
+	// AActor* AttackerActor = ImpactEffectParams.SourceASC->GetAvatarActor();
+	AActor* AttackerActor = GetOwner();
+	const bool bCauserSameAsTarget = AttackerActor == OtherActor;
+	if ( bCauserSameAsTarget )
+	{
+		return false;
+	}
+
+	const FName OpponentTag = UAuraGasBpLibrary::GetOpponentActorTag( AttackerActor );
+	if ( !OtherActor->ActorHasTag( OpponentTag ) )
+	{
+		return false;
+	}
+
+	return true;
+}
 
 void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                                 const FHitResult& SweepResult )
@@ -79,18 +98,7 @@ void AAuraProjectile::OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedC
 		return;
 	}
 
-	// const FGameplayEffectContextHandle& EffectContextHandle = ImpactEffectHandle.Data->GetEffectContext();
-	// AActor* AttackerActor =.GetEffectCauser();
-	AActor* AttackerActor = ImpactEffectParams.SourceASC->GetAvatarActor();
-	const bool bCauserSameAsTarget = AttackerActor == OtherActor;
-	// bool bCauserSameAsTarget = ImpactEffectHandle.Data.IsValid() && AttackerActor == OtherActor;
-	if ( bCauserSameAsTarget )
-	{
-		return;
-	}
-
-	const FName OpponentTag = UAuraGasBpLibrary::GetOpponentActorTag( AttackerActor );
-	if ( !OtherActor->ActorHasTag( OpponentTag ) )
+	if ( !IsValidOverlap( OtherActor ) )
 	{
 		return;
 	}

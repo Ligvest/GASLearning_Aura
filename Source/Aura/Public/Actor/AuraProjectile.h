@@ -26,9 +26,11 @@ protected:
 	virtual void Destroyed() override;
 
 	UFUNCTION()
-	void OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult );
+	virtual void OnCollisionSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	                                       const FHitResult& SweepResult );
 
-	void PlayImpactEffects() const;
+	UFUNCTION( BlueprintCallable )
+	virtual void PlayImpactEffects() const;
 
 	UPROPERTY( VisibleAnywhere, Category = "Collision" )
 	TObjectPtr<USphereComponent> CollisionSphere;
@@ -38,6 +40,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> FlySoundComponent;
+
+	bool IsValidOverlap( AActor* OtherActor );
 
 	float LifeSpan = 5.f;
 	bool bImpactHappened = false;

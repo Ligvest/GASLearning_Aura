@@ -57,6 +57,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	// Values
 	Values_XP = AddGameplayTag( ValuesPrefix, "XP", "ValueTag: XP" );
 
+	// Gameplay Cues
+	GameplayCue_FireBlast = AddGameplayTag( FString{}, "GameplayCue.FireBlast", "FireBlast gameplay cue" );
+
 	// Offensive Ability Tags
 	Abilities_None = AddGameplayTag( AbilitiesPrefix, "None", "No Ability Tag" );
 	Abilities_Attack = AddGameplayTag( AbilitiesPrefix, "Attack", "Attack Ability Tag" );

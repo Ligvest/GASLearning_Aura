@@ -289,8 +289,48 @@ void UAuraGasBpLibrary::SetRadialDamageOrigin( FGameplayEffectContextHandle& Eff
 		AuraEffectContext->SetRadialDamageOrigin( InOrigin );
 	}
 }
-
 // End of Effect Context Methods
+
+// ~ Begin of Damage Effect Params
+void UAuraGasBpLibrary::SetIsRadialDamageEffectParam( FDamageEffectParams& DamageEffectParams, bool bIsRadial, float InnerRadius, float OuterRadius, FVector Origin )
+{
+	DamageEffectParams.bIsRadialDamage = bIsRadial;
+	DamageEffectParams.RadialDamageInnerRadius = InnerRadius;
+	DamageEffectParams.RadialDamageOuterRadius = OuterRadius;
+	DamageEffectParams.RadialDamageOrigin = Origin;
+}
+
+void UAuraGasBpLibrary::SetKnockbackDirection( FDamageEffectParams& DamageEffectParams, FVector KnockbackDirection, float Magnitude )
+{
+	KnockbackDirection.Normalize();
+	if ( Magnitude == 0.f )
+	{
+		DamageEffectParams.KnockbackImpulse = KnockbackDirection * DamageEffectParams.KnockbackMagnitude;
+	}
+	else
+	{
+		DamageEffectParams.KnockbackImpulse = KnockbackDirection * Magnitude;
+	}
+}
+
+void UAuraGasBpLibrary::SetDeathImpulseDirection( FDamageEffectParams& DamageEffectParams, FVector ImpulseDirection, float Magnitude )
+{
+	ImpulseDirection.Normalize();
+	if ( Magnitude == 0.f )
+	{
+		DamageEffectParams.DeathImpulse = ImpulseDirection * DamageEffectParams.DeathImpulseMagnitude;
+	}
+	else
+	{
+		DamageEffectParams.DeathImpulse = ImpulseDirection * Magnitude;
+	}
+}
+
+void UAuraGasBpLibrary::SetTargetEffectParamsASC( FDamageEffectParams& DamageEffectParams, UAbilitySystemComponent* InASC )
+{
+	DamageEffectParams.TargetASC = InASC;
+}
+// ~ End of Damage Effect Params
 
 void UAuraGasBpLibrary::GetLivePlayersInRadus( const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
                                                const FVector& SphereOrigin )
