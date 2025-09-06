@@ -14,7 +14,7 @@ void UAuraUserWidget::SetWidgetController( UObject* InWidgetController )
 	WidgetController = InWidgetController;
 	WidgetControllerSet();
 }
-void UAuraUserWidget::Open( UAuraUserWidget* InParentWidget, UButton* OpenButton )
+void UAuraUserWidget::Open( UUserWidget* InParentWidget, UButton* OpenButton )
 {
 	if ( InParentWidget )
 	{
@@ -34,12 +34,13 @@ void UAuraUserWidget::Open( UAuraUserWidget* InParentWidget, UButton* OpenButton
 		check( PC );
 		FInputModeUIOnly InputMode;
 		InputMode.SetLockMouseToViewportBehavior( EMouseLockMode::DoNotLock );
+		// InputMode.SetWidgetToFocus( TakeWidget() );
 		PC->SetInputMode( InputMode );
 	}
 
 	AddToViewport();
 }
-void UAuraUserWidget::Close()
+void UAuraUserWidget::Close( bool ReturnInputToCharacter )
 {
 	if ( ParentWidget )
 	{
@@ -54,12 +55,17 @@ void UAuraUserWidget::Close()
 	// Return input to character
 	// If I want to open several windows then I should make a bool for each window and check it here I believe.
 	// Or make good and beautiful stack ;)
+	if ( ReturnInputToCharacter )
 	{
 		APlayerController* PC = GetOwningPlayer();
 		check( PC );
 		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior( EMouseLockMode::DoNotLock );
 		InputMode.SetHideCursorDuringCapture( false );
+		// if ( ParentWidget )
+		// {
+		// 	InputMode.SetWidgetToFocus( ParentWidget->TakeWidget() );
+		// }
 		PC->SetInputMode( InputMode );
 	}
 

@@ -8,6 +8,8 @@
 
 class UMVVM_LoadSlot;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE( FSlotSelectedSignature );
+
 /**
  *
  */
@@ -19,6 +21,9 @@ class AURA_API UMVVM_LoadScreen : public UMVVMViewModelBase
 	GENERATED_BODY()
 
 public:
+	UPROPERTY( BlueprintAssignable )
+	FSlotSelectedSignature OnSlotSelectedDelegate;
+
 	void InitializeLoadSlots();
 
 	UPROPERTY( EditDefaultsOnly )
@@ -26,6 +31,24 @@ public:
 
 	UFUNCTION( BlueprintPure )
 	UMVVM_LoadSlot* GetLoadSlotViewModelByIndex( int32 Index ) const;
+
+	// Button callbacks
+	UFUNCTION( BlueprintCallable )
+	void NewSlotButtonPressed( int32 Slot, const FString& EnteredName );
+
+	UFUNCTION( BlueprintCallable )
+	void NewGameButtonPressed( int32 Slot );
+
+	UFUNCTION( BlueprintCallable )
+	void SelectSlotButtonPressed( int32 InSlotIndex );
+
+	UFUNCTION( BlueprintCallable )
+	void DeleteButtonPressed();
+
+	UFUNCTION( BlueprintCallable )
+	void PlayButtonPressed();
+
+	void LoadData();
 
 private:
 	// 3 slots. 1 slot for each WidgetSwitcher
@@ -40,4 +63,12 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UMVVM_LoadSlot> LoadSlot_2;
+
+	UPROPERTY()
+	UMVVM_LoadSlot* SelectedSlot;
+
+	// A variable to bind widget to the ViewModel so the ViewModel would initialize properly.
+	// I'll remove it when there will be a binding which makes sense instead of this workaround
+	UPROPERTY( BlueprintReadWrite, FieldNotify, meta = ( AllowPrivateAccess = "true" ) )
+	float Opacity = 1;
 };

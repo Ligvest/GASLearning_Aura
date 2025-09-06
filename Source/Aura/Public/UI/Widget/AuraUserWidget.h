@@ -26,9 +26,9 @@ public:
 	void SetWidgetController( UObject* InWidgetController );
 
 	UFUNCTION( BlueprintCallable )
-	void Open( UAuraUserWidget* InParentWidget, UButton* OpenButton );
+	void Open( UUserWidget* InParentWidget, UButton* OpenButton );
 	UFUNCTION( BlueprintCallable )
-	void Close();
+	void Close( bool ReturnInputToCharacter = true );
 
 protected:
 	// Called when WidgetController is set
@@ -39,7 +39,7 @@ protected:
 	TObjectPtr<UButton> ParentButton;
 
 	UPROPERTY()
-	TObjectPtr<UAuraUserWidget> ParentWidget;
+	TObjectPtr<UUserWidget> ParentWidget;
 
 	UPROPERTY( BlueprintAssignable )
 	FOnWidgetClosed OnWidgetClosed;
