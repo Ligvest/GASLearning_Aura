@@ -14,6 +14,7 @@ class UAbilitySystemComponent;
 class UAuraLevelUpInfo_DA;
 
 DECLARE_MULTICAST_DELEGATE_OneParam( FOnPlayerStatChangedSignature, int32 /* Stat Value */ );
+DECLARE_MULTICAST_DELEGATE_TwoParams( FOnPlayerLevelChangedSignature, int32 /* Level Value */, bool /* bLevelUp */ );
 
 /**
  *
@@ -50,14 +51,14 @@ public:
 	void OnRep_Level( int32 OldLevel );
 
 	// Attribute Points
-	int32 GetPlayerAttributePoints() const { return AttributePoints; }
+	int32 GetAttributePoints() const { return AttributePoints; }
 	void SetAttributePoints( int32 NewAttributePoints );
 	void AddToAttributePoints( int32 AttributePointsToAdd );
 	UFUNCTION()
 	void OnRep_AttributePoints( int32 OldAttributePoints );
 
 	// Spell Points
-	int32 GetPlayerSpellPoints() const { return SpellPoints; }
+	int32 GetSpellPoints() const { return SpellPoints; }
 	void SetSpellPoints( int32 NewSpellPoints );
 	void AddToSpellPoints( int32 SpellPointsToAdd );
 	UFUNCTION()
@@ -65,7 +66,7 @@ public:
 
 	// Delegates:
 	FOnPlayerStatChangedSignature OnXpChangedDelegate;
-	FOnPlayerStatChangedSignature OnLevelChangedDelegate;
+	FOnPlayerLevelChangedSignature OnLevelChangedDelegate;
 	FOnPlayerStatChangedSignature OnAttributePointsChangedDelegate;
 	FOnPlayerStatChangedSignature OnSpellPointsChangedDelegate;
 

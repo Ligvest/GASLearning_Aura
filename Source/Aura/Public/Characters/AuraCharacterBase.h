@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class ULoadScreenSaveGame;
 enum class ECharacterClass : uint8;
 class UGameplayAbility;
 class UGameplayEffect;
@@ -64,7 +65,8 @@ public:
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
-	virtual void InitDefaultAttributes( int InCharacterLevel ) const;
+	virtual void InitDefaultAttributes( int CharacterLevel ) const;
+	virtual void InitSavedAttributes( int InCharacterLevel, ULoadScreenSaveGame* SaveGame ) const;
 
 	UFUNCTION( BlueprintCallable, Category = "GAS" )
 	void ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectClass, float EffectLevel = 1.f ) const;
@@ -98,8 +100,13 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
 
+	/*
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<UGameplayEffect> InitPrimaryAttributesEffectClass;
+
+	UPROPERTY( EditAnywhere )
+	TSubclassOf<UGameplayEffect> InitPrimaryAttributesEffect_SetByCallerClass;
+	*/
 
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<UGameplayEffect> InitSecondaryAttributesEffectClass;

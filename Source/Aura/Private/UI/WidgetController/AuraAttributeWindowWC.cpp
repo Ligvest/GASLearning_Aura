@@ -50,5 +50,5 @@ void UAuraAttributeWindowWC::BroadcastInitialValues()
 	// PS Broadcasts to every client. But here we subscribe only to our own PSs OnPlayerStatChangedDelegate
 	// Thats why on LevelUp or other broadcast only 1 OnPlayerStatChangedDynamicDelegate is broadcasted
 	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
-	OnAttributePointsChangedDynamicDelegate.Broadcast( AuraPS->GetPlayerAttributePoints() );
+	OnAttributePointsChangedDynamicDelegate.Broadcast( AuraPS->GetAttributePoints() );
 }

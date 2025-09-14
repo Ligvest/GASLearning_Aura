@@ -59,7 +59,7 @@ public:
 	FOnAttributeChangedSignature OnXpPercentageChangedDelegate;
 
 	UPROPERTY( BlueprintAssignable )
-	FOnPlayerStatChangedDynamicSignature OnPlayerLevelChangedDynamicDelegate;
+	FOnPlayerLevelChangedDynamicSignature OnPlayerLevelChangedDynamicDelegate;
 
 	UPROPERTY( BlueprintAssignable )
 	FEffectMessageRowDelegate EffectMessageRowDelegate;

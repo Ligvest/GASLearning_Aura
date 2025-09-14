@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
+class ULoadScreenSaveGame;
 DECLARE_MULTICAST_DELEGATE_OneParam( FOnEffectWithTagsApplied, const FGameplayTagContainer& /* TagContainer */ );
 DECLARE_MULTICAST_DELEGATE( FSendSignalFromASCSignature );
 DECLARE_DELEGATE_OneParam( FForEachAbility, const FGameplayAbilitySpec& );
@@ -31,6 +32,7 @@ public:
 	FDeactivatePassiveAbility DeactivatePassiveAbility;
 	FActivatePassiveEffect ActivatePassiveEffect;
 
+	void AddCharacterAbilitiesFromSaveData( ULoadScreenSaveGame* SaveData );
 	void GrantAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses, int AbilitiesLevel = 1 );
 	void GrantPassiveAbilities( const TArray<TSubclassOf<UGameplayAbility>>& AbilityClasses, int AbilitiesLevel = 1 );
 	void AbilityInputTagPressed( const FGameplayTag& InputTag );
@@ -55,15 +57,19 @@ public:
 	UFUNCTION( NetMulticast, Unreliable )
 	void Multicast_ActivatePassiveEffect( const FGameplayTag& AbilityTag, bool bActivate );
 
+	void SetInputTagToSpec( FGameplayTag AbilityTag, const FGameplayTag InputTag );
+
 	static FGameplayTag GetAbilityTagFromSpec( const FGameplayAbilitySpec& AbilitySpec );
 	static FGameplayTag GetInputTagFromSpec( const FGameplayAbilitySpec& AbilitySpec );
-	void SetInputTagToSpec( FGameplayTag AbilityTag, const FGameplayTag InputTag );
 	static FGameplayTag GetStatusTagFromSpec( const FGameplayAbilitySpec& AbilitySpec );
+	FGameplayTag GetSlotFromAbilityTag( const FGameplayTag& AbilityTag );
+	FGameplayTag GetStatusFromAbilityTag( const FGameplayTag& AbilityTag );
 	FGameplayAbilitySpec* GetSpecFromAbilityTag( const FGameplayTag& AbilityTag );
+	FGameplayAbilitySpec* GetSpecWithSlot( const FGameplayTag& Slot );
+
 	bool SlotIsEmpty( const FGameplayTag& Slot );
 	static bool AbilityHasSlot( const FGameplayAbilitySpec& Spec, const FGameplayTag& Slot );
 	static bool AbilityHasAnySlot( const FGameplayAbilitySpec& Spec );
-	FGameplayAbilitySpec* GetSpecWithSlot( const FGameplayTag& Slot );
 	bool IsPassiveAbility( const FGameplayAbilitySpec& Spec ) const;
 	void AssignSlotToAbility( FGameplayAbilitySpec& Spec, const FGameplayTag& Slot );
 

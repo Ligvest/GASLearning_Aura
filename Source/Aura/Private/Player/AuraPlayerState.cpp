@@ -63,7 +63,7 @@ void AAuraPlayerState::SetLevel( int32 NewLevel )
 		check( false );
 	}
 	Level = NewLevel;
-	OnLevelChangedDelegate.Broadcast( Level );
+	OnLevelChangedDelegate.Broadcast( Level, false );
 }
 
 // Should be called only on Server.
@@ -77,14 +77,14 @@ void AAuraPlayerState::AddToLevel( int32 LevelToAdd )
 		check( false );
 	}
 	Level += LevelToAdd;
-	OnLevelChangedDelegate.Broadcast( Level );
+	OnLevelChangedDelegate.Broadcast( Level, true );
 }
 
 void AAuraPlayerState::OnRep_Level( int32 OldLevel )
 {
 	// PS Broadcasts to every client. But in WC we subscribe only to our own PSs OnLevelChangedDelegate
 	// Thats why on LevelUp only 1 WC::OnPlayerLevelChangedDynamicDelegate is broadcasted
-	OnLevelChangedDelegate.Broadcast( Level );
+	OnLevelChangedDelegate.Broadcast( Level, true );
 }
 
 // Attribute Points

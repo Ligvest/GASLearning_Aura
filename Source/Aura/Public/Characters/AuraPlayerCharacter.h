@@ -35,11 +35,14 @@ public:
 	virtual int32 GetSpellPointsReward_Implementation( int32 Level ) const override;
 	virtual void ShowMagicCircle_Implementation( UMaterialInterface* DecalMaterial ) override;
 	virtual void HideMagicCircle_Implementation() override;
+	virtual void SaveProgress_Implementation( const FName& CheckpointTag ) override;
 	// ~End of IPlayerInterface
 
 	AAuraPlayerCharacter();
 	virtual void BeginPlay() override;
 	virtual void PossessedBy( AController* NewController ) override;
+
+	void LoadProgress();
 
 	// Replication
 	virtual void OnRep_PlayerState() override;

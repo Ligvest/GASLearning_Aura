@@ -10,7 +10,7 @@
 void UAuraSpellsWindowWC::BroadcastInitialValues()
 {
 	BroadcastAbilityInfo();
-	OnSpellPointsChangedDynamicDelegate.Broadcast( GetAuraPS()->GetPlayerSpellPoints() );
+	OnSpellPointsChangedDynamicDelegate.Broadcast( GetAuraPS()->GetSpellPoints() );
 }
 
 void UAuraSpellsWindowWC::BindCallbacksToAttributeChanges()
@@ -44,7 +44,7 @@ void UAuraSpellsWindowWC::BindCallbacksToAttributeChanges()
 
 int32 UAuraSpellsWindowWC::GetSpellPoints()
 {
-	return GetAuraPS()->GetPlayerSpellPoints();
+	return GetAuraPS()->GetSpellPoints();
 }
 
 void UAuraSpellsWindowWC::SpellGlobeSelected( const FGameplayTag AbilityTag )
@@ -56,7 +56,7 @@ void UAuraSpellsWindowWC::SpellGlobeSelected( const FGameplayTag AbilityTag )
 	}
 
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-	const int32 SpellPoints = GetAuraPS()->GetPlayerSpellPoints();
+	const int32 SpellPoints = GetAuraPS()->GetSpellPoints();
 
 	FGameplayTag AbilityStatus;
 

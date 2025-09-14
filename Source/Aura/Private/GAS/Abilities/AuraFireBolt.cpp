@@ -79,7 +79,7 @@ void UAuraFireBolt::SpawnProjectiles( const FVector ProjectileTargetLocation, co
 		SpawnTransform.SetLocation( SocketLocation );
 		SpawnTransform.SetRotation( Rot.Quaternion() );
 
-		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>( ProjectileClass, SpawnTransform, GetOwningActorFromActorInfo(), Cast<APawn>( GetOwningActorFromActorInfo() ),
+		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>( ProjectileClass, SpawnTransform, GetAvatarActorFromActorInfo(), Cast<APawn>( GetOwningActorFromActorInfo() ),
 		                                                                               ESpawnActorCollisionHandlingMethod::AlwaysSpawn );
 
 		Projectile->ImpactEffectParams = MakeDamageEffectParamsFromClassDefaults();

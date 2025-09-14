@@ -2,6 +2,7 @@
 
 #include "Characters/AuraCharacterBase.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AuraGameplayTags.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
@@ -11,6 +12,7 @@
 #include "GAS/Debuff/DebuffNiagaraComponent.h"
 #include "GAS/NiagaraComponent/PassiveSpellNsComponent.h"
 #include "Game/AuraGameModeBase.h"
+#include "Game/LoadScreenSaveGame.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -274,12 +276,61 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation( const FVector Deat
 	OnDeathDelegate.Broadcast( this );
 }
 
-void AAuraCharacterBase::InitDefaultAttributes( int InCharacterLevel ) const
+void AAuraCharacterBase::InitDefaultAttributes( int CharacterLevel ) const
 {
+	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
+	UAuraCharacterClassInfoDA* DefaultCharacterInfoDA = AuraGM->GetDefaultCharacterInfoDA();
+	TSubclassOf<UGameplayEffect> InitPrimaryAttributesEffectClass = DefaultCharacterInfoDA->GetClassDefaultInfo( CharacterClass ).InitPrimaryAttributesEffectClass;
 	ApplyEffectToSelf( InitPrimaryAttributesEffectClass );
+
+	// If you like you can change to DefaultCharacterInfoDA->InitSecondaryAttributesEffectClass
 	ApplyEffectToSelf( InitSecondaryAttributesEffectClass );
 	ApplyEffectToSelf( InitVitalAttributesEffectClass );
 }
+
+void AAuraCharacterBase::InitSavedAttributes( int InCharacterLevel, ULoadScreenSaveGame* SaveGame ) const
+{
+	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
+
+	UAuraCharacterClassInfoDA* CharacterClassInfoDA = AuraGM->GetDefaultCharacterInfoDA();
+	if ( CharacterClassInfoDA == nullptr )
+	{
+		return;
+	}
+
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	const AActor* SourceAvatarActor = ASC->GetAvatarActor();
+	FGameplayEffectContextHandle EffectContexthandle = ASC->MakeEffectContext();
+	EffectContexthandle.AddSourceObject( SourceAvatarActor );
+
+	TSubclassOf<UGameplayEffect> InitPrimaryAttributesEffect_SetByCallerClass = CharacterClassInfoDA->GetClassDefaultInfo( CharacterClass ).InitPrimaryAttributes_SetByCallerClass;
+	const FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec( InitPrimaryAttributesEffect_SetByCallerClass, 1.f, EffectContexthandle );
+
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude( SpecHandle, GameplayTags.Attributes_Primary_Strength, SaveGame->Strength );
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude( SpecHandle, GameplayTags.Attributes_Primary_Intelligence, SaveGame->Intelligence );
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude( SpecHandle, GameplayTags.Attributes_Primary_Resilience, SaveGame->Resilience );
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude( SpecHandle, GameplayTags.Attributes_Primary_Vigor, SaveGame->Vigor );
+
+	ASC->ApplyGameplayEffectSpecToSelf( *SpecHandle.Data );
+
+	// If you like you can change to DefaultCharacterInfoDA->InitSecondaryAttributesEffectClass
+	ApplyEffectToSelf( InitSecondaryAttributesEffectClass );
+	ApplyEffectToSelf( InitVitalAttributesEffectClass );
+
+	/*
+	FGameplayEffectContextHandle SecondaryAttributesContextHandle = ASC->MakeEffectContext();
+	SecondaryAttributesContextHandle.AddSourceObject( SourceAvatarActor );
+	const FGameplayEffectSpecHandle SecondaryAttributesSpecHandle = ASC->MakeOutgoingSpec( CharacterClassInfoDA->SecondaryAttributes_Infinite, 1.f, SecondaryAttributesContextHandle );
+	ASC->ApplyGameplayEffectSpecToSelf( *SecondaryAttributesSpecHandle.Data.Get() );
+
+	FGameplayEffectContextHandle VitalAttributesContextHandle = ASC->MakeEffectContext();
+	VitalAttributesContextHandle.AddSourceObject( SourceAvatarActor );
+	const FGameplayEffectSpecHandle VitalAttributesSpecHandle = ASC->MakeOutgoingSpec( CharacterClassInfoDA->VitalAttributes, 1.f, VitalAttributesContextHandle );
+	ASC->ApplyGameplayEffectSpecToSelf( *VitalAttributesSpecHandle.Data.Get() );
+*/
+}
+
 void AAuraCharacterBase::ApplyEffectToSelf( TSubclassOf<UGameplayEffect> EffectClass, float EffectLevel /*= 1.f*/ ) const
 {
 	// Must be set in child classes

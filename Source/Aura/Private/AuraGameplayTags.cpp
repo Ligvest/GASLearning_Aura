@@ -73,6 +73,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Abilities_Passive_HaloOfProtection = AddGameplayTag( AbilitiesPassivePrefix, "HaloOfProtection", "HaloOfProtection Ability Tag" );
 	Abilities_Passive_LifeSiphon = AddGameplayTag( AbilitiesPassivePrefix, "LifeSiphon", "LifeSiphon Ability Tag" );
 	Abilities_Passive_ManaSiphon = AddGameplayTag( AbilitiesPassivePrefix, "ManaSiphon", "ManaSiphon Ability Tag" );
+	Abilities_Passive_ListenForEvents = AddGameplayTag( AbilitiesPassivePrefix, "ListenForEvents", "ListenForEvents Ability Tag" );
 
 	// Status Tag
 	Abilities_HitReact = AddGameplayTag( AbilitiesPrefix, "HitReact", "HitReact Ability Tag" );

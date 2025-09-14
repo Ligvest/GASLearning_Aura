@@ -4,6 +4,8 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
+#include "GAS/AuraAbilitySystemComponent.h"
 #include "Interaction/CombatInterface.h"
 
 UDebuffNiagaraComponent::UDebuffNiagaraComponent()

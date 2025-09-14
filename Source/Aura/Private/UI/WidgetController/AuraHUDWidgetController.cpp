@@ -54,7 +54,7 @@ void UAuraHUDWidgetController::BindCallbacksToAttributeChanges()
 	// Thats why on LevelUp or other broadcast only 1 OnPlayerStatChangedDynamicDelegate is broadcasted
 	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
 	AuraPS->OnXpChangedDelegate.AddUObject( this, &UAuraHUDWidgetController::OnXpChanged );
-	AuraPS->OnLevelChangedDelegate.AddLambda( [this]( int32 NewValue ) { OnPlayerLevelChangedDynamicDelegate.Broadcast( NewValue ); } );
+	AuraPS->OnLevelChangedDelegate.AddLambda( [this]( int32 NewValue, bool bLevelUp ) { OnPlayerLevelChangedDynamicDelegate.Broadcast( NewValue, bLevelUp ); } );
 
 	if ( AuraASC->bStartupAbilitiesGranted )
 	{
