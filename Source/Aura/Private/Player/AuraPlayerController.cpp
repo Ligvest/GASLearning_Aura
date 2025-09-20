@@ -13,6 +13,7 @@
 #include "Characters/AuraPlayerCharacter.h"
 #include "Components/SplineComponent.h"
 #include "GAS/AuraAbilitySystemComponent.h"
+#include "GAS/AuraGasBpLibrary.h"
 #include "Input/AuraInputComponent.h"
 #include "Interaction/HighlightActorInterface.h"
 #include "UI/WidgetComponent/DamageTextComponent.h"
@@ -131,17 +132,22 @@ void AAuraPlayerController::AbilityInputTagReleased( FGameplayTag InputTag )
 	}
 
 	// Move character if LMB was clicked and no actors under cursor
-	bool bShootingMode = bTargeting || bShiftPressed;
+	bool bShootingMode = bTargetingEnemy || bShiftPressed;
 	bool bIsClick = FollowTime <= HoldButtonThreshold;
 	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LMB ) && !bShootingMode && bIsClick )
 	{
-		GeneratePathToPoint( LastCursorTraceImpactPoint );
+		if ( CurrentActorUnderCursorToHighlight )
+		{
+			IHighlightActorInterface::Execute_SetMoveToLocation( ActorUnderCursor, LastCursorTraceImpactPoint );
+		}
 		// Don't call this shit each frame. If you need to add such check in tick function
 		// then subscribe to EGameplayTagEventType::NewOrRemoved and change bool field in the class
-		if ( GetASC() && !GetASC()->HasMatchingGameplayTag( FAuraGameplayTags::Get().Player_Block_InputPressed ) )
+		else if ( GetASC() && !GetASC()->HasMatchingGameplayTag( FAuraGameplayTags::Get().Player_Block_InputPressed ) )
 		{
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation( this, ClickNS, LastCursorTraceImpactPoint );
 		}
+
+		GeneratePathToPoint( LastCursorTraceImpactPoint );
 	}
 	// Activate\Diactivate ability otherwise
 	else
@@ -164,7 +170,7 @@ void AAuraPlayerController::AbilityInputTagHeld( FGameplayTag InputTag )
 	}
 
 	// Move character if LMB pressed and no actors under cursor
-	bool bShootingMode = bTargeting || bShiftPressed;
+	bool bShootingMode = bTargetingEnemy || bShiftPressed;
 	if ( InputTag.MatchesTagExact( FAuraGameplayTags::Get().AuraInput_LMB ) && !bShootingMode )
 	{
 		MoveWithCursor();
@@ -288,7 +294,7 @@ void AAuraPlayerController::GeneratePathToPoint( FVector TargetPoint )
 		return;
 	}
 
-	UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously( this, ControlledPawn->GetActorLocation(), LastCursorTraceImpactPoint );
+	UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously( this, ControlledPawn->GetActorLocation(), TargetPoint );
 	if ( !NavPath )
 	{
 		return;
@@ -338,7 +344,7 @@ void AAuraPlayerController::CursorTrace()
 		if ( CurrentActorUnderCursorToHighlight ) CurrentActorUnderCursorToHighlight->UnHighlightActor();
 		LastActorUnderCursorToHighlight = nullptr;
 		CurrentActorUnderCursorToHighlight = nullptr;
-		bTargeting = false;
+		bTargetingEnemy = false;
 		return;
 	}
 
@@ -382,14 +388,17 @@ void AAuraPlayerController::UpdateHightlightActor()
 	if ( LastActorUnderCursorToHighlight )
 	{
 		LastActorUnderCursorToHighlight->UnHighlightActor();
-		bTargeting = false;
+		bTargetingEnemy = false;
 	}
 
 	// If there is a new actor to highlight, highlight it
 	if ( CurrentActorUnderCursorToHighlight )
 	{
 		CurrentActorUnderCursorToHighlight->HighlightActor();
-		bTargeting = true;
+		if ( UAuraGasBpLibrary::HasEnemyActorTag( ActorUnderCursor ) )
+		{
+			bTargetingEnemy = true;
+		}
 	}
 }
 void AAuraPlayerController::PlayerTick( float DeltaSeconds )

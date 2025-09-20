@@ -171,9 +171,10 @@ void AAuraEnemyCharacter::ReactOnBeingHit( const FGameplayTag HitTag, const int 
 void AAuraEnemyCharacter::Die( const FVector DeathImpulse )
 {
 	SetLifeSpan( CorpseLifeSpan );
+	SpawnLoot();
 	Super::Die( DeathImpulse );
 	// IsDead is Set in Super::Die()
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool( BBValueName_Dead, IsDead );
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool( BBValueName_Dead, bDead );
 }
 bool AAuraEnemyCharacter::IsRangedCharacter() const
 {

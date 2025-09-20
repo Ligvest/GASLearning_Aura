@@ -34,12 +34,18 @@ UMVVM_LoadSlot* UMVVM_LoadScreen::GetLoadSlotViewModelByIndex( int32 Index ) con
 void UMVVM_LoadScreen::NewSlotButtonPressed( int32 Slot, const FString& EnteredName )
 {
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
+	if ( !IsValid( AuraGameMode ) )
+	{
+		GEngine->AddOnScreenDebugMessage( 1, 15.f, FColor::Magenta, FString( "Please switch to Single Player" ) );
+		return;
+	}
 
 	LoadSlots[Slot]->SlotStatus = ESaveSlotStatus::Taken;
 	LoadSlots[Slot]->SetPlayerName( EnteredName );
 	LoadSlots[Slot]->SetPlayerLevel( 1 );
 	LoadSlots[Slot]->SetMapName( AuraGameMode->DefaultMapName );
 	LoadSlots[Slot]->PlayerStartTag = AuraGameMode->DefaultPlayerStartTag;
+	LoadSlots[Slot]->MapAssetName = AuraGameMode->DefaultMap.ToSoftObjectPath().GetAssetName();
 	LoadSlots[Slot]->InitializeSlot();
 
 	AuraGameMode->SaveSlotData( LoadSlots[Slot], Slot );
@@ -91,19 +97,17 @@ void UMVVM_LoadScreen::PlayButtonPressed()
 	AuraGameInstance->LoadSlotIndex = SelectedSlot->SlotIndex;
 	AuraGameInstance->PlayerStartTag = SelectedSlot->PlayerStartTag;
 
-	AuraGameMode->TravelToMap( SelectedSlot );
-
-	/*
-	if ( IsValid( SelectedSlot ) )
-	{
-	    AuraGameMode->TravelToMap( SelectedSlot );
-	}
-*/
+	AuraGameMode->TravelToMap( SelectedSlot->GetMapName() );
 }
 
 void UMVVM_LoadScreen::LoadData()
 {
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
+	if ( !IsValid( AuraGameMode ) )
+	{
+		return;
+	}
+
 	for ( const auto& [LoadSlotIndex, LoadSlotViewModel] : LoadSlots )
 	{
 		ULoadScreenSaveGame* SaveObject = AuraGameMode->GetSaveSlotData( LoadSlotViewModel->GetLoadSlotName(), LoadSlotIndex );
@@ -111,7 +115,7 @@ void UMVVM_LoadScreen::LoadData()
 		LoadSlotViewModel->SlotStatus = SaveObject->SaveSlotStatus;
 		LoadSlotViewModel->SetPlayerName( SaveObject->PlayerName );
 		LoadSlotViewModel->SetPlayerLevel( SaveObject->PlayerLevel );
-		LoadSlotViewModel->SetMapName( SaveObject->MapName );
+		LoadSlotViewModel->SetMapName( SaveObject->DestinationMapName );
 		LoadSlotViewModel->PlayerStartTag = SaveObject->PlayerStartTag;
 		LoadSlotViewModel->InitializeSlot();
 	}

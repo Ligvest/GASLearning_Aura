@@ -11,6 +11,8 @@ int FHighlightActorHelper::HighlightActorTypeToStencilValue( const EHighlightAct
 			return 250;
 		case EHighlightActorType::Ally:
 			return 251;
+		case EHighlightActorType::Interactable:
+			return 252;
 		default:
 			return 0;
 	}

@@ -25,6 +25,8 @@ public:
 	virtual int GetCharacterLevel() const override;
 	//~ End of ICombatInterface
 
+	void SetLevel( int32 InLevel ) { EnemyLevel = InLevel; }
+
 	AAuraEnemyCharacter();
 	virtual void BeginPlay() override;
 

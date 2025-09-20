@@ -5,6 +5,7 @@
 #include "EngineUtils.h"
 #include "Game/AuraGameInstance.h"
 #include "Game/LoadScreenSaveGame.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/PlayerStart.h"
 #include "Interaction/SaveInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -36,7 +37,8 @@ void AAuraGameModeBase::SaveSlotData( UMVVM_LoadSlot* LoadSlot, int32 SlotIndex 
 	ULoadScreenSaveGame* LoadScreenSaveGame = Cast<ULoadScreenSaveGame>( SaveGameObject );
 	LoadScreenSaveGame->SaveSlotStatus = LoadSlot->SlotStatus;
 	LoadScreenSaveGame->PlayerName = LoadSlot->GetPlayerName();
-	LoadScreenSaveGame->MapName = LoadSlot->GetMapName();
+	LoadScreenSaveGame->DestinationMapName = LoadSlot->GetMapName();
+	LoadScreenSaveGame->DestinationMapAssetName = LoadSlot->MapAssetName;
 	LoadScreenSaveGame->PlayerStartTag = LoadSlot->PlayerStartTag;
 
 	// Save the SaveGame object to disk
@@ -87,7 +89,7 @@ void AAuraGameModeBase::SaveInGameProgressData( ULoadScreenSaveGame* SaveObject 
 	UGameplayStatics::SaveGameToSlot( SaveObject, InGameLoadSlotName, InGameLoadSlotIndex );
 }
 
-void AAuraGameModeBase::SaveWorldState( UWorld* World ) const
+void AAuraGameModeBase::SaveWorldState( UWorld* World, const FString& DestinationMapAssetName ) const
 {
 	// Remove streaming prefix from WorldName
 	FString WorldName = World->GetMapName();
@@ -109,6 +111,12 @@ void AAuraGameModeBase::SaveWorldState( UWorld* World ) const
 			FSavedMap NewSavedMap;
 			NewSavedMap.MapAssetName = WorldName;
 			SaveGame->SavedMaps.Add( NewSavedMap );
+		}
+
+		if ( !DestinationMapAssetName.IsEmpty() )
+		{
+			SaveGame->DestinationMapAssetName = DestinationMapAssetName;
+			SaveGame->DestinationMapName = GetMapNameFromMapAssetName( DestinationMapAssetName );
 		}
 
 		// Get a copy of this map from the SaveGame
@@ -218,12 +226,10 @@ void AAuraGameModeBase::LoadWorldState( UWorld* World ) const
 	}
 }
 
-void AAuraGameModeBase::TravelToMap( UMVVM_LoadSlot* Slot )
+void AAuraGameModeBase::TravelToMap( const FString& MapName )
 {
-	const FString SlotName = Slot->GetLoadSlotName();
-	const int32 SlotIndex = Slot->SlotIndex;
-
-	UGameplayStatics::OpenLevelBySoftObjectPtr( Slot, Maps.FindChecked( Slot->GetMapName() ) );
+	TSoftObjectPtr<UWorld> MapSoftPtr = MapNameToMapPtr.FindChecked( MapName );
+	UGameplayStatics::OpenLevelBySoftObjectPtr( this, MapSoftPtr );
 }
 
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation( AController* Player )
@@ -251,8 +257,31 @@ AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation( AController* Player
 	return nullptr;
 }
 
+void AAuraGameModeBase::PlayerDied( ACharacter* DeadCharacter )
+{
+	ULoadScreenSaveGame* SaveGame = RetrieveInGameSaveData();
+	if ( !IsValid( SaveGame ) ) return;
+
+	UGameplayStatics::OpenLevel( DeadCharacter, FName( SaveGame->DestinationMapAssetName ) );
+}
+
 void AAuraGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-	Maps.Add( DefaultMapName, DefaultMap );
+	MapNameToMapPtr.Add( DefaultMapName, DefaultMap );
+}
+
+// This is just a little workaround to get a Map name from a MapNameToMapPtr TMap
+// On production don't do like this and develop another way to save/load world.
+// Or you can use this save/load system but think how to use for example Enums or just Dungeon Assets to not convert name many times
+FString AAuraGameModeBase::GetMapNameFromMapAssetName( const FString& MapAssetName ) const
+{
+	for ( const auto& [MapName, MapSoftPtr] : MapNameToMapPtr )
+	{
+		if ( MapSoftPtr.ToSoftObjectPath().GetAssetName() == MapAssetName )
+		{
+			return MapName;
+		}
+	}
+	return FString();
 }

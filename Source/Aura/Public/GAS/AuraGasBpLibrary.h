@@ -10,6 +10,7 @@
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraGasBpLibrary.generated.h"
 
+class ULootTiersDA;
 struct FDamageEffectParams;
 struct FGameplayEffectContextHandle;
 class UAuraHUDWidgetController;
@@ -33,6 +34,9 @@ public:
 
 	UFUNCTION( BlueprintPure )
 	static UAuraAbilityInfo_DA* GetAbilityInfoDA( const UObject* WorldContext );
+
+	UFUNCTION( BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults", meta = ( DefaultToSelf = "WorldContextObject" ) )
+	static ULootTiersDA* GetLootTiersDA( const UObject* WorldContextObject );
 
 	UFUNCTION( BlueprintPure, meta = ( DefaultToSelf = "WorldContext" ) )
 	static UAuraSpellsWindowWC* GetSpellsWindowWC( const UObject* WorldContext );

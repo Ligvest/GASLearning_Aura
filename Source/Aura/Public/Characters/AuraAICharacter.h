@@ -26,6 +26,9 @@ public:
 	virtual void UnHighlightActor() override;
 	//~ End of IHightlightActorInterface
 
+	UFUNCTION( BlueprintImplementableEvent )
+	void SpawnLoot();
+
 protected:
 	UPROPERTY( EditAnywhere, Category = Interaction )
 	EHighlightActorType HighlightActorType;

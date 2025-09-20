@@ -51,6 +51,9 @@ public:
 	UPROPERTY()
 	FName PlayerStartTag;
 
+	UPROPERTY()
+	FString MapAssetName;
+
 private:
 	UPROPERTY( BlueprintReadWrite, FieldNotify, Setter, Getter, meta = ( AllowPrivateAccess = "true" ) );
 	FString LoadSlotName;

@@ -58,6 +58,7 @@ public:
 	virtual float TakeDamage( float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser ) override;
 	//~ End of APawn
 
+	void SetCharacterClass( ECharacterClass InClass ) { CharacterClass = InClass; }
 	void DissolveCorpse();
 
 	UFUNCTION( BlueprintImplementableEvent, Category = "Death" )
@@ -186,7 +187,8 @@ protected:
 	UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Death" )
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
 
-	bool IsDead = false;
+	UPROPERTY( BlueprintReadOnly )
+	bool bDead = false;
 
 	UPROPERTY( EditAnywhere, BlueprintReadOnly, Category = "Combat" )
 	float BaseMaxWalkSpeed = 600.f;

@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "AuraGameModeBase.generated.h"
 
+class ULootTiersDA;
 class ULoadScreenSaveGame;
 class USaveGame;
 class UMVVM_LoadSlot;
@@ -28,14 +29,20 @@ public:
 	static void DeleteSlot( const FString& SlotName, int32 SlotIndex );
 	ULoadScreenSaveGame* RetrieveInGameSaveData();
 	void SaveInGameProgressData( ULoadScreenSaveGame* SaveObject );
-	void SaveWorldState( UWorld* World ) const;
+	void SaveWorldState( UWorld* World, const FString& DestinationMapAssetName = FString() ) const;
 	void LoadWorldState( UWorld* World ) const;
 
-	void TravelToMap( UMVVM_LoadSlot* Slot );
+	void TravelToMap( const FString& MapName );
+	void PlayerDied( ACharacter* DeadCharacter );
 
 protected:
 	virtual AActor* ChoosePlayerStart_Implementation( AController* Player ) override;
 	virtual void BeginPlay() override;
+
+	// This is just a little workaround to get a Map name from a MapNameToMapPtr TMap
+	// On production don't do like this and develop another way to save/load world.
+	// Or you can use this save/load system but think how to use for example Enums or just Dungeon Assets to not convert name many times
+	FString GetMapNameFromMapAssetName( const FString& MapAssetName ) const;
 
 public:
 	UPROPERTY( EditDefaultsOnly )
@@ -51,7 +58,10 @@ public:
 	TSoftObjectPtr<UWorld> DefaultMap;
 
 	UPROPERTY( EditDefaultsOnly )
-	TMap<FString, TSoftObjectPtr<UWorld>> Maps;
+	TMap<FString, TSoftObjectPtr<UWorld>> MapNameToMapPtr;
+
+	UPROPERTY( EditDefaultsOnly, Category = "Loot Tiers" )
+	TObjectPtr<ULootTiersDA> LootTiers;
 
 protected:
 	UPROPERTY( EditDefaultsOnly, Category = "CharactersDefault" )

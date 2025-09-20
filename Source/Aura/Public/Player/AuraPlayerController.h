@@ -88,7 +88,7 @@ private:
 	FVector AutoMoveDirection = FVector::ZeroVector;
 	bool bAutoMove = false;
 	float AutoMoveDisableDistanceThreshold = 50.f;
-	bool bTargeting = false;
+	bool bTargetingEnemy = false;
 	float FollowTime = 0.f;
 	bool bShiftPressed = false;
 

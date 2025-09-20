@@ -116,7 +116,7 @@ void AAuraCharacterBase::Die( const FVector DeathImpulse )
 }
 bool AAuraCharacterBase::IsDead_Implementation()
 {
-	return IsDead;
+	return bDead;
 }
 
 AActor* AAuraCharacterBase::GetAvatar_Implementation()
@@ -257,7 +257,7 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation( const FVector Deat
 	GetCapsuleComponent()->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 
 	DissolveCorpse();
-	IsDead = true;
+	bDead = true;
 
 	if ( AbilitySystemComponent )
 	{

@@ -66,6 +66,16 @@ UAuraAbilityInfo_DA* UAuraGasBpLibrary::GetAbilityInfoDA( const UObject* WorldCo
 	return AuraGM->GetAbilityInfoDA();
 }
 
+ULootTiersDA* UAuraGasBpLibrary::GetLootTiersDA( const UObject* WorldContextObject )
+{
+	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( WorldContextObject ) );
+	if ( AuraGameMode == nullptr )
+	{
+		return nullptr;
+	}
+	return AuraGameMode->LootTiers;
+}
+
 // Begin of Effect Context Methods
 // Effect Context Getters
 bool UAuraGasBpLibrary::GetIsBlockedHitFromEffectContext( const FGameplayEffectContextHandle& EffectContextHandle )

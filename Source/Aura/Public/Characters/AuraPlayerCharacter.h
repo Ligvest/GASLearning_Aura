@@ -38,6 +38,15 @@ public:
 	virtual void SaveProgress_Implementation( const FName& CheckpointTag ) override;
 	// ~End of IPlayerInterface
 
+	// ~Begin of ICombatInterface
+	virtual void Die( FVector DeathImpulse ) override;
+	// ~End of ICombatInterface
+
+	UPROPERTY( EditDefaultsOnly )
+	float DeathTime = 2.f;
+
+	FTimerHandle DeathTimer;
+
 	AAuraPlayerCharacter();
 	virtual void BeginPlay() override;
 	virtual void PossessedBy( AController* NewController ) override;

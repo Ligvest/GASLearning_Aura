@@ -4,15 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerStart.h"
+#include "Interaction/HighlightActorInterface.h"
 #include "Interaction/SaveInterface.h"
 #include "Checkpoint.generated.h"
 
+enum class EHighlightActorType : uint8;
 class USphereComponent;
 /**
  *
  */
 UCLASS()
-class AURA_API ACheckpoint : public APlayerStart, public ISaveInterface
+class AURA_API ACheckpoint : public APlayerStart, public ISaveInterface, public IHighlightActorInterface
 {
 	GENERATED_BODY()
 public:
@@ -23,8 +25,11 @@ public:
 	virtual void LoadActor_Implementation() override;
 	/* end Save Interface */
 
-	UPROPERTY( BlueprintReadOnly, SaveGame )
-	bool bReached = false;
+	//~ Begin of IHightlightActorInterface
+	virtual void HighlightActor() override;
+	virtual void UnHighlightActor() override;
+	virtual void SetMoveToLocation_Implementation( FVector& OutDestination ) override;
+	//~ End of IHightlightActorInterface
 
 protected:
 	UFUNCTION()
@@ -37,10 +42,20 @@ protected:
 
 	void HandleGlowEffects();
 
-private:
+protected:
 	UPROPERTY( VisibleAnywhere )
 	TObjectPtr<UStaticMeshComponent> CheckpointMesh;
 
 	UPROPERTY( VisibleAnywhere )
+	TObjectPtr<USceneComponent> MoveToComponent;
+
+	UPROPERTY( VisibleAnywhere )
 	TObjectPtr<USphereComponent> Sphere;
+
+	UPROPERTY( BlueprintReadOnly, SaveGame )
+	bool bReached = false;
+
+private:
+	UPROPERTY( EditAnywhere, Category = Interaction )
+	EHighlightActorType HighlightActorType;
 };

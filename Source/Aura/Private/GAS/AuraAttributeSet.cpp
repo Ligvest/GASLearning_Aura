@@ -214,7 +214,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute( const FGameplayEffectModCallb
 	FillEffectPropertiesWithASC( EffectTargetProperties, &TargetASCRef );
 
 	// Return if the target is Dead
-	if ( EffectTargetProperties.Character->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead( EffectTargetProperties.Character ) )
+	if ( /*EffectSourceProperties.Character && */ EffectTargetProperties.Character->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead( EffectTargetProperties.Character ) )
 	{
 		return;
 	}
