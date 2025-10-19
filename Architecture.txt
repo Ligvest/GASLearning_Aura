@@ -1,0 +1,43 @@
+Input:
+UAuraInputConfig is a DataAsset which contains assosiative map TagsToInputActions which is filled up in the DataAsset
+For Each button we have an InputAction which is assosiated with FGameplayTag in UAuraInputConfig DataAsset
+We have 3 Callbacks which take an FGameplayTag InputTag as an argument. Callbacks are: InputPressed, InputReleased, InputHeld
+In APlayerController::SetupInputComponent we iterate through all InputActions and their assosiated FGameplayTags and bind 3 input callbacks to each InputAction with their corresponding FGameplayTag InputTag
+
+Ability activation:
+We expanded ability so that it has FGameplayAbility InputTag which tells us by what InputAction should this ability be ran.
+When we press a button we execute callbacks which has in it its correspoding Input GameplayTag. We iterate through all activatable abilities and run the one which tag matches ours.
+
+Ability execution:
+Inside the ability try commit the cost and cooldown. If all good then go next step:
+In GA we run a montage
+In a montage we call AN_MontageEvent blueprint
+Which calls inside it SendGameplayEvent
+In GA we are waiting for GameplayEvent with the corresponding GameplayTag
+When event has been recieved we activate the logic of the ability ( e.g. spawn a projectile )
+
+Spawn a projectile:
+In the GA we have all information about the attack:
+damage
+debuff chance
+crit rate
+etc
+Also we have a damage effect class (GE_Damage)
+And a projectile class
+
+GE_Damage calls ExecCalc_Damage which gets all the damage related attributes ( damage, defence, etc ), calculates damage and debuff and applies the result to IncomingDamageAttribute
+And in UAuraAttributeSet we are applying the damage to HealthAttribute and send any widget notifications to show them on screen
+
+The projectile class just spawns a projectile, puts there GameplayEffectSpec to be applied on collision with an enemy.
+
+Character attributes:
+Primary - 4 main attributes ( Int, Str, Vigor, Resilience )
+Secondary - attributes which depend on primary ones. These are modified by Inifinite GE so it would change each time the primary attribute change
+
+Widgets:
+For widgets I use MVC model. Each widget has its WidgetController ( WC ). For example if we press a button to add points to Int attribute, we send a broadcast to WC.
+WC eventually calls UAuraAbilitySystemComponent::ServerUpgradeAttribute_Implementation, which asks server to send a GameplayEvent to our ASC
+And we already have inifinely running ability GA_ListenForEvents which tracks for GameplayEvents with FGameplayTag "Attribute"
+After recieving the event out ability applies sets magnitude by caller for this FGameplayTag ( Intelligence attribute in our case ) and applies GE_EventBasedEffect which 
+can modify primary abilities and IncomingXP attibutes.
+And after we changed the attribute, we broadcast OnAttributeInfoChanged delegate which is subscribed to all needed attribute changes here: UAuraAttributeWindowWC::BindCallbacksToAttributeChanges
