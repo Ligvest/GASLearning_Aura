@@ -15,5 +15,6 @@ Build
 *.xcodeproj
 *.xcworkspace
 *.sln.DotSettings.user
+*.DotSettings.user
 .idea/
 .vsconfig
