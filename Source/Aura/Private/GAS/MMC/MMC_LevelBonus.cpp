@@ -26,6 +26,8 @@ void UMMC_LevelBonus::InitBaseAttributeDef()
 	BaseAttributeDef.bSnapshot = false;
 
 	// Capture this attribute to use it's value later using GetCapturedAttributeMagnitude
+	// Also this line lets GAS "see" that this attribute depends on BaseAttributeDef and will be
+	// recalculated for Infinite and Duration GE if bSnapshot = false.
 	RelevantAttributesToCapture.Add( BaseAttributeDef );
 }
 

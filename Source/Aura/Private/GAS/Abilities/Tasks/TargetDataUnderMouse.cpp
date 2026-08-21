@@ -35,7 +35,8 @@ void UTargetDataUnderMouse::Activate()
 		// Bind callback to run on receiving TargetData for given ActivationPredictionKey and SpecHandle
 		// This delegate is used for all TargetDatas including this. So we don't need to specify any information about this TargetData
 		AbilitySystemComponent.Get()->AbilityTargetDataSetDelegate( SpecHandle, ActivationPredictionKey ).AddUObject( this, &UTargetDataUnderMouse::OnTargetDataReplicatedCallback );
-		// Call delegates with TargetDataHandle for given ActivationPredictionKay and SpecHandle
+		// Call delegates with TargetDataHandle for given ActivationPredictionKay and SpecHandle if data has already came to the server
+		// Or wait in the next line of code otherwise
 		const bool bCalledDelegate = AbilitySystemComponent.Get()->CallReplicatedTargetDataDelegatesIfSet( SpecHandle, ActivationPredictionKey );
 		if ( !bCalledDelegate )
 		{
@@ -55,7 +56,7 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	// And if the server cancels the ability, it says to a client to revert all changes marked with this very key ( ScopedPrediction ).
 	FScopedPredictionWindow ScopedPrediction( AbilitySystemComponent.Get() );
 
-	// Get HitResul
+	// Get HitResult
 	APlayerController* PC = Ability->GetCurrentActorInfo()->PlayerController.Get();
 	FHitResult CursorHit;
 	PC->GetHitResultUnderCursor( ECC_Visibility, false, CursorHit );
@@ -70,7 +71,7 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	// Ability handle
 	FGameplayAbilitySpecHandle SpecHandle = GetAbilitySpecHandle();
 
-	// Prediction key which was passed to the GampleAbility on activation
+	// Prediction key which was passed to the GameplayAbility on activation
 	// Allows server and client to be sure that they are talking about the same ability
 	FPredictionKey ActivationPredictionKey = GetActivationPredictionKey();
 

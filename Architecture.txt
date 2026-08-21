@@ -25,10 +25,10 @@ etc
 Also we have a damage effect class (GE_Damage)
 And a projectile class
 
-GE_Damage calls ExecCalc_Damage which gets all the damage related attributes ( damage, defence, etc ), calculates damage and debuff and applies the result to IncomingDamageAttribute
-And in UAuraAttributeSet we are applying the damage to HealthAttribute and send any widget notifications to show them on screen
-
 The projectile class just spawns a projectile, puts there GameplayEffectSpec to be applied on collision with an enemy.
+
+On collision we apply GE_Damage which calls ExecCalc_Damage which gets all the damage related attributes ( damage, defence, etc ), calculates damage and debuff and applies the result to IncomingDamageAttribute
+And in UAuraAttributeSet we are applying the damage to HealthAttribute and send any widget notifications to show them on screen
 
 Character attributes:
 Primary - 4 main attributes ( Int, Str, Vigor, Resilience )

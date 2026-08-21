@@ -21,7 +21,7 @@ class AURA_API UTargetDataUnderMouse : public UAbilityTask
 	GENERATED_BODY()
 
 public:
-	// Implementing this static function is the AbilityTask implementation
+	// Implementing this static function is the AbilityTask implementation ( boilerplate )
 	UFUNCTION( BlueprintCallable, Category = "Ability|Tasks",
 	           meta = ( DisplayName = "TargetDataUnderMouse", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE" ) )
 	static UTargetDataUnderMouse* CreateTargetDataUnderMouse( UGameplayAbility* OwningAbility );
