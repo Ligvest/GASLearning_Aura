@@ -40,7 +40,9 @@ AAuraEnemyCharacter::AAuraEnemyCharacter()
 	Tags.Add( UAuraGasBpLibrary::GetEnemyActorTag() );
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>( "AuraAbilitySystemComponent" );
-	// #lig Replication
+
+	// Enemies don't need GEs on clients - only tags and cues, which Minimal still replicates.
+	// Attributes replicate regardless of the mode, so the health bar keeps working.
 	AbilitySystemComponent->SetIsReplicated( true );
 	AbilitySystemComponent->SetReplicationMode( EGameplayEffectReplicationMode::Minimal );
 

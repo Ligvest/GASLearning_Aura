@@ -11,13 +11,15 @@ DECLARE_MULTICAST_DELEGATE_OneParam( FOnEffectWithTagsApplied, const FGameplayTa
 DECLARE_MULTICAST_DELEGATE( FSendSignalFromASCSignature );
 DECLARE_DELEGATE_OneParam( FForEachAbility, const FGameplayAbilitySpec& );
 DECLARE_MULTICAST_DELEGATE_ThreeParams( FAbilityStatusChanged, const FGameplayTag /*AbilityTag*/, const FGameplayTag /*StatusTag*/, const int32 /* AbilityLevel */ );
+DECLARE_MULTICAST_DELEGATE_FourParams( FAbilityEquipped, FGameplayTag /*AbilityTag*/, FGameplayTag /*AbilitySkillMenuStatus*/, FGameplayTag /*NewSlot*/, FGameplayTag /*OldSlot*/ );
 DECLARE_MULTICAST_DELEGATE_OneParam( FDeactivatePassiveAbility, const FGameplayTag& /*AbilityTag*/ );
 DECLARE_MULTICAST_DELEGATE_TwoParams( FActivatePassiveEffect, const FGameplayTag& /*AbilityTag*/, bool /*bActivate*/ );
 
 /**
  *
  */
-UCLASS() class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
+UCLASS()
+class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 public:
@@ -29,6 +31,7 @@ public:
 	FSendSignalFromASCSignature OnAbilitiesGrantedDelegate;
 	FSendSignalFromASCSignature OnAbilityEquippedDelegate;
 	FAbilityStatusChanged AbilityStatusChangedDelegate;
+	FAbilityEquipped AbilityEquipped;
 	FDeactivatePassiveAbility DeactivatePassiveAbility;
 	FActivatePassiveEffect ActivatePassiveEffect;
 
@@ -51,8 +54,12 @@ public:
 	UFUNCTION( Server, Reliable )
 	void Server_SetInputTagToSpec( const FGameplayTag AbilityTag, const FGameplayTag InputTag );
 
+	// TODO: #lig Now Client_BroadcastAbilityEquipped and Client_EquipAbility duplicate each other. Must be merged for production
 	UFUNCTION( Client, Reliable )
 	void Client_BroadcastAbilityEquipped();
+
+	UFUNCTION( Client, Reliable )
+	void Client_EquipAbility( FGameplayTag AbilityTag, FGameplayTag AbilitySkillMenuStatus, FGameplayTag NewSlot, FGameplayTag OldSlot );
 
 	UFUNCTION( NetMulticast, Unreliable )
 	void Multicast_ActivatePassiveEffect( const FGameplayTag& AbilityTag, bool bActivate );

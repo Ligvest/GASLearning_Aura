@@ -39,7 +39,7 @@ void UAuraSpellsWindowWC::BindCallbacksToAttributeChanges()
 		    }
 	    } );
 
-	GetAuraASC()->OnAbilityEquippedDelegate.AddUObject( this, &UAuraSpellsWindowWC::AbilityEquipped );
+	GetAuraASC()->AbilityEquipped.AddUObject( this, &UAuraSpellsWindowWC::AbilityEquipped );
 }
 
 int32 UAuraSpellsWindowWC::GetSpellPoints()
@@ -123,17 +123,24 @@ void UAuraSpellsWindowWC::EquipGlobePressed( const FGameplayTag InputTag, const 
 	GetAuraASC()->SetInputTagToSpec( SelectedAbility.AbilityTag, InputTag );
 }
 
-void UAuraSpellsWindowWC::AbilityEquipped()
+void UAuraSpellsWindowWC::AbilityEquipped( FGameplayTag AbilityTag, FGameplayTag AbilitySkillMenuStatus, FGameplayTag NewSlot, FGameplayTag OldSlot )
 {
 	bWaitingForEquipSelection = false;
-	ClearEquipGlobesDelegate.Broadcast();
-	StopWaitForEquipDelegate.Broadcast( SelectedAbility.AbilityTypeTag );
-	AbilityEquippedDelegate.Broadcast();
 
-	// This is an overkill and not performance efficient as we are broadcasting ability info for each ability.
-	// But as this is a course project and this is easy to implement, and we have very little amount of abilities
-	// we can use this clean and good-looking option even on each ability equip
-	BroadcastAbilityInfo();
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+
+	FAuraAbilityInfo OldSlotInfo;
+	OldSlotInfo.InputTag = OldSlot;
+	OldSlotInfo.AbilityTag = GameplayTags.Abilities_None;
+	AbilityInfoDelegate.Broadcast( OldSlotInfo );
+
+	FAuraAbilityInfo NewSlotInfo = AbilityInfoDataAsset->FindAbilityInfoForTag( AbilityTag );
+	NewSlotInfo.AbilityStatusTag = AbilitySkillMenuStatus;
+	NewSlotInfo.InputTag = NewSlot;
+	AbilityInfoDelegate.Broadcast( NewSlotInfo );
+
+	StopWaitForEquipDelegate.Broadcast( NewSlotInfo.AbilityTypeTag );
+	// 	AbilityEquippedDelegate.Broadcast();
 }
 
 void UAuraSpellsWindowWC::BroadcastInfoOnSpellGlobeSelected( const int32 SpellPoints )

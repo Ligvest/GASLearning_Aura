@@ -67,7 +67,7 @@ public:
 	UFUNCTION( BlueprintCallable )
 	void EquipGlobePressed( const FGameplayTag InputTag, const FGameplayTag AbilityTypeTag );
 
-	void AbilityEquipped();
+	void AbilityEquipped( FGameplayTag AbilityTag, FGameplayTag AbilitySkillMenuStatus, FGameplayTag NewSlot, FGameplayTag OldSlot );
 
 	void BroadcastInfoOnSpellGlobeSelected( const int32 SpellPoints );
 

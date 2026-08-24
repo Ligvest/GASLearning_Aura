@@ -2,6 +2,7 @@
 
 #include "UI/WidgetController/AuraHUDWidgetController.h"
 
+#include "AuraGameplayTags.h"
 #include "GAS/AuraAbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
 #include "GAS/Data/AuraAbilityInfo_DA.h"
@@ -50,6 +51,8 @@ void UAuraHUDWidgetController::BindCallbacksToAttributeChanges()
 	// Bind OnEffectWithTagsApplied to call when an effect with tags is applied
 	AuraASC->OnEffectWithTagsAppliedDelegate.AddUObject( this, &UAuraHUDWidgetController::OnEffectWithTagsApplied );
 
+	GetAuraASC()->AbilityEquipped.AddUObject( this, &UAuraHUDWidgetController::OnAbilityEquipped );
+
 	// PS Broadcasts to every client. But here we subscribe only to our own PSs OnPlayerStatChangedDelegate
 	// Thats why on LevelUp or other broadcast only 1 OnPlayerStatChangedDynamicDelegate is broadcasted
 	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
@@ -69,6 +72,7 @@ void UAuraHUDWidgetController::BindCallbacksToAttributeChanges()
 	GetAuraASC()->OnAbilityEquippedDelegate.AddUObject( this, &UAuraHUDWidgetController::OnSpellEquipped );
 }
 
+// TODO: #lig Now OnSpellEquipped and OnAbilityEquipped duplicate each other. Must be merge for production
 void UAuraHUDWidgetController::OnSpellEquipped()
 {
 	AAuraPlayerState* AuraPS = CastChecked<AAuraPlayerState>( PlayerState );
@@ -89,6 +93,22 @@ void UAuraHUDWidgetController::OnSpellEquipped()
 		// we can use this clean and good-looking option even on each ability equip
 		BroadcastAbilityInfo();
 	}
+}
+
+void UAuraHUDWidgetController::OnAbilityEquipped( FGameplayTag AbilityTag, FGameplayTag AbilitySpellMenuStatus, FGameplayTag NewSlot, FGameplayTag OldSlot ) const
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+
+	// Broadcast empty info if PreviousSlot is a valid slot. Only if equipping an already-equipped spell
+	FAuraAbilityInfo OldSlotInfo;
+	OldSlotInfo.InputTag = OldSlot;
+	OldSlotInfo.AbilityTag = GameplayTags.Abilities_None;
+	AbilityInfoDelegate.Broadcast( OldSlotInfo );
+
+	FAuraAbilityInfo NewSlotInfo = AbilityInfoDataAsset->FindAbilityInfoForTag( AbilityTag );
+	NewSlotInfo.AbilityStatusTag = AbilitySpellMenuStatus;
+	NewSlotInfo.InputTag = NewSlot;
+	AbilityInfoDelegate.Broadcast( NewSlotInfo );
 }
 
 void UAuraHUDWidgetController::OnXpChanged( int32 NewXP ) const

@@ -6,7 +6,11 @@ Gameplay Ability System (GAS) with network replication and a data-driven setup.
 Built by following Stephen Ulibarri's UE5 GAS course, with my own changes to the
 code along the way. This README documents how the systems fit together.
 
+A Listen Server and a Client on the screenshot:
 ![Gameplay screenshot](Docs/ListenServer+Client.png)
+
+## Current state.
+Single-player, including the main menu and save/load, works end to end. Multiplayer worked throughout the GAS part of the project, but the menu added at the end of the course loads the level locally, so the host doesn't carry connected clients with them and they end up in separate worlds. Fixing it properly means routing the map load through server travel and reconciling the save system with replication, which I haven't done yet. The gameplay video and the screenshot are from a build before that change.
 
 ## Tech
 

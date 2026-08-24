@@ -282,8 +282,6 @@ void UAuraAbilitySystemComponent::Server_SetInputTagToSpec_Implementation( const
 					// is that ability the same as this ability? If so, we can return early.
 					if ( AbilityTag.MatchesTagExact( GetAbilityTagFromSpec( *SpecWithSlot ) ) )
 					{
-						// Stephans broadcast Version:
-						// ClientEquipAbility( AbilityTag, GameplayTags.Abilities_Status_Equipped, Slot, PrevSlot );
 						Client_BroadcastAbilityEquipped();
 						return;
 					}
@@ -312,14 +310,15 @@ void UAuraAbilitySystemComponent::Server_SetInputTagToSpec_Implementation( const
 			AssignSlotToAbility( *AbilitySpec, Slot );
 			MarkAbilitySpecDirty( *AbilitySpec );
 		}
-		// Stephans broadcast Version:
-		//  ClientEquipAbility(AbilityTag, GameplayTags.Abilities_Status_Equipped, Slot, PrevSlot);
 
 		// It won't work on client. Because I modify ability here on Server and ask client to update its abilities.
 		// But at the moment client still don't know anything about these changes as MarkAbilitySpecDirty only tells the server
 		// to update the modified info on the next NetUpdate. So broadcasting only broadcasts old abilities info.
-		// To fix this I should pass info to the broadcast and the process it to update it manually. But I don't want to spend time on it now
-		Client_BroadcastAbilityEquipped();
+		// To fix this I should pass info to the broadcast and the process it to update it manually. But I don't want to spend time on it now.
+		// So the Stephans solution works, though there should be other more clean ways I believe
+		// Client_BroadcastAbilityEquipped();
+
+		Client_EquipAbility( AbilityTag, GameplayTags.Abilities_Status_Equipped, Slot, PrevSlot );
 	}
 }
 
@@ -331,6 +330,11 @@ void UAuraAbilitySystemComponent::Client_BroadcastAbilityEquipped_Implementation
 void UAuraAbilitySystemComponent::Multicast_ActivatePassiveEffect_Implementation( const FGameplayTag& AbilityTag, bool bActivate )
 {
 	ActivatePassiveEffect.Broadcast( AbilityTag, bActivate );
+}
+
+void UAuraAbilitySystemComponent::Client_EquipAbility_Implementation( FGameplayTag AbilityTag, FGameplayTag AbilitySkillMenuStatus, FGameplayTag NewSlot, FGameplayTag OldSlot )
+{
+	AbilityEquipped.Broadcast( AbilityTag, AbilitySkillMenuStatus, NewSlot, OldSlot );
 }
 
 FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec( const FGameplayAbilitySpec& AbilitySpec )

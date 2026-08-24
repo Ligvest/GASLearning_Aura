@@ -78,7 +78,9 @@ protected:
 	// Here we bind callbacks to be called whenever our attributes changes ( damage to Health etc. )
 	virtual void BindCallbacksToAttributeChanges() override;
 
+	// TODO: #lig Now OnSpellEquipped and OnAbilityEquipped duplicate each other. Must be merge for production
 	void OnSpellEquipped();
+	void OnAbilityEquipped( FGameplayTag AbilityTag, FGameplayTag AbilitySpellMenuStatus, FGameplayTag NewSlot, FGameplayTag OldSlot ) const;
 
 private:
 	template <typename T>
