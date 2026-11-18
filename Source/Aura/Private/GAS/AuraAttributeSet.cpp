@@ -391,7 +391,10 @@ void UAuraAttributeSet::ProcessDebuff( const FGameplayEffectContextHandle& Conte
 	Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;
 	Effect->Period = DebuffFrequency;
 	Effect->DurationMagnitude = FScalableFloat( DebuffDuration );
+	// No runtime setter exists (SetStackingType is editor-only), so the deprecated field is still the only way for a runtime-created effect
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	Effect->StackLimitCount = 1;
 
 	// Add tag to be able to distinguish debuff effects and remove them on character death

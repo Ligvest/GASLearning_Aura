@@ -103,7 +103,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagPressed( const FGameplayTag& In
 	for ( FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
 	{
 		// check if any of these abilities has the same tag as our input tag
-		if ( AbilitySpec.DynamicAbilityTags.HasTagExact( InputTag ) )
+		if ( AbilitySpec.GetDynamicSpecSourceTags().HasTagExact( InputTag ) )
 		{
 			// Activate the ability and set flag "Pressed"
 			AbilitySpecInputPressed( AbilitySpec );
@@ -130,7 +130,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagReleased( const FGameplayTag& I
 	for ( FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
 	{
 		// check if any of these abilities has the same tag as our input tag
-		if ( AbilitySpec.DynamicAbilityTags.HasTagExact( InputTag ) )
+		if ( AbilitySpec.GetDynamicSpecSourceTags().HasTagExact( InputTag ) )
 		{
 			// Set flag "Released"
 			AbilitySpecInputReleased( AbilitySpec );
@@ -153,7 +153,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld( const FGameplayTag& Input
 	for ( FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
 	{
 		// check if any of these abilities has the same tag as our input tag
-		if ( AbilitySpec.DynamicAbilityTags.HasTagExact( InputTag ) )
+		if ( AbilitySpec.GetDynamicSpecSourceTags().HasTagExact( InputTag ) )
 		{
 			// Activate the ability and set flag "Pressed"
 			AbilitySpecInputPressed( AbilitySpec );
@@ -225,8 +225,8 @@ void UAuraAbilitySystemComponent::Server_SpendSpellPoint_Implementation( const F
 		FGameplayTag StatusTag = GetStatusTagFromSpec( *AbilitySpec );
 		if ( StatusTag.MatchesTagExact( GameplayTags.Abilities_Status_Eligible ) )
 		{
-			AbilitySpec->DynamicAbilityTags.RemoveTag( GameplayTags.Abilities_Status_Eligible );
-			AbilitySpec->DynamicAbilityTags.AddTag( GameplayTags.Abilities_Status_Unlocked );
+			AbilitySpec->GetDynamicSpecSourceTags().RemoveTag( GameplayTags.Abilities_Status_Eligible );
+			AbilitySpec->GetDynamicSpecSourceTags().AddTag( GameplayTags.Abilities_Status_Unlocked );
 			StatusTag = GameplayTags.Abilities_Status_Unlocked;
 		}
 		else if ( StatusTag.MatchesTagExact( GameplayTags.Abilities_Status_Equipped ) || StatusTag.MatchesTagExact( GameplayTags.Abilities_Status_Unlocked ) )
@@ -255,11 +255,11 @@ void UAuraAbilitySystemComponent::Server_SetInputTagToSpec_Implementation( const
 		    // Clear this ability's slot, just in case, it's a different slot
 		    ClearInputTagFromAbility( AbilitySpec );
 		    // Now, assign this ability to this slot
-		    AbilitySpec->DynamicAbilityTags.AddTag( InputTag );
+		    AbilitySpec->GetDynamicSpecSourceTags().AddTag( InputTag );
 		    if ( Status.MatchesTagExact( GameplayTags.Abilities_Status_Unlocked ) )
 		    {
-		        AbilitySpec->DynamicAbilityTags.RemoveTag( GameplayTags.Abilities_Status_Unlocked );
-		        AbilitySpec->DynamicAbilityTags.AddTag( GameplayTags.Abilities_Status_Equipped );
+		        AbilitySpec->GetDynamicSpecSourceTags().RemoveTag( GameplayTags.Abilities_Status_Unlocked );
+		        AbilitySpec->GetDynamicSpecSourceTags().AddTag( GameplayTags.Abilities_Status_Equipped );
 		    }
 
 		    MarkAbilitySpecDirty( *AbilitySpec );
@@ -343,7 +343,7 @@ FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec( const FGameplay
 	{
 		// could it work?
 		// FAuraGameplayTags::Get().InputPrefix;
-		for ( FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags )
+		for ( FGameplayTag Tag : AbilitySpec.Ability.Get()->GetAssetTags() )
 		{
 			if ( Tag.MatchesTag( FGameplayTag::RequestGameplayTag( FName( "Abilities" ) ) ) )
 			{
@@ -356,7 +356,7 @@ FGameplayTag UAuraAbilitySystemComponent::GetAbilityTagFromSpec( const FGameplay
 
 FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec( const FGameplayAbilitySpec& AbilitySpec )
 {
-	for ( FGameplayTag Tag : AbilitySpec.DynamicAbilityTags )
+	for ( FGameplayTag Tag : AbilitySpec.GetDynamicSpecSourceTags() )
 	{
 		// could it work?
 		// FAuraGameplayTags::Get().InputPrefix;
@@ -378,7 +378,7 @@ FGameplayTag UAuraAbilitySystemComponent::GetStatusTagFromSpec( const FGameplayA
 	// could it work?
 	// FAuraGameplayTags::Get().InputPrefix;
 
-	for ( FGameplayTag StatusTag : AbilitySpec.DynamicAbilityTags )
+	for ( FGameplayTag StatusTag : AbilitySpec.GetDynamicSpecSourceTags() )
 	{
 		if ( StatusTag.MatchesTag( FGameplayTag::RequestGameplayTag( FName( "Abilities.Status" ) ) ) )
 		{
@@ -415,7 +415,7 @@ FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag( const 
 	FScopedAbilityListLock ActiveScopeLock( *this );
 	for ( FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
 	{
-		for ( FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags )
+		for ( FGameplayTag Tag : AbilitySpec.Ability.Get()->GetAssetTags() )
 		{
 			if ( Tag.MatchesTag( AbilityTag ) )
 			{
@@ -441,12 +441,12 @@ bool UAuraAbilitySystemComponent::SlotIsEmpty( const FGameplayTag& Slot )
 
 bool UAuraAbilitySystemComponent::AbilityHasSlot( const FGameplayAbilitySpec& Spec, const FGameplayTag& Slot )
 {
-	return Spec.DynamicAbilityTags.HasTagExact( Slot );
+	return Spec.GetDynamicSpecSourceTags().HasTagExact( Slot );
 }
 
 bool UAuraAbilitySystemComponent::AbilityHasAnySlot( const FGameplayAbilitySpec& Spec )
 {
-	return Spec.DynamicAbilityTags.HasTag( FAuraGameplayTags::Get().AuraInput );
+	return Spec.GetDynamicSpecSourceTags().HasTag( FAuraGameplayTags::Get().AuraInput );
 }
 
 FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecWithSlot( const FGameplayTag& Slot )
@@ -454,7 +454,7 @@ FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecWithSlot( const FGamep
 	FScopedAbilityListLock ActiveScopeLock( *this );
 	for ( FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities() )
 	{
-		if ( AbilitySpec.DynamicAbilityTags.HasTagExact( Slot ) )
+		if ( AbilitySpec.GetDynamicSpecSourceTags().HasTagExact( Slot ) )
 		{
 			return &AbilitySpec;
 		}
@@ -474,7 +474,7 @@ bool UAuraAbilitySystemComponent::IsPassiveAbility( const FGameplayAbilitySpec& 
 void UAuraAbilitySystemComponent::AssignSlotToAbility( FGameplayAbilitySpec& Spec, const FGameplayTag& Slot )
 {
 	ClearSlot( &Spec );
-	Spec.DynamicAbilityTags.AddTag( Slot );
+	Spec.GetDynamicSpecSourceTags().AddTag( Slot );
 }
 
 bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag( const FGameplayTag& AbilityTag, FString& OutDescription, FString& OutNextLevelDescription )
@@ -529,7 +529,7 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatuses( int32 Level )
 void UAuraAbilitySystemComponent::ClearSlot( FGameplayAbilitySpec* Spec )
 {
 	const FGameplayTag InputTag = GetInputTagFromSpec( *Spec );
-	Spec->DynamicAbilityTags.RemoveTag( InputTag );
+	Spec->GetDynamicSpecSourceTags().RemoveTag( InputTag );
 	MarkAbilitySpecDirty( *Spec );
 }
 
