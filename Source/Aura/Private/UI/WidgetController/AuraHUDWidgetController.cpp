@@ -11,7 +11,7 @@
 
 void UAuraHUDWidgetController::BroadcastInitialValues()
 {
-	check( GetAuraAS() );
+	verify( GetAuraAS() );
 	OnHealthChanged.Broadcast( AuraAttributeSet->GetHealth() );
 	OnMaxHealthChanged.Broadcast( AuraAttributeSet->GetMaxHealth() );
 	OnManaChanged.Broadcast( AuraAttributeSet->GetMana() );
@@ -23,7 +23,7 @@ void UAuraHUDWidgetController::BroadcastInitialValues()
 
 void UAuraHUDWidgetController::BindCallbacksToAttributeChanges()
 {
-	check( GetAuraAS() );
+	verify( GetAuraAS() );
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	// AuraASC should always be a base class for ASC for this project
 	check( AuraASC );

@@ -26,7 +26,7 @@ void UAuraWidgetController::BroadcastAbilityInfo()
 	BroadcastDelegate.BindLambda(
 	    [this]( const FGameplayAbilitySpec& AbilitySpec )
 	    {
-		    check( GetAuraASC() );
+		    verify( GetAuraASC() );
 		    FGameplayTag AbilityTag = AuraAbilitySystemComponent->GetAbilityTagFromSpec( AbilitySpec );
 		    FAuraAbilityInfo AbilityInfo = AbilityInfoDataAsset->FindAbilityInfoForTag( AbilityTag );
 		    AbilityInfo.InputTag = AuraAbilitySystemComponent->GetInputTagFromSpec( AbilitySpec );

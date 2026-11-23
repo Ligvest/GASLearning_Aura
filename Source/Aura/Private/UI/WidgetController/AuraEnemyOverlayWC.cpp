@@ -7,13 +7,13 @@
 
 void UAuraEnemyOverlayWC::BroadcastInitialValues()
 {
-	check( GetAuraAS() );
+	verify( GetAuraAS() );
 	OnHealthChanged.Broadcast( AuraAttributeSet->GetHealth() );
 	OnMaxHealthChanged.Broadcast( AuraAttributeSet->GetMaxHealth() );
 }
 void UAuraEnemyOverlayWC::BindCallbacksToAttributeChanges()
 {
-	check( GetAuraAS() );
+	verify( GetAuraAS() );
 	UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>( AbilitySystemComponent );
 	// AuraASC should always be a base class for ASC for this project
 	check( AuraASC );

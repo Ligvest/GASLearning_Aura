@@ -247,14 +247,22 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation( const FVector Deat
 	WeaponMeshComponent->SetSimulatePhysics( true );
 	WeaponMeshComponent->SetEnableGravity( true );
 	WeaponMeshComponent->SetCollisionEnabled( ECollisionEnabled::PhysicsOnly );
+	// Dropped weapon must not block living characters, but should still land on the floor
+	WeaponMeshComponent->SetCollisionResponseToChannel( ECC_Pawn, ECR_Ignore );
 
 	USkeletalMeshComponent* CharacterMesh = GetMesh();
 	CharacterMesh->SetSimulatePhysics( true );
 	CharacterMesh->SetEnableGravity( true );
 	CharacterMesh->SetCollisionEnabled( ECollisionEnabled::PhysicsOnly );
+	// Ragdoll must not block living characters, but should still collide with the level so it doesn't fall through the floor
+	CharacterMesh->SetCollisionResponseToChannel( ECC_Pawn, ECR_Ignore );
+
 	CharacterMesh->AddImpulse( DeathImpulse );
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel( ECC_Visibility, ECR_Ignore );
+	// The capsule stays alive until the corpse's LifeSpan expires; stop it from blocking the player right away.
+	// Responses to WorldStatic/WorldDynamic are kept so the actor itself doesn't fall through the floor.
+	GetCapsuleComponent()->SetCollisionResponseToChannel( ECC_Pawn, ECR_Ignore );
 
 	DissolveCorpse();
 	bDead = true;
