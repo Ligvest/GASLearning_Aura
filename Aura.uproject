@@ -39,6 +39,18 @@
 		{
 			"Name": "ModelViewViewModel",
 			"Enabled": true
+		},
+		{
+			"Name": "ModelContextProtocol",
+			"Enabled": true
+		},
+		{
+			"Name": "MCPClientToolset",
+			"Enabled": true
+		},
+		{
+			"Name": "EditorToolset",
+			"Enabled": true
 		}
 	]
 }

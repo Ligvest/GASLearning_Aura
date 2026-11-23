@@ -36,4 +36,8 @@ protected:
 
 	UPROPERTY( EditDefaultsOnly, Category = "Summoning" )
 	float SpawnSpreadAngle = 90.f;
+
+	// How far to pull the spawn point back from a NavMesh edge (wall, map border) when the nav raycast hits it.
+	UPROPERTY( EditDefaultsOnly, Category = "Summoning" )
+	float SpawnEdgeOffset = 50.f;
 };
