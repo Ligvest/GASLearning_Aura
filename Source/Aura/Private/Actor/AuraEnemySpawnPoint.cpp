@@ -6,6 +6,12 @@
 
 void AAuraEnemySpawnPoint::SpawnEnemy()
 {
+	// Enemies are spawned only on the server and replicated to clients
+	if ( GetNetMode() == NM_Client )
+	{
+		return;
+	}
+
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 

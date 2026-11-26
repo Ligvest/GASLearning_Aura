@@ -37,17 +37,27 @@ void AMapEntrance::LoadActor_Implementation()
 
 void AMapEntrance::OnSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult )
 {
+	// Overlaps fire on clients too. Saving and travelling are the server's job
+	if ( !HasAuthority() || bTravelStarted )
+	{
+		return;
+	}
+
 	if ( OtherActor->Implements<UPlayerInterface>() )
 	{
-		bReached = true;
-
-		if ( AAuraGameModeBase* AuraGM = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) ) )
+		AAuraGameModeBase* AuraGM = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
+		if ( !AuraGM )
 		{
-			AuraGM->SaveWorldState( GetWorld(), DestinationMap.ToSoftObjectPath().GetAssetName() );
+			return;
 		}
 
-		IPlayerInterface::Execute_SaveProgress( OtherActor, DestinationPlayerStartTag );
+		bReached = true;
+		bTravelStarted = true;
 
-		UGameplayStatics::OpenLevelBySoftObjectPtr( this, DestinationMap );
+		AuraGM->SaveWorldState( GetWorld(), DestinationMap.ToSoftObjectPath().GetAssetName() );
+		// Whoever entered, the host's progress is saved ( remote players are skipped inside SaveProgress )
+		AuraGM->SaveProgressForAllPlayers( DestinationPlayerStartTag );
+		// ServerTravel: every connected client goes to the new map together with the host
+		AuraGM->TravelToMap( DestinationMap );
 	}
 }

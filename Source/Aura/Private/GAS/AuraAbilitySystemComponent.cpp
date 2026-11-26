@@ -14,8 +14,16 @@ void UAuraAbilitySystemComponent::Init()
 {
 	InitSubscriptions();
 }
+
 void UAuraAbilitySystemComponent::InitSubscriptions()
 {
+	// It initializes with each created character, so avoid dubplicated subscriptions on character respawn
+	if ( bSubscriptionsInitialized )
+	{
+		return;
+	}
+	bSubscriptionsInitialized = true;
+
 	// This delegate is called only on a server.
 	// So it doesn't replicate the call. Thats because we use an RPC instead of local function so that a server
 	// replicated the call to the client for this ASC

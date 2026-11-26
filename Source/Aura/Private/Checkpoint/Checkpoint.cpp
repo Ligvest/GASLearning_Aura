@@ -76,9 +76,9 @@ void ACheckpoint::OnSphereOverlap( UPrimitiveComponent* OverlappedComponent, AAc
 			MapName.RemoveFromStart( World->StreamingLevelsPrefix );
 
 			AuraGM->SaveWorldState( GetWorld(), MapName );
+			// GameMode exists only on the server. Whoever reached the checkpoint, the host's progress is saved
+			AuraGM->SaveProgressForAllPlayers( PlayerStartTag );
 		}
-
-		IPlayerInterface::Execute_SaveProgress( OtherActor, PlayerStartTag );
 		HandleGlowEffects();
 	}
 }

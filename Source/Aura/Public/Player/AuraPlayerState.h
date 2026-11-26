@@ -27,6 +27,11 @@ class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInte
 public:
 	AAuraPlayerState();
 
+	// To avoid loading player attributes on subsequent calls of OnPossessed on player respawn.
+	// Server only. Set after the first possession loaded progress (from the save or defaults) into this PlayerState's ASC.
+	// The ASC lives on the PlayerState, so a respawned character must not grant abilities / init attributes again.
+	bool bProgressLoaded = false;
+
 	//~ Begin of IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; };
 	//~ End of IAbilitySystemInterface

@@ -6,18 +6,20 @@
 #include "Game/AuraGameInstance.h"
 #include "Game/LoadScreenSaveGame.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerStart.h"
+#include "Interaction/PlayerInterface.h"
 #include "Interaction/SaveInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 
-UAuraCharacterClassInfoDA* AAuraGameModeBase::GetDefaultCharacterInfoDA()
+UAuraCharacterClassInfoDA* AAuraGameModeBase::GetDefaultCharacterInfoDA() const
 {
 	check( DefaultCharacterInfoDA );
 	return DefaultCharacterInfoDA;
 }
-UAuraAbilityInfo_DA* AAuraGameModeBase::GetAbilityInfoDA()
+UAuraAbilityInfo_DA* AAuraGameModeBase::GetAbilityInfoDA() const
 {
 	check( AbilityInfoDA );
 	return AbilityInfoDA;
@@ -226,10 +228,46 @@ void AAuraGameModeBase::LoadWorldState( UWorld* World ) const
 	}
 }
 
-void AAuraGameModeBase::TravelToMap( const FString& MapName )
+void AAuraGameModeBase::LoadWorldStateOnce( UWorld* World )
 {
-	TSoftObjectPtr<UWorld> MapSoftPtr = MapNameToMapPtr.FindChecked( MapName );
-	UGameplayStatics::OpenLevelBySoftObjectPtr( this, MapSoftPtr );
+	if ( bWorldStateLoaded )
+	{
+		return;
+	}
+	bWorldStateLoaded = true;
+	LoadWorldState( World );
+}
+
+bool AAuraGameModeBase::IsSavingPlayer( const AController* Controller )
+{
+	// Server has all PCs, including clients. And we save only for the one which owned by the server (host)
+	return IsValid( Controller ) && Controller->IsLocalPlayerController();
+}
+
+void AAuraGameModeBase::SaveProgressForAllPlayers( const FName& PlayerStartTag ) const
+{
+	// AAuraPlayerCharacter::SaveProgress_Implementation returns for non host controlled characters so it
+	// effectively will save only hosts character but in the future it's possible to implement saves for all clients if needed
+	for ( FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It )
+	{
+		APlayerController* PC = It->Get();
+		APawn* Pawn = IsValid( PC ) ? PC->GetPawn() : nullptr;
+		if ( IsValid( Pawn ) && Pawn->Implements<UPlayerInterface>() )
+		{
+			IPlayerInterface::Execute_SaveProgress( Pawn, PlayerStartTag );
+		}
+	}
+}
+
+void AAuraGameModeBase::TravelToMap( const TSoftObjectPtr<UWorld>& MapSoftPtr )
+{
+	if ( MapSoftPtr.IsNull() ) return;
+
+	// OpenLevel loads the map only on this machine, so the clients would be left behind.
+	// ServerTravel loads the map on the server and tells every connected client to follow.
+	// "?listen" keeps (or starts) the listen server on the new map so clients can stay connected / join.
+	const FString MapPath = MapSoftPtr.ToSoftObjectPath().GetLongPackageName();
+	GetWorld()->ServerTravel( MapPath + TEXT( "?listen" ) );
 }
 
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation( AController* Player )
@@ -259,6 +297,25 @@ AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation( AController* Player
 
 void AAuraGameModeBase::PlayerDied( ACharacter* DeadCharacter )
 {
+	if ( !IsValid( DeadCharacter ) )
+	{
+		return;
+	}
+
+	// With several players reloading the level would reset everybody because of one death.
+	// Respawn only the dead player. Its ASC, abilities and attributes live on the PlayerState, so they are kept.
+	if ( GetNumPlayers() > 1 )
+	{
+		if ( AController* Controller = DeadCharacter->GetController() )
+		{
+			Controller->UnPossess();
+			RestartPlayer( Controller );
+		}
+		DeadCharacter->SetLifeSpan( DeadBodyLifeSpan );
+		return;
+	}
+
+	// Single player: reload the last checkpoint from the save
 	ULoadScreenSaveGame* SaveGame = RetrieveInGameSaveData();
 	if ( !IsValid( SaveGame ) ) return;
 

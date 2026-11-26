@@ -35,6 +35,9 @@ public:
 	FName DestinationPlayerStartTag;
 
 protected:
+	// Not saved. Prevents starting a second travel if another player enters while the first travel is in progress
+	bool bTravelStarted = false;
+
 	virtual void OnSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	                              const FHitResult& SweepResult ) override;
 };

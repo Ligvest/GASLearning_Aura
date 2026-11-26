@@ -20,8 +20,8 @@ class AURA_API AAuraGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 public:
-	UAuraCharacterClassInfoDA* GetDefaultCharacterInfoDA();
-	UAuraAbilityInfo_DA* GetAbilityInfoDA();
+	UAuraCharacterClassInfoDA* GetDefaultCharacterInfoDA() const;
+	UAuraAbilityInfo_DA* GetAbilityInfoDA() const;
 
 	// Saving
 	void SaveSlotData( UMVVM_LoadSlot* LoadSlot, int32 SlotIndex );
@@ -31,8 +31,19 @@ public:
 	void SaveInGameProgressData( ULoadScreenSaveGame* SaveObject );
 	void SaveWorldState( UWorld* World, const FString& DestinationMapAssetName = FString() ) const;
 	void LoadWorldState( UWorld* World ) const;
+	// Loads the saved world state only once per map, no matter how many players get possessed
+	void LoadWorldStateOnce( UWorld* World );
 
-	void TravelToMap( const FString& MapName );
+	// Only the host's own player reads and writes the save slot. Remote players start with defaults
+	static bool IsSavingPlayer( const AController* Controller );
+	// Calls SaveProgress for every player pawn. SaveProgress itself skips everyone but the host
+	void SaveProgressForAllPlayers( const FName& PlayerStartTag ) const;
+
+	// Uses ServerTravel so that connected clients travel together with the host.
+	// GameMode exists only on the server, so callers get here only on the server.
+	// Also use it in menu Blueprints instead of "Open Level": Get Game Mode -> Cast To AuraGameModeBase -> Travel To Map
+	UFUNCTION( BlueprintCallable, Category = "Travel" )
+	void TravelToMap( const TSoftObjectPtr<UWorld>& MapSoftPtr );
 	void PlayerDied( ACharacter* DeadCharacter );
 
 protected:
@@ -63,7 +74,15 @@ public:
 	UPROPERTY( EditDefaultsOnly, Category = "Loot Tiers" )
 	TObjectPtr<ULootTiersDA> LootTiers;
 
+	// With several players a dead character is respawned instead of reloading the level. The dead body stays for this long
+	UPROPERTY( EditDefaultsOnly, Category = "Multiplayer" )
+	float DeadBodyLifeSpan = 5.f;
+
 protected:
+	// To avoid loading player attributes on subsequent calls of OnPossessed on player respawn.
+	// Because in the OnPossessed we load the WorldState from saves
+	bool bWorldStateLoaded = false;
+
 	UPROPERTY( EditDefaultsOnly, Category = "CharactersDefault" )
 	TObjectPtr<UAuraCharacterClassInfoDA> DefaultCharacterInfoDA;
 

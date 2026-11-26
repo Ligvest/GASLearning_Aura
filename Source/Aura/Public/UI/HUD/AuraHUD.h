@@ -11,6 +11,7 @@
 class UAuraHUDWidgetController;
 class UAuraAttributeWindowWC;
 class UAuraSpellsWindowWC;
+class UAuraUserWidget;
 
 /**
  *
@@ -26,6 +27,10 @@ protected:
 	// HUD Widget
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<UUserWidget> HUDWidgetClass;
+
+	// Kept so a respawned character doesn't create a second HUD widget
+	UPROPERTY()
+	TObjectPtr<UAuraUserWidget> HUDWidget;
 
 	// HUD WC
 	UPROPERTY()

@@ -7,6 +7,7 @@
 #include "AuraGameplayTags.h"
 #include "Engine/OverlapResult.h"
 #include "Game/AuraGameModeBase.h"
+#include "GameFramework/GameStateBase.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
@@ -51,19 +52,36 @@ UAuraSpellsWindowWC* UAuraGasBpLibrary::GetSpellsWindowWC( const UObject* WorldC
 	return HUD->TryGetSpellsWindowWC( WidgetControllerParams );
 }
 
-// Server only
+// The GameMode instance exists only on the server. Clients still know the GameMode class through the replicated GameState,
+// so they read the Data Assets from its default object. The Data Assets are set in the GameMode Blueprint defaults, so they are the same.
+static const AAuraGameModeBase* GetAuraGameModeOrDefault( const UObject* WorldContext )
+{
+	if ( const AAuraGameModeBase* AuraGM = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( WorldContext ) ) )
+	{
+		return AuraGM;
+	}
+
+	if ( const AGameStateBase* GameState = UGameplayStatics::GetGameState( WorldContext ) )
+	{
+		return GameState->GetDefaultGameMode<AAuraGameModeBase>();
+	}
+
+	return nullptr;
+}
+
+// Server and clients (GM CDO for clients )
 UAuraCharacterClassInfoDA* UAuraGasBpLibrary::GetCharacterClassInfoDA( const UObject* WorldContext )
 {
-	// GameMode available only on Server. Use GameState if you need to replicate GameMode specific data to clients
-	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( WorldContext ) );
+	const AAuraGameModeBase* AuraGM = GetAuraGameModeOrDefault( WorldContext );
+	check( AuraGM );
 	return AuraGM->GetDefaultCharacterInfoDA();
 }
 
-// Server only
+// Server and clients
 UAuraAbilityInfo_DA* UAuraGasBpLibrary::GetAbilityInfoDA( const UObject* WorldContext )
 {
-	// GameMode available only on Server. Use GameState if you need to replicate GameMode specific data to clients
-	AAuraGameModeBase* AuraGM = CastChecked<AAuraGameModeBase>( UGameplayStatics::GetGameMode( WorldContext ) );
+	const AAuraGameModeBase* AuraGM = GetAuraGameModeOrDefault( WorldContext );
+	check( AuraGM );
 	return AuraGM->GetAbilityInfoDA();
 }
 

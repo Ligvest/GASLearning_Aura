@@ -89,6 +89,8 @@ protected:
 
 	virtual void OnRep_ActivateAbilities() override;
 	void InitSubscriptions();
+	// Init() runs again for every respawned avatar, subscriptions must be added only once
+	bool bSubscriptionsInitialized = false;
 
 	/** OnGameplayEffectAppliedDelegateToSelf Called on server whenever a GE is applied to self. This includes instant and duration based GEs. */
 	UFUNCTION( Client, Reliable )

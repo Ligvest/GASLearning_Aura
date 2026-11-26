@@ -122,6 +122,12 @@ void AAuraPlayerCharacter::HideMagicCircle_Implementation()
 
 void AAuraPlayerCharacter::SaveProgress_Implementation( const FName& CheckpointTag )
 {
+	// There is a single save slot and it belongs to the host. Remote players' progress isn't written to it
+	if ( !HasAuthority() || !AAuraGameModeBase::IsSavingPlayer( GetController() ) )
+	{
+		return;
+	}
+
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
 	if ( AuraGameMode )
 	{
@@ -244,11 +250,22 @@ void AAuraPlayerCharacter::PossessedBy( AController* NewController )
 	// For initializing AbilityComponent we use PossessedBy because without controlling the character the abilities don't make sense
 	// Init ability actor info for Server
 	InitGASInfoAndHUD();
-	LoadProgress();
+
+	// ASC, abilities and attributes live on the PlayerState. If it was already initialized this is a respawn:
+	// granting abilities / applying init effects again would duplicate them, so only restore Health and Mana
+	if ( !AuraPS->bProgressLoaded )
+	{
+		LoadProgress();
+		AuraPS->bProgressLoaded = true;
+	}
+	else
+	{
+		ApplyEffectToSelf( InitVitalAttributesEffectClass );
+	}
 
 	if ( AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) ) )
 	{
-		AuraGameMode->LoadWorldState( GetWorld() );
+		AuraGameMode->LoadWorldStateOnce( GetWorld() );
 	}
 }
 
@@ -257,10 +274,15 @@ void AAuraPlayerCharacter::LoadProgress()
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
 	if ( AuraGameMode )
 	{
-		ULoadScreenSaveGame* SaveData = AuraGameMode->RetrieveInGameSaveData();
-		if ( SaveData == nullptr ) return;
+		// The server creates and possesses the characters of ALL players, not only the host's one.
+		// So a valid GameMode only tells us that we are on the server. It doesn't tell us whose character this is.
+		// There is one save slot and it belongs to the host. To not give the host's progress to clients
+		// ( and later to not overwrite the host's save with a client's progress in SaveProgress ) we must tell them apart.
+		// IsSavingPlayer: the host's PlayerController is local on the server, the clients' PlayerControllers are not.
+		// Only the host's player is loaded from the save slot. Remote players always start with default attributes and abilities
+		ULoadScreenSaveGame* SaveData = AAuraGameModeBase::IsSavingPlayer( GetController() ) ? AuraGameMode->RetrieveInGameSaveData() : nullptr;
 
-		if ( SaveData->bFirstTimeLoadIn )
+		if ( SaveData == nullptr || SaveData->bFirstTimeLoadIn )
 		{
 			InitDefaultAttributes( GetCharacterLevel() );
 			GrantDefaultAbilities();
@@ -290,7 +312,12 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	AuraPS = CastChecked<AAuraPlayerState>( GetPlayerState() );
+	AuraPS = Cast<AAuraPlayerState>( GetPlayerState() );
+	if ( AuraPS == nullptr )
+	{
+		// nullptr would be also when unpossess happens. So do nothing here
+		return;
+	}
 
 	// For initializing AbilityComponent we use OnRep_PlayerState instead of AknowledgePossession on a client
 	// because we need to be sure that PlayerState is replicated and has all valid data so we can use it

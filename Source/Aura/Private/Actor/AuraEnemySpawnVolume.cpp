@@ -35,7 +35,16 @@ void AAuraEnemySpawnVolume::BeginPlay()
 void AAuraEnemySpawnVolume::OnBoxOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                           const FHitResult& SweepResult )
 {
-	if ( !OtherActor->Implements<UPlayerInterface>() ) return;
+	// React to overlap only on server
+	if ( GetNetMode() == NM_Client )
+	{
+		return;
+	}
+
+	if ( !OtherActor->Implements<UPlayerInterface>() )
+	{
+		return;
+	}
 
 	bReached = true;
 	for ( AAuraEnemySpawnPoint* Point : SpawnPoints )

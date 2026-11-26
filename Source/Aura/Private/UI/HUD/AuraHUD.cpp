@@ -20,9 +20,16 @@ void AAuraHUD::InitHUDWidget()
 	// TODO: I think this shouldnt be here. This is very stupid but for now i'll leave it here
 	UAuraGasBpLibrary::GetHudWC( this );
 
+	// After a respawn the HUD widget already exists. It is bound to the PlayerState's ASC which didn't change
+	if ( IsValid( HUDWidget ) )
+	{
+		HUDWidgetController->BroadcastInitialValues();
+		return;
+	}
+
 	// Create and init HUDWidget
 	checkf( HUDWidgetClass, TEXT( "The variable is not set in blueprints" ) );
-	UAuraUserWidget* HUDWidget = CreateWidget<UAuraUserWidget>( GetWorld(), HUDWidgetClass, "HUDWidget" );
+	HUDWidget = CreateWidget<UAuraUserWidget>( GetWorld(), HUDWidgetClass, "HUDWidget" );
 	HUDWidget->SetWidgetController( HUDWidgetController );
 	HUDWidgetController->BroadcastInitialValues();
 	HUDWidget->AddToViewport();

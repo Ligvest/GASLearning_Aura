@@ -67,6 +67,11 @@ private:
 	UPROPERTY()
 	UMVVM_LoadSlot* SelectedSlot;
 
+	// False on a client connected to a host. Only the host picks the slot and starts the game,
+	// clients travel with the host. Bind the menu buttons' IsEnabled to it in the widget
+	UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess = "true" ) )
+	bool bIsHost = true;
+
 	// A variable to bind widget to the ViewModel so the ViewModel would initialize properly.
 	// I'll remove it when there will be a binding which makes sense instead of this workaround
 	UPROPERTY( BlueprintReadWrite, FieldNotify, meta = ( AllowPrivateAccess = "true" ) )

@@ -10,6 +10,13 @@
 
 void UMVVM_LoadScreen::InitializeLoadSlots()
 {
+	// GameMode exists only on the server ( host or single player )
+	bIsHost = IsValid( UGameplayStatics::GetGameMode( this ) );
+	if ( !bIsHost && GEngine )
+	{
+		GEngine->AddOnScreenDebugMessage( -1, 30.f, FColor::Cyan, FString( "Connected to the host. Waiting for the host to start the game" ) );
+	}
+
 	LoadSlot_0 = NewObject<UMVVM_LoadSlot>( this, LoadSlotViewModelClass );
 	LoadSlot_0->SetLoadSlotName( FString( "LoadSlot_0" ) );
 	LoadSlot_0->SlotIndex = 0;
@@ -36,7 +43,7 @@ void UMVVM_LoadScreen::NewSlotButtonPressed( int32 Slot, const FString& EnteredN
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
 	if ( !IsValid( AuraGameMode ) )
 	{
-		GEngine->AddOnScreenDebugMessage( 1, 15.f, FColor::Magenta, FString( "Please switch to Single Player" ) );
+		GEngine->AddOnScreenDebugMessage( 1, 15.f, FColor::Magenta, FString( "Only the host can create a save slot" ) );
 		return;
 	}
 
@@ -75,6 +82,12 @@ void UMVVM_LoadScreen::SelectSlotButtonPressed( int32 InSlotIndex )
 
 void UMVVM_LoadScreen::DeleteButtonPressed()
 {
+	// Save slots belong to the host
+	if ( !bIsHost )
+	{
+		return;
+	}
+
 	if ( IsValid( SelectedSlot ) )
 	{
 		AAuraGameModeBase::DeleteSlot( SelectedSlot->GetLoadSlotName(), SelectedSlot->SlotIndex );
@@ -91,13 +104,18 @@ void UMVVM_LoadScreen::PlayButtonPressed()
 		return;
 	}
 
+	// Only the host starts the game. Clients are taken to the map by the host's ServerTravel
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
+	if ( !IsValid( AuraGameMode ) )
+	{
+		return;
+	}
 	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>( AuraGameMode->GetGameInstance() );
 	AuraGameInstance->LoadSlotName = SelectedSlot->GetLoadSlotName();
 	AuraGameInstance->LoadSlotIndex = SelectedSlot->SlotIndex;
 	AuraGameInstance->PlayerStartTag = SelectedSlot->PlayerStartTag;
 
-	AuraGameMode->TravelToMap( SelectedSlot->GetMapName() );
+	AuraGameMode->TravelToMap( AuraGameMode->MapNameToMapPtr.FindChecked( SelectedSlot->GetMapName() ) );
 }
 
 void UMVVM_LoadScreen::LoadData()
