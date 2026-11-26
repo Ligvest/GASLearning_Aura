@@ -50,6 +50,7 @@ public:
 	AAuraPlayerCharacter();
 	virtual void BeginPlay() override;
 	virtual void PossessedBy( AController* NewController ) override;
+	virtual void UnPossessed() override;
 
 	void LoadProgress();
 
@@ -74,6 +75,8 @@ private:
 	void InitGASInfo();
 	void InitHUD() const;
 	void InitGASInfoAndHUD();
+	// Dead body after a respawn: forget the ASC / AttributeSet of the PlayerState, they belong to the new character now
+	void ReleaseSharedAbilitySystem();
 
 	UFUNCTION( NetMulticast, Reliable )
 	void MulticastLevelUpParticles() const;

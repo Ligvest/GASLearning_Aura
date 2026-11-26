@@ -182,6 +182,11 @@ void AAuraPlayerCharacter::Die( FVector DeathImpulse )
 {
 	Super::Die( DeathImpulse );
 
+	// Enemies find their target by the "Player" actor tag ( BTS_FindNearestPlayer ) and projectiles / radius damage choose victims by it too.
+	// In multiplayer the dead body stays in the level after the respawn, and it still returns the ASC from the shared PlayerState.
+	// So remove the tag to avoid focusing the dead body
+	Tags.Remove( UAuraGasBpLibrary::GetPlayerActorTag() );
+
 	FTimerDelegate DeathTimerDelegate;
 	DeathTimerDelegate.BindLambda(
 	    [this]()
@@ -269,6 +274,47 @@ void AAuraPlayerCharacter::PossessedBy( AController* NewController )
 	}
 }
 
+// Server
+void AAuraPlayerCharacter::UnPossessed()
+{
+	Super::UnPossessed();
+
+	// Respawn: GameMode::PlayerDied unpossesses the dead character and a new one gets the same PlayerState
+	if ( bDead )
+	{
+		ReleaseSharedAbilitySystem();
+	}
+}
+
+void AAuraPlayerCharacter::ReleaseSharedAbilitySystem()
+{
+	// UnPossess clears only APawn::PlayerState. AbilitySystemComponent and AttributeSet are our own cached pointers
+	// ( set in InitGASInfo ), the engine doesn't know about them. So release them manually
+	if ( AbilitySystemComponent == nullptr )
+	{
+		return;
+	}
+
+	// For dead character:
+	// Unbind callbacks from Debuff_Stun tag
+	AbilitySystemComponent->RegisterGameplayTagEvent( FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved ).RemoveAll( this );
+	TArray<UDebuffNiagaraComponent*> DebuffComponents;
+	GetComponents( DebuffComponents );
+	for ( UDebuffNiagaraComponent* DebuffComponent : DebuffComponents )
+	{
+		if ( IsValid( DebuffComponent ) )
+		{
+			// For dead character's debuff niagara components:
+			// Unbind callbacks from DebuffTag tag
+			AbilitySystemComponent->RegisterGameplayTagEvent( DebuffComponent->DebuffTag, EGameplayTagEventType::NewOrRemoved ).RemoveAll( DebuffComponent );
+			DebuffComponent->Deactivate();
+		}
+	}
+
+	AbilitySystemComponent = nullptr;
+	AttributeSet = nullptr;
+}
+
 void AAuraPlayerCharacter::LoadProgress()
 {
 	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>( UGameplayStatics::GetGameMode( this ) );
@@ -316,6 +362,8 @@ void AAuraPlayerCharacter::OnRep_PlayerState()
 	if ( AuraPS == nullptr )
 	{
 		// nullptr would be also when unpossess happens. So do nothing here
+		// except forgetting the shared ASC, same as UnPossessed does on the server
+		ReleaseSharedAbilitySystem();
 		return;
 	}
 

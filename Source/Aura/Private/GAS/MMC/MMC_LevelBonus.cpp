@@ -2,6 +2,7 @@
 
 #include "GAS/MMC/MMC_LevelBonus.h"
 
+#include "AbilitySystemComponent.h"
 #include "GAS/AuraAttributeSet.h"
 #include "Interaction/CombatInterface.h"
 
@@ -41,8 +42,19 @@ float UMMC_LevelBonus::CalculateBaseMagnitude_Implementation( const FGameplayEff
 
 	// Get Actor Level
 	int ActorLevel = 0;
-	UObject* EffectSource = Spec.GetContext().GetSourceObject();
-	check( EffectSource );
+
+	// These infinite GEs ( secondary attributes ) are applied once, with the character as the SourceObject.
+	// After a respawn the SourceObject is the old ( destroyed ) body, so get AvatarActor from ASC instead.
+	UObject* EffectSource = nullptr;
+	if ( const UAbilitySystemComponent* InstigatorASC = Spec.GetContext().GetOriginalInstigatorAbilitySystemComponent() )
+	{
+		EffectSource = InstigatorASC->GetAvatarActor();
+	}
+
+	if ( !IsValid( EffectSource ) )
+	{
+		EffectSource = Spec.GetContext().GetSourceObject();
+	}
 
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>( EffectSource );
 	if ( CombatInterface )
